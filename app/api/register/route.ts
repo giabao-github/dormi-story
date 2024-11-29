@@ -55,13 +55,14 @@ export async function POST(request: Request) {
           hashedPassword,
         },
       });
-  
+      
       return NextResponse.json(user);
-    }  
-    else return NextResponse.json(
-      { message: 'Email or student ID already exists' },
-      { status: 400 }
-    );
+    } else {
+      return NextResponse.json(
+          { message: 'Email or student ID already exists' },
+          { status: 400 }
+        );
+    }
   } catch (error) {
     console.log(error);
     return NextResponse.json(

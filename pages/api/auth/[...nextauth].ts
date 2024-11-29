@@ -26,9 +26,8 @@ export const authOptions: AuthOptions = {
         password: { label: 'password', type: 'password' }
       },
       async authorize(credentials) {
-        console.log('Credentials received: ', credentials);
         if (!credentials?.studentId || !credentials?.password) {
-          throw new Error('Invalid credentials 1');
+          throw new Error('Invalid credentials');
         }
 
         const user = await prisma.user.findUnique({
@@ -36,11 +35,10 @@ export const authOptions: AuthOptions = {
             studentId: credentials.studentId.toUpperCase(),
           }
         });
-        console.log('Database user:', user);
 
         if (!user || !user?.hashedPassword) {
           console.log('No user found or missing hashed password');
-          throw new Error('Invalid credentials 2');
+          throw new Error('User is not registered');
         }
 
         const isCorrectPassword = await bcrypt.compare(
@@ -53,14 +51,12 @@ export const authOptions: AuthOptions = {
           throw new Error('Incorrect password');
         }
 
-        console.log('User authenticated successfully:', user);
         return user;
       }
     })
   ],
   pages: {
     signIn: '/',
-    error: '/'
   },
   debug: process.env.NODE_ENV === 'development',
   session: {

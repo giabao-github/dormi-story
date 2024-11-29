@@ -1,7 +1,7 @@
 "use client";
 
 import axios from 'axios';
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import useRegisterModal from '@/app/hooks/useRegisterModal';
 import toast from 'react-hot-toast';
@@ -300,11 +300,11 @@ const RegisterModal = ({ title = 'Sign Up' }) => {
       });
   }
 
-  const handleSwitchModal = () => {
+  const handleSwitchModal = useCallback(() => {
     registerModal.onClose();
     title = 'Sign In';
     loginModal.onOpen();
-  }
+  }, [registerModal, loginModal])
 
   const handleKeyDown = (e: React.KeyboardEvent, nextFieldRef: React.RefObject<HTMLInputElement>) => {
     if (e.key === 'Tab' && !e.shiftKey) {
@@ -375,7 +375,7 @@ const RegisterModal = ({ title = 'Sign Up' }) => {
           </div>
           <div
             onClick={handleSwitchModal}
-            className='text-rose-500 font-semibold cursor-pointer hover:underline'
+            className='text-primary font-semibold cursor-pointer hover:underline'
           >
             Log in
           </div>

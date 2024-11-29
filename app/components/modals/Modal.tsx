@@ -1,7 +1,7 @@
 "use client";
 
 import { Rowdies } from "next/font/google";
-import { useCallback, useEffect, useState } from "react";
+import { LegacyRef, useCallback, useEffect, useState } from "react";
 import { IoCloseCircleOutline } from "react-icons/io5";
 import Button from "../Button";
 
@@ -21,9 +21,10 @@ interface ModalProps {
   disabled?: boolean;
   secondaryAction?: () => void;
   secondaryActionLabel?: string;
+  ref?: LegacyRef<HTMLDivElement> | undefined; 
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, body, footer, actionLabel, disabled, secondaryAction, secondaryActionLabel }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, body, footer, actionLabel, disabled, secondaryAction, secondaryActionLabel, ref }) => {
   const [showModal, setShowModal] = useState(isOpen);
 
   useEffect(() => {
@@ -75,7 +76,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, body, f
 
   return (
     <>
-      <div className='flex items-center justify-center overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none focus:shadow-sm bg-neutral-800/70'>
+      <div ref={ref} className='flex items-center justify-center overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none focus:shadow-sm bg-neutral-800/70'>
         <div className='relative w-full md:w-2/3 lg:w-1/2 xl:w-2/5 my-6 mx-auto h-full lg:h-auto md:h-auto'>
           {/* CONTENT */}
           <div className={`translate duration-300 h-full ${modalClass} `}>
@@ -84,8 +85,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, body, f
               <div className='flex items-center p-6 rounded-t justify-center relative border-b-[1px]'>
                 <button 
                   onClick={handleClose}
-                  type="button" 
-                  title="Close" 
+                  type='button' 
+                  title='Close' 
                   className='p-1 border-0 hover:text-red-500 transition absolute right-9 top-4'>
                   <IoCloseCircleOutline size={24} />
                 </button>
@@ -101,9 +102,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, body, f
               <div className='flex flex-col gap-2 p-6'>
                 <div className={`flex flex-row items-center gap-4 w-full ${rowdies.className}`}>
                   {secondaryAction && secondaryActionLabel && (
-                    <Button outline label={secondaryActionLabel} onClick={handleSecondaryAction} disabled={disabled} />
+                    <Button primary outline label={secondaryActionLabel} onClick={handleSecondaryAction} disabled={disabled} />
                   )}
-                  <Button label={actionLabel} onClick={handleSubmit} disabled={disabled} />
+                  {(title === 'Sign In' || title === 'Messenger Token' || title === 'Post An Article' || title === 'Create An Event') ? 
+                    <Button primary label={actionLabel} onClick={handleSubmit} disabled={disabled} /> : 
+                    <Button label={actionLabel} onClick={handleSubmit} disabled={disabled} />
+                  }
                 </div>
                 {footer}
               </div>

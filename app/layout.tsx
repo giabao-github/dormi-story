@@ -7,6 +7,9 @@ import LoginModal from './components/modals/LoginModal';
 import getCurrentUser from './actions/getCurrentUser';
 import Sidebar from './components/sidebar/Sidebar';
 import IntroductionPage from './components/IntroductionPage';
+import TokenModal from './components/modals/TokenModal';
+import ReportModal from './components/modals/ReportModal';
+import ArticleModal from './components/modals/ArticleModal';
 
 
 export default async function RootLayout({
@@ -24,10 +27,15 @@ export default async function RootLayout({
           <ToasterProvider />
           <LoginModal />
           <RegisterModal />
+          <TokenModal />
+          <ReportModal currentUser={currentUser} />
+          <ArticleModal currentUser={currentUser} />
           <Navbar currentUser={currentUser} />
           <IntroductionPage currentUser={currentUser} />
           <Sidebar currentUser={currentUser} />
-          {children}
+          <div className='pb-20 pt-28'>
+            {children}
+          </div>
         </body>
       </ClientOnly>
     </html>

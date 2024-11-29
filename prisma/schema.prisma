@@ -27,6 +27,7 @@ model User {
   account Account[]
   personalInformation PersonalInformation[]
   report Report[]
+  article Article[]
   parkingLotRegistration ParkingLotRegistration[]
 }
 
@@ -64,16 +65,34 @@ model PersonalInformation {
 
 model Report {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  title String
-  description String
-  evidenceSrc String
-  createdAt DateTime @default(now())
+  reporterName String
+  reporterStudentId String
+  time String
+  location String
   category String
+  description String
+  proofSrc String
+  createdAt DateTime @default(now())
   userId String @db.ObjectId
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Article {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  category String
+  title String
+  author String
+  introduction String
+  content String
+  files String
+  tags String
+  sources String
+  createdAt DateTime @default(now())
+  userId String @db.ObjectId
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 model ParkingLotRegistration {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   userId String @db.ObjectId

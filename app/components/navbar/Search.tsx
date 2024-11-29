@@ -30,7 +30,7 @@ const Search = () => {
         <div className='text-sm pr-5 text-gray-600 flex flex-row items-center gap-3'>
           <div
             onClick={handleSearch}
-            className='p-2 bg-rose-500 text-white rounded-full hover:scale-105'
+            className='p-3 bg-primary text-white rounded-full hover:scale-105'
           >
             <FaSearch size={24} />
           </div>

@@ -31,7 +31,7 @@ const Avatar: React.FC<AvatarProps> = ({ user }) => {
     );
   } else if (user && !user.image) {
     return (
-      <div className='bg-rose-500 h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-semibold'>
+      <div className='bg-primary h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-semibold select-none'>
         {getAbbreviation(user.name)}
       </div>
     );

@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn } from 'next-auth/react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import Modal from './Modal';
@@ -9,7 +9,7 @@ import Heading from '../Heading';
 import Input from '../inputs/Input';
 import useLoginModal from '@/app/hooks/useLoginModal';
 import useRegisterModal from '@/app/hooks/useRegisterModal';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 
 
 const LoginModal = ({ title = 'Sign In' }) => {
@@ -19,6 +19,7 @@ const LoginModal = ({ title = 'Sign In' }) => {
   const [isLoading, setIsLoading] = useState(false);
   const idRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const idParts = {
     it: { major: 'IT', subMajors: ['IT', 'CS', 'DS'] },
@@ -175,7 +176,7 @@ const LoginModal = ({ title = 'Sign In' }) => {
 
     signIn('credentials', {
       ...data,
-      redirect: false,
+      redirect: false
     })
     .then((callback) => {
       setIsLoading(false);
@@ -183,8 +184,9 @@ const LoginModal = ({ title = 'Sign In' }) => {
       if (callback?.ok) {
         toast.remove();
         toast.success('Logged in');
-        router.refresh();
+        router.push('/?category=Announcement');
         loginModal.onClose();
+        router.refresh();
       }
 
       if (callback?.error) {
@@ -204,11 +206,11 @@ const LoginModal = ({ title = 'Sign In' }) => {
     });
   }
 
-  const handleSwitchModal = () => {
+  const handleSwitchModal = useCallback(() => {
     loginModal.onClose();
     title = 'Sign Up';
     registerModal.onOpen();
-  }
+  }, [loginModal, registerModal])
 
   const handleKeyDown = (e: React.KeyboardEvent, nextFieldRef: React.RefObject<HTMLInputElement>) => {
     if (e.key === 'Tab' && !e.shiftKey) {
@@ -221,6 +223,16 @@ const LoginModal = ({ title = 'Sign In' }) => {
       handleSubmit(onSubmit)();
     }
   }
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        loginModal.onClose();
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const bodyContent = (
     <div className='flex flex-col gap-4'>
@@ -259,7 +271,7 @@ const LoginModal = ({ title = 'Sign In' }) => {
           </div>
           <div
             onClick={handleSwitchModal}
-            className='text-rose-500 font-semibold cursor-pointer hover:underline'
+            className='text-button font-semibold cursor-pointer hover:underline'
           >
             Register
           </div>
@@ -270,6 +282,7 @@ const LoginModal = ({ title = 'Sign In' }) => {
 
   return (
     <Modal
+      ref={modalRef}
       disabled={isLoading}
       isOpen={loginModal.isOpen}
       title={title}
