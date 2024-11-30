@@ -1,4 +1,11 @@
-import { User } from '@prisma/client';
+import { Article, User } from '@prisma/client';
+
+export type SafeArticle = Omit<
+  Article,
+  'createdAt'
+> & {
+  createdAt: string;
+};
 
 export type SafeUser = Omit<
   User,

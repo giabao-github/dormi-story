@@ -21,7 +21,7 @@ const Articles = async () => {
     <ClientOnly>
       <Container>
         <div className='ml-[241px] mt-20 grid grid-cols-1 gap-8'>
-          {articles.map((article: any) => {
+          {articles.map((article) => {
             return (
               <ArticleCard
                 currentUser={currentUser}

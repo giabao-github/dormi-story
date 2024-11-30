@@ -11,7 +11,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ currentUser }) => {
   const pathname = usePathname();
-  const is404Page = (pathname !== '/' && pathname !== '/articles');
+  const is404Page = (pathname !== '/' && pathname !== '/articles' && !pathname?.includes('/articles/'));
 
   if (!is404Page && currentUser) {
     return (

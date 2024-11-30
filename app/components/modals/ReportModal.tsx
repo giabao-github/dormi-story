@@ -232,6 +232,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
               label='Time'
               errors={errors}
               register={register}
+              onChange={(e) => setCustomValue('time', e.target.value)}
               required
             />
           </div>
@@ -241,6 +242,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
               label='Location'
               errors={errors}
               register={register}
+              onChange={(e) => setCustomValue('location', e.target.value)}
               required
             />
           </div>

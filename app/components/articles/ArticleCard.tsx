@@ -1,13 +1,13 @@
 "use client";
 
-import { SafeUser } from '@/app/types';
+import { SafeArticle, SafeUser } from '@/app/types';
 import { Article } from '@prisma/client';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import HeartButton from '../HeartButton';
 
 interface ArticleCardProps {
-  data: Article;
+  data: SafeArticle;
   onAction?: (id: string) => void;
   disabled?: boolean;
   actionLabel?: string;
@@ -20,7 +20,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ data, onAction, disabled, act
 
   return (
     <div className='col-span-1'>
-      <div className='flex flex-row items-center gap-2 w-[60vw] p-2 border-2 border-primary rounded-md'>
+      <div className='flex flex-row items-center gap-2 w-2/3 p-2 border-2 border-primary rounded-md'>
         <div className='aspect-square w-1/12 relative overflow-hidden rounded-xl'>
           <Image
             fill
@@ -42,17 +42,13 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ data, onAction, disabled, act
               {data.author}
             </div>
             <div className='font-normal text-sm text-neutral-500'>
-              {`${data.createdAt.getDate().toString().padStart(2, '0')}/${
-                (data.createdAt.getMonth() + 1).toString().padStart(2, '0')
-              }/${data.createdAt.getFullYear()} - ${
-                data.createdAt.getHours().toString().padStart(2, '0')
-              }:${data.createdAt.getMinutes().toString().padStart(2, '0')}`}
+              {`${new Date(data.createdAt).getDate().toString().padStart(2, '0')}/${
+                (new Date(data.createdAt).getMonth() + 1).toString().padStart(2, '0')
+              }/${new Date(data.createdAt).getFullYear()} - ${
+                new Date(data.createdAt).getHours().toString().padStart(2, '0')
+              }:${new Date(data.createdAt).getMinutes().toString().padStart(2, '0')}`}
             </div>
           </div>
-          <HeartButton
-            articleId={data.id}
-            currentUser={currentUser}
-          />
         </div>
       </div>
     </div>

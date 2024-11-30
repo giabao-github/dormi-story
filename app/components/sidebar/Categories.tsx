@@ -104,7 +104,7 @@ const Categories = () => {
   const category = params?.get('category');
   const pathname = usePathname();
 
-  const isMainPage = (pathname === '/' || pathname === '/articles');
+  const isMainPage = (pathname === '/' || pathname === '/articles' || pathname?.includes('/articles/'));
 
   if (!isMainPage) {
     return null;

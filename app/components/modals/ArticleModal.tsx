@@ -8,11 +8,11 @@ import { SafeUser } from '@/app/types';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import { IoWarning } from 'react-icons/io5';
 import { HiAcademicCap } from 'react-icons/hi2';
-import { SiActivitypub } from 'react-icons/si';
-import { FaPeopleRobbery } from 'react-icons/fa6';
+import { FaVolleyball, FaPeopleRobbery } from 'react-icons/fa6';
 import { GrUserWorker, GrTechnology } from 'react-icons/gr';
 import { MdAutoStories } from 'react-icons/md';
-import { TiWeatherPartlySunny } from 'react-icons/ti';
+import { MdForest } from 'react-icons/md';
+import { GiCardRandom } from 'react-icons/gi';
 import Modal from './Modal'
 import Heading from '../Heading';
 import CategoryInput from '../inputs/CategoryInput';
@@ -40,8 +40,8 @@ export const categories = [
   },
   {
     label: 'Extracurricular Activities',
-    icon: SiActivitypub,
-    example: 'Sport tournaments, camping trips...',
+    icon: FaVolleyball,
+    example: 'Sport tournaments, camping trips, community service...',
     description: 'Articles about extracurricular activities' 
   },
   {
@@ -70,9 +70,15 @@ export const categories = [
   },
   {
     label: 'Weathers and environment',
-    icon: TiWeatherPartlySunny,
-    example: 'Environmental awareness, environmental campaign...',
+    icon: MdForest,
+    example: 'Environmental campaign...',
     description: 'Articles about weathers and environment'
+  }, 
+  {
+    label: 'Other',
+    icon: GiCardRandom,
+    example: 'Other article categories...',
+    description: 'Articles about other categories'
   }
 ]
 
@@ -85,7 +91,7 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
   const articleModal = useArticleModal();
   const [step, setStep] = useState(STEPS.AUTHOR);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [inputError, setInputError] = useState(false);
 
   const { register, handleSubmit, setValue, watch, formState: { errors }, reset } = useForm<FieldValues>({
     defaultValues: {
@@ -123,16 +129,19 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
       toast.error('Please select a category before proceeding');
       return;
     }
-    if (step === STEPS.TITLE && !title) {
+    else if (step === STEPS.TITLE && !title) {
+      setInputError(true);
       toast.remove();
       toast.error('Please provide a title before proceeding');
       return;
     }
-    if (step === STEPS.CONTENT && !content) {
+    else if (step === STEPS.CONTENT && !content) {
+      setInputError(true);
       toast.remove();
       toast.error('Please write the article content before proceeding');
       return;
     }
+    setInputError(false);
     setStep((value) => value + 1);
   }
 
@@ -159,14 +168,6 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
     .finally(() => {
       setIsLoading(false);
     })
-  }
-
-  const handleFileChange = (event: any) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      setCustomValue('files', file);
-    }
   }
 
   const actionLabel = useMemo(() => {
@@ -236,8 +237,8 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
       <div className='flex flex-col gap-8'>
         <div className='mx-6'>
           <Heading
-            title='Article Title and Introduction'
-            subtitle='Provide your article title and introduction part'
+            title='Article Title and Introductory Text'
+            subtitle='Provide your article title and introductory text (lead paragraph)'
           />
         </div>
         <div className='flex flex-col gap-y-4'>
@@ -246,14 +247,16 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
               id='title'
               label='Title'
               errors={errors}
-              register={register}
-              required
+              register={register} 
+              onChange={(e) => setCustomValue('title', e.target.value)}
+              required={false}
+              inputError={inputError}
             />
           </div>
           <textarea
             id='introduction'
             title=''
-            placeholder='Describe your article in short (optional)'
+            placeholder='Provide an overview or additional context for your article (optional)'
             className='flex mx-6 text-base font-normal rounded-md bg-white border-2 border-neutral-300 focus:border-neutral-800 px-3 py-3 placeholder:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none'
             rows={5}
             value={intro}
@@ -288,7 +291,7 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
         <div className='mx-6'>
           <Heading
             title='Article Content'
-            subtitle='Write your article main content'
+            subtitle='For sub-heading, follow this template: [###Sub-heading]'
           />
         </div>
         <div className='flex flex-col gap-y-4'>
@@ -296,8 +299,8 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
             id='content'
             title=''
             placeholder='Write your article in details'
-            className='flex mx-6 text-base font-normal rounded-md bg-white border-2 border-neutral-300 focus:border-neutral-800 px-3 py-3 placeholder:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none'
-            rows={10}
+            className={`flex mx-6 text-base font-normal rounded-md bg-white border-2 border-neutral-300 focus:border-neutral-800 px-3 py-3 placeholder:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none ${inputError ? 'border-red-500 focus:border-red-500' : 'border-neutral-300'}`}
+            rows={15}
             value={content}
             {...register('content')}
             onChange={(e) => setCustomValue('content', e.target.value)}
@@ -359,7 +362,7 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
     <Modal
       title='Post An Article'
       isOpen={articleModal.isOpen}
-      onClose={articleModal.onClose}
+      onClose={ articleModal.onClose}
       onSubmit={handleSubmit(onSubmit)}
       disabled={isLoading}
       actionLabel={actionLabel}

@@ -21,7 +21,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
   const registerModal = useRegisterModal();
   const loginModal = useLoginModal();
   const pathname = usePathname();
-  const is404Page = (pathname !== '/' && pathname !== '/articles');
+  const is404Page = (pathname !== '/' && pathname !== '/articles' && !pathname?.includes('/articles/'));
 
   if (!is404Page) {
     return (
