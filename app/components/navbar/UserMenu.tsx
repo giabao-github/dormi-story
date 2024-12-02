@@ -88,7 +88,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
         </div>
         <div
           onClick={toggleOpen}
-          className='p-3 md:py-2 md:px-3 border-[1px] border-neutral-200 flex flex-row items-center gap-3 rounded-full cursor-pointer hover:shadow-md transition'
+          className='p-3 md:py-2 md:px-3 border-[1px] border-neutral-300 bg-highlight flex flex-row items-center gap-3 rounded-full cursor-pointer hover:shadow-md transition'
         >
           <IoMenu size={24} />
           <div className='hidden md:block'>

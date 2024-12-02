@@ -59,9 +59,9 @@ export async function POST(request: Request) {
       return NextResponse.json(user);
     } else {
       return NextResponse.json(
-          { message: 'Email or student ID already exists' },
-          { status: 400 }
-        );
+        { message: 'Email or student ID already exists' },
+        { status: 400 }
+      );
     }
   } catch (error) {
     console.log(error);

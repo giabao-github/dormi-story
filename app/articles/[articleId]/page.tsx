@@ -22,6 +22,7 @@ const ArticlePage = async ({ params } : { params: IParams }) => {
   if (!article) {
     return (
       <ClientOnly>
+        <title>Dormistory | Search</title>
         <EmptyState />
       </ClientOnly>
     )
@@ -29,6 +30,7 @@ const ArticlePage = async ({ params } : { params: IParams }) => {
 
   return (
     <div className={`overflow-y-auto max-h-full absolute right-0 ${nunito.className}`}>
+      <title>{`Dormistory | ${article.title}`}</title>
       <ClientOnly>
         <ArticleClient
           article={article}

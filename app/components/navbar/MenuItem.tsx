@@ -40,7 +40,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ onClick, label }) => {
   } else {
     return (
       <div
-        className='px-4 py-3 font-medium text-sm'
+        className='px-4 py-3 font-semibold text-sm'
       >
         {truncatedLabel}
       </div>

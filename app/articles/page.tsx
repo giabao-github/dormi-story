@@ -19,6 +19,7 @@ const Articles = async () => {
 
   return (
     <ClientOnly>
+      <title>Dormistory | Articles</title>
       <Container>
         <div className='ml-[241px] mt-20 grid grid-cols-1 gap-8'>
           {articles.map((article) => {

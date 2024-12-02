@@ -1,19 +1,27 @@
 "use client";
 
-import { IoWarning } from 'react-icons/io5';
-import useTokenModal from "@/app/hooks/useTokenModal";
-import Modal from "./Modal";
 import { useEffect, useState } from 'react';
-import { RiExchangeFill } from 'react-icons/ri';
-import { MdContentCopy } from 'react-icons/md';
-import { FaCheck } from 'react-icons/fa6';
 import toast from 'react-hot-toast';
+import { IoWarning } from 'react-icons/io5';
+import { RiExchangeFill } from 'react-icons/ri';
+import { FaCheck } from 'react-icons/fa6';
+import { MdContentCopy } from 'react-icons/md';
+import useTokenModal from '@/app/hooks/useTokenModal';
+import Modal from './Modal';
+import { SafeUser } from '@/app/types';
+import checkCorrectPassword from '@/app/actions/checkCorrectPassword';
+import axios from 'axios';
 
+interface TokenModalProps {
+  currentUser?: SafeUser | null | undefined;
+}
 
-const TokenModal = () => {
+const TokenModal: React.FC<TokenModalProps> = ({ currentUser }) => {
   const tokenModal = useTokenModal();
   const [value, setValue] = useState('');
   const [isTokenVisible, setIsTokenVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCorrectPassword, setIsCorrectPassword] = useState(false);
 
   const generateRandomToken = () => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -24,8 +32,8 @@ const TokenModal = () => {
     return result;
   }
 
-  const revealMessengerToken = () => {
-    setIsTokenVisible(true);
+  const handleMessengerToken = () => {
+    setIsTokenVisible(!isTokenVisible);
   }
 
   const [token, setToken] = useState(generateRandomToken());
@@ -36,16 +44,65 @@ const TokenModal = () => {
     toast.success('Messenger Token copied to clipboard');
   }
 
-  const updateToken = () => {
-    toast.remove();
-    toast.success('Messenger Token updated successfully');
+  const updateToken = async () => {
+    setIsLoading(true);
+    axios
+      .post('/api/token', { token })
+      .then((callback) => {
+        setIsLoading(false);
+        
+        if (callback.status === 200) {
+          toast.remove();
+          toast.success(callback.data.message);
+        }
+        
+        if (callback.status === 400) {
+          toast.remove();
+          toast.error(callback.data.message);
+          return;
+        }
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        console.log(error);
+        if (error.response && error.response.data && error.response.data.message) {
+          toast.remove();
+          toast.error(error.response.data.message);
+        }
+        else {
+          toast.remove();
+          toast.error(error);
+        }
+        return;
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }
+
+  useEffect(() => {
+    const validatePassword = async () => {
+      if (currentUser) {
+        const isValid = await checkCorrectPassword(currentUser, value);
+        setIsCorrectPassword(isValid);
+      } else {
+        setIsCorrectPassword(false);
+      }
+    };
+
+    if (value) {
+      validatePassword();
+    } else {
+      setIsCorrectPassword(false);
+    }
+  }, [value]);
 
   useEffect(() => {
     if (!tokenModal.isOpen) {
       setIsTokenVisible(false);
+      setValue('');
     }
-  }, [tokenModal.isOpen]);
+  }, [tokenModal.isOpen, isCorrectPassword]);
 
   let bodyContent = (
     <div className='flex flex-col gap-8'>
@@ -59,19 +116,19 @@ const TokenModal = () => {
         <div className='flex flex-col justify-center items-center'>
           <input 
             title=''
-            type='text'
-            placeholder={`Type "I understand" to continue`}
+            type='password'
+            placeholder={`Enter your password to continue`}
             onChange={(e) => setValue(e.target.value)}
             className='my-8 w-1/2 p-3 font-normal bg-white border-2 rounded-md outline-none border-neutral-300 focus:border-black' 
           />
           <button
             title=''
             type='button'
-            onClick={revealMessengerToken}
-            disabled={value.toLowerCase() !== 'i understand'}
-            className='relative disabled:opacity-50 disabled:cursor-not-allowed rounded-lg hover:opacity-80 transition w-1/2 bg-primary border-primary text-white py-2 text-lg font-medium border-2' 
+            onClick={handleMessengerToken}
+            disabled={!isCorrectPassword}
+            className='relative disabled:opacity-50 disabled:cursor-not-allowed rounded-lg hover:opacity-80 transition w-1/2 bg-primary border-primary text-white py-2 text-lg font-semibold border-2' 
           >
-            Reveal Messenger Token
+            {`${isTokenVisible ? 'Hide Messenger Token' : 'Reveal Messenger Token'}`}
           </button>
         </div>
         <div className='mt-14 mb-3 px-10 text-black text-xl text-start font-bold'>
@@ -116,6 +173,7 @@ const TokenModal = () => {
 
   return (
     <Modal
+      disabled={isLoading}
       title='Messenger Token'
       isOpen={tokenModal.isOpen}
       onClose={tokenModal.onClose}

@@ -21,11 +21,18 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
   const registerModal = useRegisterModal();
   const loginModal = useLoginModal();
   const pathname = usePathname();
-  const is404Page = (pathname !== '/' && pathname !== '/articles' && !pathname?.includes('/articles/'));
+  const is404Page = (
+    pathname !== '/' && 
+    pathname !== '/articles' && 
+    !pathname?.includes('/articles/') &&
+    pathname !== '/messenger' &&
+    pathname !== '/conversations' &&
+    !pathname?.includes('/conversations/')
+  );
 
   if (!is404Page) {
     return (
-      <div className='fixed w-full bg-white z-10 shadow-md'>
+      <div className='fixed w-full bg-primary/10 z-10 shadow-md'>
         <div className='py-4 border-b-[1px]'>
           <Container>
             <div className='flex flex-row items-center justify-between gap-3 md:gap-0'>

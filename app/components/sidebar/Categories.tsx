@@ -88,6 +88,8 @@ export const categories = [
   {
     label: 'Messenger',
     route: '/messenger',
+    secondRoute: '/conversations',
+    childRoute: '/conversations/',
     icon: RiMessengerLine,
     description: "Facebook's Messenger"
   },
@@ -104,7 +106,14 @@ const Categories = () => {
   const category = params?.get('category');
   const pathname = usePathname();
 
-  const isMainPage = (pathname === '/' || pathname === '/articles' || pathname?.includes('/articles/'));
+  const isMainPage = (
+    pathname === '/' || 
+    pathname === '/articles' || 
+    pathname?.includes('/articles/') ||
+    pathname === '/messenger' ||
+    pathname === '/conversations' ||
+    pathname?.includes('/conversations/')
+  );
 
   if (!isMainPage) {
     return null;
@@ -117,10 +126,17 @@ const Categories = () => {
           <CategorySection
             key={item.label}
             label={item.label}
-            selected={category === item.label || pathname === item.route}
+            route={item.route}
+            selected={
+              category === item.label || 
+              (
+                item.childRoute ? 
+                pathname?.includes(item.childRoute) || pathname === item.route || pathname === item.secondRoute : 
+                pathname === item.route
+              )
+            }
             icon={item.icon}
           />
-
         ))}
       </div>
     </div>

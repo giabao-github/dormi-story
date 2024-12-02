@@ -3,7 +3,6 @@
 import { FaSearch } from 'react-icons/fa';
 import SearchInput from '../SearchInput';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import useSearchResult from '@/app/hooks/useSearchResult';
 
 const Search = () => {
@@ -24,7 +23,7 @@ const Search = () => {
   };
 
   return (
-    <div className='border-[1px] w-full md:w-1/2 py-2 rounded-full shadow-sm hover:shadow-md transition cursor-pointer flex flex-row'>
+    <div className='w-full md:w-1/2 py-2 rounded-full hover:shadow-md hover:border transition cursor-pointer flex flex-row'>
       <SearchInput type='text' />
       <div className='flex flex-row items-center justify-between'>
         <div className='text-sm pr-5 text-gray-600 flex flex-row items-center gap-3'>

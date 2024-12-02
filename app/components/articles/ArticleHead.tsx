@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
 import { SafeUser } from '@/app/types';
 import Avatar from '../Avatar';
-import { IoCalendarOutline, IoTimeOutline } from "react-icons/io5";
+import { IoCalendarOutline, IoTimeOutline } from 'react-icons/io5';
 
 interface ArticleHeadProps {
   title: string;

@@ -38,7 +38,7 @@ export const authOptions: AuthOptions = {
 
         if (!user || !user?.hashedPassword) {
           console.log('No user found or missing hashed password');
-          throw new Error('User is not registered');
+          throw new Error('This account is not registered');
         }
 
         const isCorrectPassword = await bcrypt.compare(
