@@ -36,7 +36,7 @@ const TokenModal: React.FC<TokenModalProps> = ({ currentUser }) => {
     setIsTokenVisible(!isTokenVisible);
   }
 
-  const [token, setToken] = useState(generateRandomToken());
+  const [token, setToken] = useState(currentUser?.messengerSecretToken ? currentUser?.messengerSecretToken : generateRandomToken());
 
   const copyToken = () => {
     navigator.clipboard.writeText(token);

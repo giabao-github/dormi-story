@@ -29,6 +29,7 @@ const getUsers = async () => {
       emailVerified: user.emailVerified ? user.emailVerified.toISOString() : null,
       image: user.image,
       hashedPassword: user.hashedPassword,
+      messengerSecretToken: user.messengerSecretToken,
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
       conversationIds: user.conversationIds || [],

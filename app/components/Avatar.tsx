@@ -41,6 +41,16 @@ const Avatar: React.FC<AvatarProps> = ({ user, type }) => {
         </div>
       );
     }
+    else if (type === 'panel') {
+      return (
+        <div className='relative'>
+          <div className='bg-button h-12 w-12 rounded-full flex items-center justify-center text-white text-lg font-semibold select-none'>
+            {getAbbreviation(user.name)}
+          </div>
+          <span className='absolute block rounded-full bg-green-500 ring-2 ring-white top-1 right-0 h-1 w-1 md:h-2 md:w-2' />
+        </div>
+      );
+    }
     return (
       <div className='bg-button h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-semibold select-none'>
         {getAbbreviation(user.name)}

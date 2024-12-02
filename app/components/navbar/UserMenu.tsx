@@ -126,8 +126,10 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
                 <MenuItem
                   onClick={() => {
                     signOut({ callbackUrl: `http://localhost:3100${pathname}` });
-                    toast.remove();
-                    toast.success('Logged out');
+                    if (!currentUser) {
+                      toast.remove();
+                      toast.success('Logged out');
+                    }
                   }}
                   label='Log out'
                 />

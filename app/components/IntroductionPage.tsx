@@ -10,7 +10,15 @@ interface IntroductionPageProps {
 
 const IntroductionPage: React.FC<IntroductionPageProps> = ({ currentUser }) => {
   const pathname = usePathname();
-  const is404Page = (pathname !== '/' && pathname !== '/articles');
+  const is404Page = (
+    pathname !== '/' && 
+    pathname !== '/articles' && 
+    !pathname?.includes('/articles/') &&
+    pathname !== '/messenger' &&
+    pathname !== '/conversations' &&
+    !pathname?.includes('/conversations/')
+  );
+
   if (!is404Page && !currentUser) {
     return (
       <div className='absolute bottom-0 sm:h-[calc(100vh-99px)] md:h-[calc(100vh-130px)] w-full'>

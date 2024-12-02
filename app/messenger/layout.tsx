@@ -3,6 +3,8 @@ import getUsers from '../actions/getUsers';
 import ClientOnly from '../components/ClientOnly';
 import MessengerSidebar from '../components/sidebar/MessengerSidebar';
 import UserList from './components/UserList';
+import getCurrentUser from '../actions/getCurrentUser';
+import IntroductionPage from '../components/IntroductionPage';
 
 const lexend = Lexend({
   subsets: ['latin', 'vietnamese'],
@@ -11,6 +13,11 @@ const lexend = Lexend({
 
 export default async function MessengerLayout({ children } : { children: React.ReactNode }) {
   const users = await getUsers();
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    return null;
+  }
 
   return (
     <ClientOnly>

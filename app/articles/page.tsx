@@ -9,6 +9,10 @@ const Articles = async () => {
   const currentUser = await getCurrentUser();
   const articles = await getArticles();
 
+  if (!currentUser) {
+    return null;
+  }
+
   if (articles.length === 0) {
     return (
       <ClientOnly>

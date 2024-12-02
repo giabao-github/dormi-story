@@ -1,6 +1,7 @@
 import ClientOnly from '../components/ClientOnly';
 import getCurrentUser from '../actions/getCurrentUser';
 import MessengerEmptyState from '../components/MessengerEmptyState';
+import IntroductionPage from '../components/IntroductionPage';
 
 
 const Messenger = async () => {

@@ -14,6 +14,10 @@ export default async function ConversationsLayout({ children }: { children: Reac
   const conversations = await getConversations();
   const currentUser = await getCurrentUser();
 
+  if (!currentUser) {
+    return null;
+  }
+
   return (
     <ClientOnly>
       <title>Dormistory | Messenger</title>

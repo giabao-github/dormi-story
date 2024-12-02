@@ -42,6 +42,18 @@ const getConversations = async () => {
       messages: conversation.messages.map(message => ({
         ...message,
         createdAt: message.createdAt.toISOString(),
+        sender: {
+          ...message.sender,
+          createdAt: message.sender.createdAt.toISOString(),
+          updatedAt: message.sender.updatedAt.toISOString(),
+          emailVerified: message.sender.emailVerified ? message.sender.emailVerified.toISOString() : null,
+        },
+        seen: message.seen.map(user => ({
+          ...user,
+          createdAt: user.createdAt.toISOString(),
+          updatedAt: user.updatedAt.toISOString(),
+          emailVerified: user.emailVerified ? user.emailVerified.toISOString() : null,
+        })),
       }))
     }));
 

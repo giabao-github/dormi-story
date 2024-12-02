@@ -19,6 +19,10 @@ const ArticlePage = async ({ params } : { params: IParams }) => {
   const article = await getArticleById(params);
   const currentUser = await getCurrentUser();
 
+  if (!currentUser) {
+    return null;
+  }
+
   if (!article) {
     return (
       <ClientOnly>

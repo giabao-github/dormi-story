@@ -9,11 +9,12 @@ import Heading from '../Heading';
 import Input from '../inputs/Input';
 import useLoginModal from '@/app/hooks/useLoginModal';
 import useRegisterModal from '@/app/hooks/useRegisterModal';
-import { redirect, useRouter } from 'next/navigation';
+import { redirect, usePathname, useRouter } from 'next/navigation';
 
 
 const LoginModal = ({ title = 'Sign In' }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const loginModal = useLoginModal();
   const registerModal = useRegisterModal();
   const [isLoading, setIsLoading] = useState(false);
@@ -184,7 +185,7 @@ const LoginModal = ({ title = 'Sign In' }) => {
       if (callback?.ok) {
         toast.remove();
         toast.success('Logged in');
-        router.push('/?category=Announcement');
+        router.push(pathname || '/?category=Announcement');
         loginModal.onClose();
         router.refresh();
       }
