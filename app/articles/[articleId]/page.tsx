@@ -3,10 +3,10 @@ import getCurrentUser from '@/app/actions/getCurrentUser';
 import ClientOnly from '@/app/components/ClientOnly';
 import EmptyState from '@/app/components/EmptyState';
 import ArticleClient from './ArticleClient';
-import { Comfortaa, Lexend, Nunito, Nunito_Sans, Varela_Round } from 'next/font/google';
+import { Lexend } from 'next/font/google';
 
 
-const nunito = Lexend({
+const lexend = Lexend({
   subsets: ['latin', 'vietnamese'],
   weight: '400'
 });
@@ -26,14 +26,14 @@ const ArticlePage = async ({ params } : { params: IParams }) => {
   if (!article) {
     return (
       <ClientOnly>
-        <title>Dormistory | Search</title>
+        <title>Dormistory | Article</title>
         <EmptyState />
       </ClientOnly>
     )
   }
 
   return (
-    <div className={`overflow-y-auto max-h-full absolute right-0 ${nunito.className}`}>
+    <div className={`mt-4 overflow-y-auto max-h-full absolute right-0 ${lexend.className}`}>
       <title>{`Dormistory | ${article.title}`}</title>
       <ClientOnly>
         <ArticleClient

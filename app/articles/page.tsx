@@ -4,6 +4,12 @@ import EmptyState from '../components/EmptyState';
 import getArticles from '../actions/getArticles';
 import ArticleCard from '../components/articles/ArticleCard';
 import getCurrentUser from '../actions/getCurrentUser';
+import { Lexend } from 'next/font/google';
+
+const lexend = Lexend({
+  subsets: ['latin', 'vietnamese'],
+  weight: '400'
+});
 
 const Articles = async () => {
   const currentUser = await getCurrentUser();
@@ -25,7 +31,7 @@ const Articles = async () => {
     <ClientOnly>
       <title>Dormistory | Articles</title>
       <Container>
-        <div className='ml-[241px] mt-20 grid grid-cols-1 gap-8'>
+        <div className={`ml-[241px] mt-32 grid grid-cols-1 gap-8 ${lexend.className}`}>
           {articles.map((article) => {
             return (
               <ArticleCard

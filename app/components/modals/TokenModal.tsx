@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import toast from 'react-hot-toast';
 import { IoWarning } from 'react-icons/io5';
 import { RiExchangeFill } from 'react-icons/ri';
-import { FaCheck } from 'react-icons/fa6';
+import { FaCheck, FaPlus } from 'react-icons/fa6';
 import { MdContentCopy } from 'react-icons/md';
 import useTokenModal from '@/app/hooks/useTokenModal';
 import Modal from './Modal';
 import { SafeUser } from '@/app/types';
 import checkCorrectPassword from '@/app/actions/checkCorrectPassword';
-import axios from 'axios';
+import getCurrentUser from '@/app/actions/getCurrentUser';
+import prisma from '@/app/libs/prismadb';
 
 interface TokenModalProps {
   currentUser?: SafeUser | null | undefined;
@@ -36,7 +38,7 @@ const TokenModal: React.FC<TokenModalProps> = ({ currentUser }) => {
     setIsTokenVisible(!isTokenVisible);
   }
 
-  const [token, setToken] = useState(currentUser?.messengerSecretToken ? currentUser?.messengerSecretToken : generateRandomToken());
+  const [token, setToken] = useState(currentUser?.messengerSecretToken || generateRandomToken());
 
   const copyToken = () => {
     navigator.clipboard.writeText(token);
@@ -50,7 +52,7 @@ const TokenModal: React.FC<TokenModalProps> = ({ currentUser }) => {
       .post('/api/token', { token })
       .then((callback) => {
         setIsLoading(false);
-        
+
         if (callback.status === 200) {
           toast.remove();
           toast.success(callback.data.message);
@@ -79,6 +81,23 @@ const TokenModal: React.FC<TokenModalProps> = ({ currentUser }) => {
         setIsLoading(false);
       });
   }
+
+  useEffect(() => {
+    const displayIcon = async () => {
+      axios
+      .post('/api/token/label')
+      .then((callback) => {
+        if (callback.data.message === 'Create') {
+          tokenModal.onCreate();
+        }
+        
+        if (callback.data.message === 'Update') {
+          tokenModal.onUpdate();
+        }
+      })
+    }
+    displayIcon();
+  } , []);
 
   useEffect(() => {
     const validatePassword = async () => {
@@ -157,13 +176,17 @@ const TokenModal: React.FC<TokenModalProps> = ({ currentUser }) => {
             <MdContentCopy size={20} className='text-white' />
           </button>
           <button
-            title='Update Messenger Token'
+            title={`${tokenModal.label === 'update' ? 'Update Messenger Token' : 'Create Messenger Token'}`}
             disabled={!isTokenVisible}
             type='button'
             className='flex items-center mx-6 p-2 rounded-full bg-primary hover:opacity-70 disabled:opacity-50'
             onClick={updateToken}
           >
-            <FaCheck size={20} className='text-white' />
+            {
+              tokenModal.label === 'update' ? 
+              <FaCheck size={20} className='text-white' /> :
+              <FaPlus size={20} className='text-white' />
+            }
           </button>
       </div>
     </div>

@@ -19,7 +19,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ data, onAction, disabled, act
   const router = useRouter();
 
   return (
-    <div className='col-span-1'>
+    <div className='col-span-1 flex justify-center'>
       <div className='flex flex-row items-center gap-2 w-2/3 p-2 border-2 border-primary rounded-md'>
         <div className='aspect-square w-1/12 relative overflow-hidden rounded-xl'>
           <Image
