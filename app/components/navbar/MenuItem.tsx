@@ -3,6 +3,7 @@
 import { TbLogout } from 'react-icons/tb';
 import { MdOutlineToken, MdOutlineReport, MdEventAvailable } from 'react-icons/md';
 import { BiNews } from 'react-icons/bi';
+import { HiOutlineUserCircle } from "react-icons/hi2";
 import { IconType } from 'react-icons';
 
 interface MenuItemProps {
@@ -17,6 +18,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ onClick, label }) => {
 
   if (label === 'Log out') {
     Icon = TbLogout;
+  } else if (label === 'Edit Profile') {
+    Icon = HiOutlineUserCircle;
   } else if (label === 'Make A Report') {
     Icon = MdOutlineReport;
   } else if (label === 'Messenger Token') {
@@ -31,7 +34,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ onClick, label }) => {
     return (
       <div
         onClick={onClick}
-        className='px-4 py-3 hover:bg-neutral-100 transition font-semibold text-base flex flex-row'
+        className={`${label === 'Edit Profile' ? 'px-[13px]' : 'px-3'} py-3 hover:bg-neutral-100 transition font-semibold text-base flex flex-row`}
       >
         {Icon && <Icon size={24} className='mr-3' />}
         {label}

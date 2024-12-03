@@ -14,6 +14,8 @@ import { SafeUser } from '@/app/types';
 import { MdOutlineToken } from 'react-icons/md';
 import useReportModal from '@/app/hooks/useReportModal';
 import useArticleModal from '@/app/hooks/useArticleModal';
+import useProfileModal from '@/app/hooks/useProfileModal';
+import ProfileModal from '../modals/ProfileModal';
 
 
 interface UserMenuProps {
@@ -23,17 +25,26 @@ interface UserMenuProps {
 const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
   const pathname = usePathname();
   const loginModal = useLoginModal();
+  const profileModal = useProfileModal();
   const registerModal = useRegisterModal();
   const tokenModal = useTokenModal();
   const reportModal = useReportModal();
   const articleModal = useArticleModal();
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null); 
   const menuItemRef = useRef<HTMLDivElement>(null); 
 
   const toggleOpen = useCallback(() => {
     setIsOpen((value) => !value);
   }, []);
+
+  const handleProfileModal = useCallback(() => {
+    if (!currentUser) {
+      return loginModal.onOpen();
+    }
+    profileModal.onOpen();
+  }, [currentUser, loginModal, profileModal]);
 
   const handleMessengerToken = useCallback(() => {
     if (!currentUser) {
@@ -44,14 +55,14 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
 
   const handleReportModal = useCallback(() => {
     if (!currentUser) {
-      return reportModal.onOpen();
+      return loginModal.onOpen();
     }
     reportModal.onOpen();
   }, [currentUser, loginModal, reportModal]);
 
   const handleArticleModal = useCallback(() => {
     if (!currentUser) {
-      return articleModal.onOpen();
+      return loginModal.onOpen();
     }
     articleModal.onOpen();
   }, [currentUser, loginModal, articleModal]);
@@ -76,6 +87,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
 
   return (
     <div ref={menuItemRef} className='relative'>
+      <ProfileModal currentUser={currentUser} isOpen={profileModal.isOpen} onClose={profileModal.onClose} />
       <div className='flex flex-row items-center gap-3'>
         <div
           onClick={handleMessengerToken}
@@ -107,11 +119,15 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
                 </div>
                 <hr />
                 <MenuItem
-                  onClick={reportModal.onOpen}
+                  onClick={handleProfileModal}
+                  label='Edit Profile'
+                />
+                <MenuItem
+                  onClick={handleReportModal}
                   label='Make A Report'
                 />
                 <MenuItem
-                  onClick={articleModal.onOpen}
+                  onClick={handleArticleModal}
                   label='Post An Article'
                 />
                 <MenuItem
@@ -119,7 +135,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
                   label='Create An Event'
                 />
                 <MenuItem
-                  onClick={tokenModal.onOpen}
+                  onClick={handleMessengerToken}
                   label='Messenger Token'
                 />
                 <hr />
