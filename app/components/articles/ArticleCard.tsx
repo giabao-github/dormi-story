@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import HeartButton from '../HeartButton';
 
 interface ArticleCardProps {
-  data: SafeArticle;
+  data: SafeArticle & { user: SafeUser };
   onAction?: (id: string) => void;
   disabled?: boolean;
   actionLabel?: string;
@@ -39,7 +39,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ data, onAction, disabled, act
               {data.title}
             </div>
             <div className='font-semibold text-base'>
-              {data.author}
+              {data.user.name}
             </div>
             <div className='font-normal text-sm text-neutral-500'>
               {`${new Date(data.createdAt).getDate().toString().padStart(2, '0')}/${

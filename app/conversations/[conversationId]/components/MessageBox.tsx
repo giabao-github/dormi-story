@@ -51,7 +51,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast }) => {
           <div className='text-sm text-gray-400'>
             {data.sender.name}
           </div>
-          <BsDot className='mx-1 text-gray-400' />
+          <BsDot className='text-gray-400' />
           <div className='text-xs text-gray-400'>
             {format(new Date(data.createdAt), 'p')}
           </div>

@@ -11,6 +11,7 @@ import { SafeUser } from '@/app/types';
 import Avatar from '@/app/components/Avatar';
 import { Lexend } from 'next/font/google';
 import ConfirmModal from './ConfirmModal';
+import GroupAvatar from '@/app/components/GroupAvatar';
 
 
 const lexend = Lexend({
@@ -97,7 +98,11 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, data }) 
                       <div className='relative mt-6 flex-1 px-4 sm:px-6'>
                         <div className='flex flex-col items-center'>
                           <div className='mb-2'>
-                            <Avatar user={otherUser} type='panel' />
+                            {data.isGroup ? (
+                              <GroupAvatar users={data.users} />
+                            ) : (
+                              <Avatar user={otherUser} type='panel' />
+                            )}
                           </div>
                           <div>{title}</div>
                           <div className='text-sm text-gray-500'>{statusText}</div>
@@ -116,6 +121,16 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, data }) 
                           </div>
                           <div className='w-full py-5 sm:px-0 sm:pt-0'>
                             <dl className='space-y-8 px-4 sm:space-y-6 sm:px-6'>
+                              {data.isGroup && (
+                                <div>
+                                  <dt className='text-base mb-4 font-medium text-gray-600 sm:w-40 sm:flex-shrink-0'>
+                                    Emails
+                                  </dt>
+                                  <dd className='mt-1 text-sm leading-8 text-gray-900 sm:col-span-2'>
+                                    {data.users.map((user) => user.email).join('\n')}
+                                  </dd>
+                                </div>
+                              )}
                               {!data.isGroup && (
                                 <div>
                                   <dt className='text-base font-medium text-gray-600 sm:w-40 sm:flex-shrink-0'>

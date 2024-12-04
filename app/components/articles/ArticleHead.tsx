@@ -26,7 +26,7 @@ const ArticleHead: React.FC<ArticleHeadProps> = ({ title, time, author, id, curr
           {title}
         </div>
         <div className='mt-12 flex flex-row items-center gap-x-12'>
-          <div className='text-lg font-semibold flex flex-row items-center gap-2'>
+          <div className='text-lg font-semibold flex flex-row items-center gap-3'>
             <Avatar user={author} />
             <div>{author.name}</div>
           </div>

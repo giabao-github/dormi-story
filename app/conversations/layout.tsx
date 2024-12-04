@@ -4,6 +4,8 @@ import ClientOnly from '../components/ClientOnly';
 import MessengerSidebar from '../components/sidebar/MessengerSidebar';
 import ConversationList from './components/ConversationList';
 import getCurrentUser from '../actions/getCurrentUser';
+import getUsers from '../actions/getUsers';
+import MessengerTab from '../components/MessengerTab';
 
 const lexend = Lexend({
   subsets: ['latin', 'vietnamese'],
@@ -11,8 +13,9 @@ const lexend = Lexend({
 });
 
 export default async function ConversationsLayout({ children }: { children: React.ReactNode }) {
-  const conversations = await getConversations();
   const currentUser = await getCurrentUser();
+  const conversations = await getConversations();
+  const users = await getUsers();
 
   if (!currentUser) {
     return null;
@@ -22,11 +25,13 @@ export default async function ConversationsLayout({ children }: { children: Reac
     <ClientOnly>
       <title>Dormistory | Messenger</title>
       <MessengerSidebar>
-        <div className={`h-[86vh] ml-[248px] ${lexend.className}`}>
+        <div className={`h-[86vh] ml-[248px] flex flex-col justify-between ${lexend.className}`}>
           <ConversationList
-            initialItems={conversations}
             currentUser={currentUser}
+            users={users}
+            initialItems={conversations}
           />
+          <MessengerTab />
           {children}
         </div>
       </MessengerSidebar>

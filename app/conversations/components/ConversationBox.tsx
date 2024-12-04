@@ -9,7 +9,7 @@ import clsx from 'clsx';
 import { FullConversationType, SafeUser } from '@/app/types';
 import useOtherUser from '@/app/hooks/useOtherUser';
 import Avatar from '@/app/components/Avatar';
-import getCurrentUser from '@/app/actions/getCurrentUser';
+import GroupAvatar from '@/app/components/GroupAvatar';
 
 interface ConversationBoxProps {
   data: FullConversationType,
@@ -72,6 +72,23 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
     return 'Started a conversation';
   }, [lastMessage]);
 
+  const displayName = () => {
+    if (data.isGroup) {
+      if (data.name && data.name.length > 24) {
+        return `${otherUser.name.slice(0, 24)}...`;
+      } else if (data.name) {
+        return data.name;
+      } 
+    }
+    else if (otherUser.name && otherUser.name.length > 24) {
+      return`${otherUser.name.slice(0, 24)}...`;
+    }
+    else if (otherUser.name) {
+      return otherUser.name;
+    } else {
+      return 'Anonymous User';
+    }
+  }
 
   return (
     <div 
@@ -81,42 +98,39 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
         `, selected ? 'bg-neutral-100' : 'bg-white'
       )}
     >
+      {data.isGroup ? (
+        <GroupAvatar users={data.users} />  
+      ) : (
         <Avatar user={otherUser} type='messenger' />
-        <div className='min-w-0 flex-1'>
-          <div className='focus:outline-none'>
-            <div className='flex justify-between items-center mb-1'>
-              <p className='text-xl font-semibold text-gray-900'>
-              {
-                otherUser.name.length > 24
-                ? `${otherUser.name.slice(0, 24)}...`
-                : otherUser.name ||
-                (data.name && data.name.length > 24
-                ? `${data.name.slice(0, 24)}...`
-                : data?.name || 'Anonymous User')
-              }
-              </p>
-            </div>
-            <div className='flex justify-between items-center'>
-              <p className={clsx(`
-                  truncate text-sm  
-                  `, hasSeen ? 'text-gray-500' : 'text-black font-medium'
-                )}
-              >
-                {
-                  lastMessageText.length > 40 ? 
-                  `${lastMessageText.slice(0, 40)}...` :
-                  lastMessageText
-                }
-              </p>
-              {lastMessage?.createdAt && (
-                <p className='text-sm text-gray-400 font-normal'>
-                  {format(new Date(lastMessage.createdAt), 'p')}
-                </p>
+      )}
+      <div className='min-w-0 flex-1'>
+        <div className='focus:outline-none'>
+          <div className='flex justify-between items-center mb-1'>
+            <p className='text-xl font-semibold text-gray-900'>
+              {displayName()}
+            </p>
+          </div>
+          <div className='flex justify-between items-center'>
+            <p className={clsx(`
+                truncate text-sm  
+                `, hasSeen ? 'text-gray-500' : 'text-black font-medium'
               )}
-            </div>
+            >
+              {
+                lastMessageText.length > 40 ? 
+                `${lastMessageText.slice(0, 40)}...` :
+                lastMessageText
+              }
+            </p>
+            {lastMessage?.createdAt && (
+              <p className='text-sm text-gray-400 font-normal'>
+                {format(new Date(lastMessage.createdAt), 'p')}
+              </p>
+            )}
           </div>
         </div>
       </div>
+    </div>
   );
 }
 

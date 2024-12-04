@@ -7,6 +7,7 @@ import { SafeUser } from '@/app/types';
 import { Conversation } from '@prisma/client';
 import { IoMenu } from 'react-icons/io5';
 import ProfileDrawer from './ProfileDrawer';
+import GroupAvatar from '@/app/components/GroupAvatar';
 
 
 interface HeaderProps {
@@ -36,12 +37,16 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
       />
       <div className='bg-white w-full flex border-b-[1px] sm:px-4 py-3 px-4 lg:px-6 justify-between items-center shadow-sm'>
         <div className='flex gap-4 items-center'>
-          <Avatar user={otherUser} type='messenger' />
-          <div className='flex flex-col'>
-            <div className='font-semibold'>
+          {conversation.isGroup ? (
+            <GroupAvatar users={conversation.users} />
+          ) : (
+            <Avatar user={otherUser} type='messenger' />
+          )}
+          <div className='flex flex-col gap-y-1 mx-2'>
+            <div className='text-xl font-semibold'>
               {conversation.name || otherUser.name}
             </div>
-            <div className='text-sm font-medium text-neutral-500'>
+            <div className='mx-1 text-sm font-medium text-neutral-500'>
               {statusText}
             </div>
           </div>

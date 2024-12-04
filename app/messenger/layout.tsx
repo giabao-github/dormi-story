@@ -4,7 +4,8 @@ import ClientOnly from '../components/ClientOnly';
 import MessengerSidebar from '../components/sidebar/MessengerSidebar';
 import UserList from './components/UserList';
 import getCurrentUser from '../actions/getCurrentUser';
-import IntroductionPage from '../components/IntroductionPage';
+import MessengerTab from '../components/MessengerTab';
+
 
 const lexend = Lexend({
   subsets: ['latin', 'vietnamese'],
@@ -22,8 +23,9 @@ export default async function MessengerLayout({ children } : { children: React.R
   return (
     <ClientOnly>
       <MessengerSidebar>
-        <div className={`h-[86vh] ml-[248px] flex flex-col ${lexend.className}`}>
+        <div className={`h-[86vh] ml-[248px] flex flex-col justify-between ${lexend.className}`}>
           <UserList items={users} />
+          <MessengerTab />
           {children}
         </div>
       </MessengerSidebar>

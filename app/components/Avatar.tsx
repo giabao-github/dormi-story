@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
-import { PiUserCircleDuotone } from "react-icons/pi";
-import { SafeUser } from "../types";
+import Image from 'next/image';
+import { PiUserCircleDuotone } from 'react-icons/pi';
+import { SafeUser } from '../types';
 
 
 interface AvatarProps {
@@ -21,12 +21,39 @@ const Avatar: React.FC<AvatarProps> = ({ user, type }) => {
   }
 
   if (user && user.image) {
+    if (type === 'messenger') {
+      return (
+        <div className='relative'>
+          <Image
+            className='rounded-full'
+            height={64}
+            width={64}
+            alt={user.name}
+            src={user.image}
+          />
+          <span className='absolute block rounded-full bg-green-500 ring-2 ring-white top-1 right-0 h-2 w-2 md:h-3 md:w-3' />
+        </div>
+      );
+    } else if (type === 'panel') {
+      return (
+        <div className='relative'>
+          <Image
+            className='rounded-full'
+            height={48}
+            width={48}
+            alt={user.name}
+            src={user.image}
+          />
+          <span className='absolute block rounded-full bg-green-500 ring-2 ring-white top-1 right-0 h-1 w-1 md:h-2 md:w-2' />
+        </div>
+      );
+    }
     return (
       <Image
         className='rounded-full'
         height={32}
         width={32}
-        alt='User avatar'
+        alt={user.name}
         src={user.image}
       />
     );
@@ -34,7 +61,7 @@ const Avatar: React.FC<AvatarProps> = ({ user, type }) => {
     if (type === 'messenger') {
       return (
         <div className='relative'>
-          <div className='bg-button h-14 w-14 rounded-full flex items-center justify-center text-white text-xl font-semibold select-none'>
+          <div className='bg-button h-16 w-16 rounded-full flex items-center justify-center text-white text-xl font-semibold select-none'>
             {getAbbreviation(user.name)}
           </div>
           <span className='absolute block rounded-full bg-green-500 ring-2 ring-white top-1 right-0 h-2 w-2 md:h-3 md:w-3' />
@@ -57,11 +84,11 @@ const Avatar: React.FC<AvatarProps> = ({ user, type }) => {
       </div>
     );
   }
-  else if (!user) {
+  else if (!user?.name) {
     return (
       <PiUserCircleDuotone
         className='rounded-full'
-        size={32}
+        size={64}
       />
     );
   }
