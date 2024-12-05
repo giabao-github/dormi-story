@@ -29,7 +29,7 @@ export default async function RootLayout({
     <html lang='en'>
       <title>Dormistory | Home Page</title>
       <ClientOnly>
-        <body className={`${nunito.className}`}>
+        <body className={`overflow-hidden ${nunito.className}`}>
           <ToasterProvider />
           <LoginModal />
           <RegisterModal />

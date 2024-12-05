@@ -9,9 +9,10 @@ interface MessengerModalProps {
   isOpen?: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  type?: string;
 }
 
-const MessengerModal: React.FC<MessengerModalProps> = ({ isOpen, onClose, children }) => {
+const MessengerModal: React.FC<MessengerModalProps> = ({ isOpen, onClose, children, type }) => {
   return (
     <Transition
       show={isOpen}
@@ -51,7 +52,7 @@ const MessengerModal: React.FC<MessengerModalProps> = ({ isOpen, onClose, childr
                   <button
                     type='button'
                     onClick={onClose}
-                    className='bg-white text-gray-400 hover:text-gray-700 focus:outline-none'
+                    className={`text-gray-400 hover:text-button focus:outline-none`}
                   >
                     <span className='sr-only'>Close</span>
                     <IoClose size={24} className='h-6 w-6' />

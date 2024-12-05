@@ -35,7 +35,7 @@ const Form = () => {
 
 
   return (
-    <div className='px-4 bg-white border-t flex items-center gap-4 lg:gap-6 w-full h-[12%] shadow-md'>
+    <div className='px-4 bg-white border-t border-l flex items-center gap-4 lg:gap-6 w-full h-[12%] shadow-md'>
       <CldUploadButton
         options={{ maxFiles: 1 }}
         onSuccess={handleUpload}

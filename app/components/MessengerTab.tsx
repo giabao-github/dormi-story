@@ -11,7 +11,7 @@ const MessengerTab = () => {
   const pathname = usePathname();
 
   return (
-    <div className='h-[8%] flex flex-row'>
+    <div className='h-[8%] flex flex-row border-t border-gray-200'>
       <div className='flex justify-center items-center w-1/2'>
         <MdGroups 
           size={34}

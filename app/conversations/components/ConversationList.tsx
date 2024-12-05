@@ -35,7 +35,7 @@ const ConversationList: React.FC<ConversationListProps> = ({ initialItems, users
         `, isOpen ? 'hidden' : 'block w-full'
         )}
       >
-        <div className='flex-col h-full border-r border-r-neutral-200'>
+        <div className='flex-col h-full'>
           <div className='flex justify-between mb-10 pt-8 mx-6'>
             <div className='text-3xl font-extrabold text-neutral-800'>Messages</div>
             <div

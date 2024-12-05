@@ -1,6 +1,7 @@
 "use client";
 
 import Avatar from '@/app/components/Avatar';
+import LoadingModal from '@/app/components/LoadingModal';
 import { SafeUser } from '@/app/types';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -27,21 +28,26 @@ const UserBox: React.FC<UserBoxProps> = ({ data }) => {
   }, [data, router]);
 
   return (
-    <div
-      onClick={handleClick}
-      className='w-full h-24 flex items-center space-x-3 py-3 px-6 hover:bg-neutral-100 transition cursor-pointer'
-    >
-      <Avatar user={data} type='messenger' />
-      <div className='min-w-0 flex-1'>
-        <div className='focus:outline-none'>
-          <div className='flex justify-between items-center ml-2 mb-1'>
-            <p className='text-lg font-semibold text-gray-900'>
-              {data.name}
-            </p>
+    <>
+      {isLoading && (
+        <LoadingModal />
+      )}
+      <div
+        onClick={handleClick}
+        className='w-full h-24 flex items-center space-x-3 py-3 px-6 hover:bg-neutral-100 transition cursor-pointer'
+      >
+        <Avatar user={data} type='messenger' />
+        <div className='min-w-0 flex-1'>
+          <div className='focus:outline-none'>
+            <div className='flex justify-between items-center ml-2 mb-1'>
+              <p className='text-lg font-semibold text-gray-900'>
+                {data.name}
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

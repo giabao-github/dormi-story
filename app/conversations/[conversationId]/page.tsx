@@ -38,7 +38,7 @@ const ConversationId = async ({ params }: { params: IParams }) => {
   };
 
   return (
-    <div className='h-full w-[60vw] lg:ml-[516px] absolute top-0'>
+    <div className='h-full w-[60vw] lg:ml-[516px] absolute top-0 overflow-y-auto'>
       <div className='h-full flex flex-col'>
         <Header conversation={fullConversation} />
         <Body initialMessages={messages} />
