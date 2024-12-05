@@ -8,31 +8,36 @@ import { Conversation } from '@prisma/client';
 import { IoMenu } from 'react-icons/io5';
 import ProfileDrawer from './ProfileDrawer';
 import GroupAvatar from '@/app/components/GroupAvatar';
+import useActiveList from '@/app/hooks/useActiveList';
 
 
 interface HeaderProps {
   conversation: Conversation & {
     users: SafeUser[]
   };
+  currentUser: SafeUser | null;
 }
 
-const Header: React.FC<HeaderProps> = ({ conversation }) => {
-  const otherUser = useOtherUser(conversation);
+const Header: React.FC<HeaderProps> = ({ conversation, currentUser }) => {
+  const otherUser = useOtherUser(conversation, currentUser);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { members } = useActiveList();
+  const isActive = members.indexOf(otherUser?.email!) !== -1;
 
   const statusText = useMemo(() => {
     if (conversation.isGroup) {
       return `${conversation.users.length} members`;
     }
 
-    return 'Active';
-  }, [conversation]);
+    return isActive ? 'Active' : 'Offline';
+  }, [conversation, isActive]);
 
   return (
     <>
       <ProfileDrawer
         data={conversation}
         isOpen={drawerOpen}
+        currentUser={currentUser}
         onClose={() => setDrawerOpen(false)}
       />
       <div className='bg-white w-full flex border-b-[1px] border-l-[1px] sm:px-4 py-3 px-4 lg:px-6 justify-between items-center shadow-sm'>

@@ -4,13 +4,15 @@ import Header from './components/Header';
 import Body from './components/Body';
 import Form from './components/Form';
 import ChatEmptyState from '../components/ChatEmptyState';
+import getCurrentUser from '@/app/actions/getCurrentUser';
 
 interface IParams {
   conversationId: string;
 }
 
 const ConversationId = async ({ params }: { params: IParams }) => {
-  const resolvedParams = await params; 
+  const resolvedParams = await params;
+  const currentUser = await getCurrentUser();
   const conversation = await getConversationById(resolvedParams.conversationId);
   const messages = await getMessages(resolvedParams.conversationId);
 
@@ -40,8 +42,8 @@ const ConversationId = async ({ params }: { params: IParams }) => {
   return (
     <div className='h-full w-[60vw] lg:ml-[516px] absolute top-0 overflow-y-auto'>
       <div className='h-full flex flex-col'>
-        <Header conversation={fullConversation} />
-        <Body initialMessages={messages} />
+        <Header conversation={fullConversation} currentUser={currentUser} />
+        <Body initialMessages={messages} currentUser={currentUser} />
         <Form />
       </div>
     </div>

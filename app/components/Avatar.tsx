@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { PiUserCircleDuotone } from 'react-icons/pi';
 import { SafeUser } from '../types';
+import useActiveList from '../hooks/useActiveList';
 
 
 interface AvatarProps {
@@ -11,6 +12,9 @@ interface AvatarProps {
 }
 
 const Avatar: React.FC<AvatarProps> = ({ user, type }) => {
+  const { members } = useActiveList();
+  const isActive = members.indexOf(user?.email!) !== -1;
+
   const getAbbreviation = (name: string) => {
     const words = name.split(' ');
     if (words.length === 1) {
@@ -31,7 +35,9 @@ const Avatar: React.FC<AvatarProps> = ({ user, type }) => {
             alt={user.name}
             src={user.image}
           />
-          <span className='absolute block rounded-full bg-green-500 ring-2 ring-white top-1 right-0 h-2 w-2 md:h-3 md:w-3' />
+          {isActive && (
+            <span className='absolute block rounded-full bg-green-500 ring-2 ring-white top-1 right-0 h-2 w-2 md:h-3 md:w-3' />
+          )}
         </div>
       );
     } else if (type === 'panel') {
@@ -44,7 +50,9 @@ const Avatar: React.FC<AvatarProps> = ({ user, type }) => {
             alt={user.name}
             src={user.image}
           />
-          <span className='absolute block rounded-full bg-green-500 ring-2 ring-white top-1 right-0 h-1 w-1 md:h-2 md:w-2' />
+          {isActive && (
+            <span className='absolute block rounded-full bg-green-500 ring-2 ring-white top-1 right-0 h-1 w-1 md:h-2 md:w-2' />
+          )}
         </div>
       );
     }
@@ -64,7 +72,9 @@ const Avatar: React.FC<AvatarProps> = ({ user, type }) => {
           <div className='bg-button h-16 w-16 rounded-full flex items-center justify-center text-white text-xl font-semibold select-none'>
             {getAbbreviation(user.name)}
           </div>
-          <span className='absolute block rounded-full bg-green-500 ring-2 ring-white top-1 right-0 h-2 w-2 md:h-3 md:w-3' />
+          {isActive && (
+            <span className='absolute block rounded-full bg-green-500 ring-2 ring-white top-1 right-0 h-2 w-2 md:h-3 md:w-3' />
+          )}
         </div>
       );
     }
@@ -74,7 +84,9 @@ const Avatar: React.FC<AvatarProps> = ({ user, type }) => {
           <div className='bg-button h-12 w-12 rounded-full flex items-center justify-center text-white text-lg font-semibold select-none'>
             {getAbbreviation(user.name)}
           </div>
-          <span className='absolute block rounded-full bg-green-500 ring-2 ring-white top-1 right-0 h-1 w-1 md:h-2 md:w-2' />
+          {isActive && (
+            <span className='absolute block rounded-full bg-green-500 ring-2 ring-white top-1 right-0 h-1 w-1 md:h-2 md:w-2' />
+          )}
         </div>
       );
     }

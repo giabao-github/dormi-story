@@ -1,25 +1,24 @@
 "use client";
 
 import { useState } from 'react';
-import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import Avatar from '@/app/components/Avatar';
-import { FullMessageType } from '@/app/types';
+import { FullMessageType, SafeUser } from '@/app/types';
 import { BsDot } from 'react-icons/bs';
 import ImageModal from './ImageModal';
 
 interface MessageBoxProps {
   data: FullMessageType;
   isLast?: boolean;
+  currentUser?: SafeUser | null;
 }
 
-const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast }) => {
-  const session = useSession();
+const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) => {
   const [imageModalOpen, setImageModalOpen] = useState(false);
 
-  const isOwn = session?.data?.user?.email?.toLowerCase() === data?.sender?.email?.toLowerCase();
+  const isOwn = currentUser?.email === data?.sender?.email;
   const seenList = (data.seen || [])
   .filter((user) => user.email !== data?.sender?.email)
   .map((user) => user.name)
@@ -39,7 +38,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast }) => {
 
   const message = clsx(
     'text-sm w-fit overflow-hidden',
-    isOwn ? 'bg-primary/80 text-white' : 'bg-gray-200',
+    isOwn ? 'bg-primary text-white' : 'bg-gray-200',
     data.image ? 'rounded-md p-0' : 'rounded-full py-2 px-3'
   );
 

@@ -1,13 +1,17 @@
 "use client";
 
 import clsx from 'clsx';
-import { useState } from 'react';
+import { find } from 'lodash';
+import { useEffect, useMemo, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import useConversation from '@/app/hooks/useConversation';
 import { FullConversationType, SafeUser } from '@/app/types';
 import ConversationBox from './ConversationBox';
 import { FaUsers } from 'react-icons/fa6';
 import GroupChatModal from './GroupChatModal';
+import { pusherClient } from '@/app/libs/pusher';
+import axios from 'axios';
 
 interface ConversationListProps {
   initialItems: FullConversationType[];
@@ -20,8 +24,68 @@ const ConversationList: React.FC<ConversationListProps> = ({ initialItems, users
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const router = useRouter();
+  const session = useSession();
 
   const { conversationId, isOpen } = useConversation();
+
+  const pusherKey = useMemo(() => {
+    return session?.data?.user?.email;
+  }, [session?.data?.user?.email]);
+
+  useEffect(() => {
+    axios.post(`/api/conversations/${conversationId}/seen`);
+  }, [conversationId]);
+
+  useEffect(() => {
+    if (!pusherKey) {
+      return;
+    }
+
+    pusherClient.subscribe(pusherKey);
+
+    const handleNewConversation = (conversation: FullConversationType) => {
+      axios.post(`/api/conversations/${conversationId}/seen`);
+      setItems((current) => {
+        if (find(current, { id: conversation.id })) {
+          return current;
+        }
+        return [conversation, ...current];
+      });
+    }
+
+    const handleConversationUpdate = (conversation: FullConversationType) => {
+      setItems((current) => current.map((currentConversation) => {
+        if (currentConversation.id === conversation.id) {
+          return {
+            ...currentConversation,
+            messages: currentConversation.messages,
+          }
+        }
+        return currentConversation;
+      }));
+    }
+
+    const handleConversationDelete = (conversation: FullConversationType) => {
+      setItems((current) => {
+        return [...current.filter((conv) => conv.id !== conversation.id)];
+      });
+      if (conversationId === conversation.id) {
+        router.push('/conversations');
+      }
+    }
+
+    pusherClient.bind('conversation:new', handleNewConversation);
+    pusherClient.bind('conversation:update', handleConversationUpdate);
+    pusherClient.bind('conversation:remove', handleConversationDelete);
+
+    return () => {
+      pusherClient.unsubscribe(pusherKey);
+      pusherClient.unbind('conversation:new', handleNewConversation);
+      pusherClient.unbind('conversation:update', handleConversationUpdate);
+      pusherClient.unbind('conversation:remove', handleConversationDelete);
+    }
+  }, [pusherKey, conversationId, router]);
+
 
   return (
     <>

@@ -11,6 +11,7 @@ import TokenModal from './components/modals/TokenModal';
 import ReportModal from './components/modals/ReportModal';
 import ArticleModal from './components/modals/ArticleModal';
 import { Nunito } from 'next/font/google';
+import ActiveStatus from './components/ActiveStatus';
 
 
 const nunito = Nunito({
@@ -31,6 +32,7 @@ export default async function RootLayout({
       <ClientOnly>
         <body className={`overflow-hidden ${nunito.className}`}>
           <ToasterProvider />
+          <ActiveStatus />
           <LoginModal />
           <RegisterModal />
           <TokenModal currentUser={currentUser} />

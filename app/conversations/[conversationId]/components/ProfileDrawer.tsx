@@ -12,6 +12,7 @@ import Avatar from '@/app/components/Avatar';
 import { Lexend } from 'next/font/google';
 import ConfirmModal from './ConfirmModal';
 import GroupAvatar from '@/app/components/GroupAvatar';
+import useActiveList from '@/app/hooks/useActiveList';
 
 
 const lexend = Lexend({
@@ -24,12 +25,15 @@ interface ProfileDrawerProps {
   onClose: () => void;
   data: Conversation & {
     users: SafeUser[];
-  }
+  };
+  currentUser: SafeUser | null;
 }
 
-const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, data }) => {
-  const otherUser = useOtherUser(data);
+const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, data, currentUser }) => {
+  const otherUser = useOtherUser(data, currentUser);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const { members } = useActiveList();
+  const isActive = members.indexOf(otherUser?.email!) !== -1;
 
   const joinedDate = useMemo(() => {
     return format(new Date(otherUser.createdAt), 'PP');
@@ -44,8 +48,8 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, data }) 
       return `${data.users.length} members`;
     }
 
-    return 'Active';
-  }, [data]);
+    return isActive ? 'Active' : 'Offline';
+  }, [data, isActive]);
 
   return (
     <>
@@ -96,7 +100,7 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, data }) 
                         </div>
                       </div>
                       <div className='relative mt-6 flex-1 px-4 sm:px-6'>
-                        <div className='flex flex-col items-center'>
+                        <div className='flex flex-col gap-y-2 items-center'>
                           <div className='mb-2'>
                             {data.isGroup ? (
                               <GroupAvatar users={data.users} />
