@@ -126,19 +126,19 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
   const onNext = () => {
     if (step === STEPS.CATEGORY && !category) {
       toast.remove();
-      toast.error('Please select a category before proceeding');
+      toast.error('Please select an article category before proceeding');
       return;
     }
     else if (step === STEPS.TITLE && !title) {
       setInputError(true);
       toast.remove();
-      toast.error('Please provide a title before proceeding');
+      toast.error('Please provide an article title before proceeding');
       return;
     }
     else if (step === STEPS.CONTENT && !content) {
       setInputError(true);
       toast.remove();
-      toast.error('Please write the article content before proceeding');
+      toast.error('Please write an article content before proceeding');
       return;
     }
     setInputError(false);
@@ -162,8 +162,9 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
       articleModal.onClose();
     })
     .catch((error) => {
+      console.log(error);
       toast.remove();
-      toast.error(error);
+      toast.error('An error occurred. Please try again');
     })
     .finally(() => {
       setIsLoading(false);
@@ -197,7 +198,7 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
         <p className='text-2xl font-semibold w-1/4'>
           Author name
         </p>
-        <div className='w-2/3 py-3 px-6 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
+        <div className='ml-8 w-2/3 py-3 px-6 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
           {currentUser?.name}
         </div>
       </div>

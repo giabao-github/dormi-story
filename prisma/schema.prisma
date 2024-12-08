@@ -35,6 +35,7 @@ model User {
   messages Message[]
   personalInformation PersonalInformation[]
   report Report[]
+  survey Survey[]
   article Article[]
   parkingLotRegistration ParkingLotRegistration[]
 
@@ -102,6 +103,20 @@ model Article {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model Survey {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  category String
+  title String
+  creator String
+  description String
+  link String
+  createdAt DateTime @default(now())
+  userId String @db.ObjectId
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model ParkingLotRegistration {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   userId String @db.ObjectId

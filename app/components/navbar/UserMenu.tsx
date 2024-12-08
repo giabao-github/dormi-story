@@ -2,7 +2,7 @@
 
 import { IoMenu } from 'react-icons/io5';
 import Avatar from '../Avatar';
-import { use, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import MenuItem from './MenuItem';
 import useRegisterModal from '@/app/hooks/useRegisterModal';
 import useLoginModal from '@/app/hooks/useLoginModal';
@@ -16,6 +16,7 @@ import useReportModal from '@/app/hooks/useReportModal';
 import useArticleModal from '@/app/hooks/useArticleModal';
 import useProfileModal from '@/app/hooks/useProfileModal';
 import ProfileModal from '../modals/ProfileModal';
+import useSurveyModal from '@/app/hooks/useSurveyModal';
 
 
 interface UserMenuProps {
@@ -30,6 +31,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
   const tokenModal = useTokenModal();
   const reportModal = useReportModal();
   const articleModal = useArticleModal();
+  const surveyModal = useSurveyModal();
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null); 
@@ -66,6 +68,13 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
     }
     articleModal.onOpen();
   }, [currentUser, loginModal, articleModal]);
+
+  const handleSurveyModal = useCallback(() => {
+    if (!currentUser) {
+      return loginModal.onOpen();
+    }
+    surveyModal.onOpen();
+  }, [currentUser, loginModal, surveyModal]);
 
   const handleClickOutside = (event: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(event.target as Node) && menuItemRef.current && !menuItemRef.current.contains(event.target as Node)) {
@@ -114,7 +123,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
           <div className='flex flex-col cursor-pointer select-none'>
             {currentUser ? (
               <>
-                <div className='cursor-default select-text'>
+                <div className='cursor-default select-text mx-2'>
                   <MenuItem label={currentUser.name} />
                 </div>
                 <hr />
@@ -129,6 +138,10 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
                 <MenuItem
                   onClick={handleArticleModal}
                   label='Post An Article'
+                />
+                <MenuItem
+                  onClick={handleSurveyModal}
+                  label='Create A Survey'
                 />
                 <MenuItem
                   onClick={articleModal.onOpen}

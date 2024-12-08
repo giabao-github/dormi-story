@@ -102,12 +102,12 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
   const onNext = () => {
     if (step === STEPS.CATEGORY && !category) {
       toast.remove();
-      toast.error('Please select a category before proceeding');
+      toast.error('Please select a report category before proceeding');
       return;
     }
     if (step === STEPS.DESCRIPTION && !description) {
       toast.remove();
-      toast.error('Please describe the issue');
+      toast.error('Please describe the reported issue');
       return;
     }
     setStep((value) => value + 1);
@@ -130,20 +130,13 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
       reportModal.onClose();
     })
     .catch((error) => {
+      console.log(error);
       toast.remove();
-      toast.error(error);
+      toast.error('An error occurred. Please try again');
     })
     .finally(() => {
       setIsLoading(false);
     })
-  }
-
-  const handleFileChange = (event: any) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      setCustomValue('proofSrc', file);
-    }
   }
 
   const actionLabel = useMemo(() => {
@@ -173,7 +166,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
         <p className='text-2xl font-semibold w-1/4'>
           Student name
         </p>
-        <div className='w-2/3 py-3 px-6 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
+        <div className='ml-8 w-2/3 py-3 px-6 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
           {currentUser?.name}
         </div>
       </div>
@@ -181,7 +174,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
         <p className='text-2xl font-semibold w-1/4'>
           Student ID
         </p>
-        <div className='w-2/3 py-3 px-6 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
+        <div className='ml-8 w-2/3 py-3 px-6 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
           {currentUser?.studentId}
         </div>
       </div>
@@ -266,39 +259,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
       <div className='flex flex-col gap-8'>
         <div className='mx-6'>
           <Heading
-            title='Upload the proof if there is one file (optional)'
-            subtitle='Accepted file formats: image, audio, video'
-          />
-          <div className={`border-primary border-2 p-4 rounded-lg flex items-center justify-center ${selectedFile ? 'border-solid flex-row' : 'border-dashed flex-col'}`}>
-            <UploadInput
-              className='hidden'
-              id='proofSrc'
-              type='file'
-              {...register('proofSrc')}
-              accept='image/*,audio/*,video/*'
-              onChange={handleFileChange}
-            />
-            <label htmlFor='proofSrc' className={`w-full bg-primary/30 cursor-pointer text-black px-2 py-2 rounded-lg flex items-center justify-center font-semibold ${selectedFile ? 'text-lg' : 'text-xl'}`}>
-              {selectedFile ? `${selectedFile.name.substring(0, 40)}${selectedFile.name.length > 40 ? '...' : ''}` : 'Choose File'}
-            </label>
-            {selectedFile && (
-              <button
-                title='Remove uploaded file'
-                type='button'
-                onClick={() => setSelectedFile(null)}
-                className='inline-flex items-center w-[5%] ml-3 text-red-500 border border-red-500 px-2 py-2 rounded-lg'
-              >
-                <FaTrashCan />
-              </button>
-            )}
-          </div>
-          <div className='mt-14 mb-12 flex flex-row items-center justify-center'>
-            <div className='flex-grow h-px bg-neutral-300'></div>
-            <span className='mx-3 text-neutral-500'>OR</span>
-            <div className='flex-grow h-px bg-neutral-300'></div>
-          </div>
-          <Heading
-            title='Provide a Cloud Service link if there are multiple files (optional)'
+            title='Provide a Cloud Service link (optional)'
             subtitle='Remember to set permission to public'
           />
           <input
@@ -320,7 +281,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
         <div className='mx-6'>
           <Heading
             title='Confirmation'
-            subtitle='Please carefully check your report information before reporting'
+            subtitle='Please carefully check your report information before submitting'
           />
           <div className='w-full py-3 px-5 text-lg font-semibold text-red-500 flex flex-row'>
             <IoWarning size={20} className='text-red-500 mr-2 mt-1' />

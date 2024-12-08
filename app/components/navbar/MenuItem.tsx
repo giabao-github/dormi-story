@@ -3,7 +3,8 @@
 import { TbLogout } from 'react-icons/tb';
 import { MdOutlineToken, MdOutlineReport, MdEventAvailable } from 'react-icons/md';
 import { BiNews } from 'react-icons/bi';
-import { HiOutlineUserCircle } from "react-icons/hi2";
+import { HiOutlineUserCircle } from 'react-icons/hi2';
+import { RiSurveyLine } from 'react-icons/ri';
 import { IconType } from 'react-icons';
 
 interface MenuItemProps {
@@ -28,6 +29,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ onClick, label }) => {
     Icon = BiNews;
   } else if (label === 'Create An Event') {
     Icon = MdEventAvailable;
+  } else if (label === 'Create A Survey') {
+    Icon = RiSurveyLine;
   }
 
   if (onClick) {

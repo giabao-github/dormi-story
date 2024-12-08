@@ -17,7 +17,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentUser }) => {
     !pathname?.includes('/articles/') &&
     pathname !== '/messenger' &&
     pathname !== '/conversations' &&
-    !pathname?.includes('/conversations/')
+    !pathname?.includes('/conversations/') &&
+    pathname !== '/surveys'
 );
 
   if (!is404Page && currentUser) {

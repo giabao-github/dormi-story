@@ -1,25 +1,25 @@
 import ClientOnly from '../components/ClientOnly';
 import Container from '../components/Container';
 import EmptyState from '../components/EmptyState';
-import getArticles from '../actions/getArticles';
-import ArticleCard from '../components/articles/ArticleCard';
 import getCurrentUser from '../actions/getCurrentUser';
 import { Lexend } from 'next/font/google';
+import getSurveys from '../actions/getSurveys';
+import SurveyCard from '../components/SurveyCard';
 
 const lexend = Lexend({
   subsets: ['latin', 'vietnamese'],
   weight: '400'
 });
 
-const Articles = async () => {
+const Survey = async () => {
   const currentUser = await getCurrentUser();
-  const articles = await getArticles();
+  const surveys = await getSurveys();
 
   if (!currentUser) {
     return null;
   }
 
-  if (articles.length === 0) {
+  if (surveys.length === 0) {
     return (
       <ClientOnly>
         <EmptyState showReset />
@@ -29,19 +29,19 @@ const Articles = async () => {
 
   return (
     <div className={`mt-4 overflow-y-auto max-h-[86%] w-full absolute right-0 ${lexend.className}`}>
-      <title>Dormistory | Articles</title>
+      <title>Dormistory | Surveys</title>
       <ClientOnly>
         <Container>
           <div className={`ml-[248px] mt-4 mb-32 grid grid-cols-1 gap-8`}>
             <div className='flex justify-center my-10'>
-              <span className='font-bold text-4xl'>Articles</span>
+              <span className='font-bold text-4xl'>Surveys</span>
             </div>
-            {articles.map((article) => {
+            {surveys.map((survey) => {
               return (
-                <ArticleCard
+                <SurveyCard
                   currentUser={currentUser}
-                  key={article.id}
-                  data={article}
+                  key={survey.id}
+                  data={survey}
                 />
               )
             })}
@@ -52,4 +52,4 @@ const Articles = async () => {
   );
 }
 
-export default Articles;
+export default Survey;

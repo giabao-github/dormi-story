@@ -33,7 +33,7 @@ const ArticlePage = async ({ params } : { params: IParams }) => {
   }
 
   return (
-    <div className={`mt-4 overflow-y-auto max-h-full absolute right-0 ${lexend.className}`}>
+    <div className={`mt-4 overflow-y-auto max-h-[86%] absolute right-0 ${lexend.className}`}>
       <title>{`Dormistory | ${article.title}`}</title>
       <ClientOnly>
         <ArticleClient

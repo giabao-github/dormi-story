@@ -1,7 +1,14 @@
-import { Article, User, Conversation, Message } from '@prisma/client';
+import { Article, Survey, User, Conversation, Message } from '@prisma/client';
 
 export type SafeArticle = Omit<
   Article,
+  'createdAt'
+> & {
+  createdAt: string;
+};
+
+export type SafeSurvey = Omit<
+  Survey,
   'createdAt'
 > & {
   createdAt: string;

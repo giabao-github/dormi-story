@@ -1,11 +1,11 @@
 "use client";
 
-import { SafeArticle, SafeUser } from '@/app/types';
+import { SafeSurvey, SafeUser } from '@/app/types';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
-interface ArticleCardProps {
-  data: SafeArticle & { user: SafeUser };
+interface SurveyCardProps {
+  data: SafeSurvey & { user: SafeUser };
   onAction?: (id: string) => void;
   disabled?: boolean;
   actionLabel?: string;
@@ -13,31 +13,34 @@ interface ArticleCardProps {
   currentUser?: SafeUser | null;
 }
 
-const ArticleCard: React.FC<ArticleCardProps> = ({ data, onAction, disabled, actionLabel, actionId, currentUser }) => {
+const SurveyCard: React.FC<SurveyCardProps> = ({ data, onAction, disabled, actionLabel, actionId, currentUser }) => {
   const router = useRouter();
 
   return (
     <div className='col-span-1 flex justify-center'>
       <div className='flex flex-row items-center gap-2 w-[80%] p-2 border-2 border-primary rounded-md'>
-        <div className='ml-2 aspect-square w-[10%] relative overflow-hidden rounded-xl'>
+        <div
+          onClick={() => router.push('https://docs.google.com/forms')} 
+          className='ml-2 aspect-[4/5] h-[90%] relative overflow-hidden rounded-xl'
+        >
           <Image
             fill
             alt={data.title}
-            src={data.files}
-            className='object-cover h-full w-full hover:scale-110 transition cursor-pointer'
+            src={'/images/google-forms.png'}
+            className='object-cover h-full w-full cursor-pointer'
           />
         </div>
         <div className='flex flex-row justify-between items-center w-full mx-6'>
           <div className='flex flex-col gap-3'>
             <div 
               title={data.title}
-              onClick={() => router.push(`/articles/${data.id}`)}
+              onClick={() => router.push(`${data.link}`)}
               className='font-bold text-2xl cursor-pointer hover:underline'
             >
               {data.title}
             </div>
             <div className='flex items-center flex-row gap-x-2 mx-2'>
-              <span className='font-normal text-neutral-500 text-sm'>Posted by: </span>
+              <span className='font-normal text-neutral-500 text-sm'>Created by: </span>
               <span className='font-semibold text-base'>{`${data.user.name}`}</span>
             </div>
             <div className='flex flex-row gap-x-4 font-normal text-sm text-neutral-500 mx-1'>
@@ -58,4 +61,4 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ data, onAction, disabled, act
   );
 }
 
-export default ArticleCard;
+export default SurveyCard;

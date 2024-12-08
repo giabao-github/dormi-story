@@ -1,4 +1,5 @@
 import './globals.css';
+import { Nunito } from 'next/font/google';
 import Navbar from './components/navbar/Navbar';
 import ClientOnly from './components/ClientOnly';
 import RegisterModal from './components/modals/RegisterModal';
@@ -10,8 +11,8 @@ import IntroductionPage from './components/IntroductionPage';
 import TokenModal from './components/modals/TokenModal';
 import ReportModal from './components/modals/ReportModal';
 import ArticleModal from './components/modals/ArticleModal';
-import { Nunito } from 'next/font/google';
 import ActiveStatus from './components/ActiveStatus';
+import SurveyModal from './components/modals/SurveyModal';
 
 
 const nunito = Nunito({
@@ -38,6 +39,7 @@ export default async function RootLayout({
           <TokenModal currentUser={currentUser} />
           <ReportModal currentUser={currentUser} />
           <ArticleModal currentUser={currentUser} />
+          <SurveyModal currentUser={currentUser} />
           <Navbar currentUser={currentUser} />
           <IntroductionPage currentUser={currentUser} />
           <Sidebar currentUser={currentUser} />

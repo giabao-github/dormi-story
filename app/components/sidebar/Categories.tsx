@@ -5,7 +5,7 @@ import { MdEventAvailable, MdOutlineReport, MdOutlineMailOutline,  MdOutlineGrad
 import { RiSurveyLine, RiMessengerLine } from 'react-icons/ri';
 import { LuParkingCircle } from 'react-icons/lu';
 import { HiOutlineWrench } from 'react-icons/hi2';
-import { IoNotificationsOutline } from 'react-icons/io5';
+import { IoNotificationsOutline, IoImageOutline } from 'react-icons/io5';
 import { FaRegUserCircle } from 'react-icons/fa';
 import { FaRegAddressCard, FaWpforms, FaScaleBalanced  } from 'react-icons/fa6';
 import CategorySection from '../CategorySection';
@@ -94,10 +94,10 @@ export const categories = [
     description: "Facebook's Messenger"
   },
   {
-    label: 'Contacts',
-    route: '/contacts',
-    icon: MdOutlineMailOutline,
-    description: "Contact Dorm's Admin"
+    label: 'Pictures',
+    route: '/pictures',
+    icon: IoImageOutline,
+    description: "Dorm's Pictures"
   },
 ]
 
@@ -112,7 +112,8 @@ const Categories = () => {
     pathname?.includes('/articles/') ||
     pathname === '/messenger' ||
     pathname === '/conversations' ||
-    pathname?.includes('/conversations/')
+    pathname?.includes('/conversations/') ||
+    pathname === '/surveys'
   );
 
   if (!isMainPage) {
