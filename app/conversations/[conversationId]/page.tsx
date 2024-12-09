@@ -1,10 +1,8 @@
 import getConversationById from '@/app/actions/getConversationById';
 import getMessages from '@/app/actions/getMessages';
-import Header from './components/Header';
-import Body from './components/Body';
-import Form from './components/Form';
 import ChatEmptyState from '../components/ChatEmptyState';
 import getCurrentUser from '@/app/actions/getCurrentUser';
+import PageContent from './components/PageContent';
 
 interface IParams {
   conversationId: string;
@@ -40,13 +38,7 @@ const ConversationId = async ({ params }: { params: IParams }) => {
   };
 
   return (
-    <div className='h-full w-[60vw] lg:ml-[516px] absolute top-0 overflow-y-auto'>
-      <div className='h-full flex flex-col'>
-        <Header conversation={fullConversation} currentUser={currentUser} />
-        <Body initialMessages={messages} currentUser={currentUser} />
-        <Form />
-      </div>
-    </div>
+    <PageContent currentUser={currentUser} conversation={fullConversation} initialMessages={messages} />
   );
 }
 

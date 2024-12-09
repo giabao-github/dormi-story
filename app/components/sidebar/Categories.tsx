@@ -94,10 +94,10 @@ export const categories = [
     description: "Facebook's Messenger"
   },
   {
-    label: 'Pictures',
+    label: 'Gallery',
     route: '/pictures',
     icon: IoImageOutline,
-    description: "Dorm's Pictures"
+    description: "Dorm's Gallery"
   },
 ]
 
@@ -114,7 +114,8 @@ const Categories = () => {
     pathname === '/conversations' ||
     pathname?.includes('/conversations/') ||
     pathname === '/surveys' ||
-    pathname === '/rules'
+    pathname === '/rules' ||
+    pathname === '/pictures'
   );
 
   if (!isMainPage) {

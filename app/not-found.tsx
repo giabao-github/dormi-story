@@ -3,7 +3,7 @@
 import { Geologica } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import ClientOnly from "./components/ClientOnly";
 
 
@@ -11,7 +11,6 @@ const geologica = Geologica({ subsets: ["latin", "cyrillic", "vietnamese", "gree
 
 export default function Page404() {
   const handleRedirect = () => {
-    console.log("Redirecting to home...");
     redirect('/');
   };
 

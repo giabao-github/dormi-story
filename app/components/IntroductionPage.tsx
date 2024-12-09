@@ -18,7 +18,8 @@ const IntroductionPage: React.FC<IntroductionPageProps> = ({ currentUser }) => {
     pathname !== '/conversations' &&
     !pathname?.includes('/conversations/') &&
     pathname !== '/surveys' &&
-    pathname !== '/rules'
+    pathname !== '/rules' &&
+    pathname !== '/pictures'
   );
 
   if (!is404Page && !currentUser) {

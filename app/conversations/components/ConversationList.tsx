@@ -2,7 +2,8 @@
 
 import clsx from 'clsx';
 import { find } from 'lodash';
-import { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import useConversation from '@/app/hooks/useConversation';
@@ -11,7 +12,8 @@ import ConversationBox from './ConversationBox';
 import { FaUsers } from 'react-icons/fa6';
 import GroupChatModal from './GroupChatModal';
 import { pusherClient } from '@/app/libs/pusher';
-import axios from 'axios';
+import useMessengerSidebar from '@/app/hooks/useMessengerSidebar';
+import useMessengerTab from '@/app/hooks/useMessengerTab';
 
 interface ConversationListProps {
   initialItems: FullConversationType[];
@@ -22,9 +24,14 @@ interface ConversationListProps {
 const ConversationList: React.FC<ConversationListProps> = ({ initialItems, users, currentUser }) => {
   const [items, setItems] = useState(initialItems);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [componentWidth, setComponentWidth] = useState<number | null>(null);
 
   const router = useRouter();
   const session = useSession();
+  const sidebar = useMessengerSidebar();
+  const tab = useMessengerTab();
+  const height = Math.round(tab.height + 212);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const { conversationId, isOpen } = useConversation();
 
@@ -86,6 +93,31 @@ const ConversationList: React.FC<ConversationListProps> = ({ initialItems, users
     }
   }, [pusherKey, conversationId, router]);
 
+  useEffect(() => {
+    if (containerRef.current) {
+      const updateWidth = () => {
+        const width = containerRef.current?.getBoundingClientRect().width;
+        setComponentWidth(width || null);
+      };
+
+      updateWidth();
+      window.addEventListener('resize', updateWidth);
+
+      return () => {
+        window.removeEventListener('resize', updateWidth);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    sidebar.setWidth(componentWidth || 0);
+  }, [componentWidth]);
+
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--height', `${height}px`);
+  }, [height]);
+
 
   return (
     <>
@@ -94,13 +126,15 @@ const ConversationList: React.FC<ConversationListProps> = ({ initialItems, users
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
       />
-      <aside className={clsx(`
-          inset-y-0 pb-20 lg:pb-0 lg:block overflow-y-auto border-r border-gray-200 block w-full h-[86vh]
+      <aside 
+        ref={containerRef}
+        className={clsx(`
+          inset-y-0 lg:block border-r border-gray-200 h-[calc(100vh-128px)]
         `, isOpen ? 'hidden' : 'block w-full'
         )}
       >
         <div className='flex-col h-full'>
-          <div className='flex justify-between mb-10 pt-8 mx-6'>
+          <div className='sticky top-0 z-10 bg-white shadow-sm flex justify-between p-6'>
             <div className='text-3xl font-extrabold text-neutral-800'>Messages</div>
             <div
               title='Create a group chat' 
@@ -110,14 +144,16 @@ const ConversationList: React.FC<ConversationListProps> = ({ initialItems, users
               <FaUsers size={20} />
             </div>
           </div>
-          {items.map((item) => (
-            <ConversationBox
-              key={item.id}
-              data={item}
-              selected={conversationId === item.id}
-              currentUser={currentUser}
-            />
-          ))}
+          <div className='overflow-y-auto h-[calc(100vh-var(--height))] w-full'>
+            {items.map((item) => (
+              <ConversationBox
+                key={item.id}
+                data={item}
+                selected={conversationId === item.id}
+                currentUser={currentUser}
+              />
+            ))}
+          </div>
         </div>
       </aside>
     </>

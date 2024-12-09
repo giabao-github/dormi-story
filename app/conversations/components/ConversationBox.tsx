@@ -92,9 +92,9 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
 
   return (
     <div 
-    onClick={handleClick}
-    className={clsx(`
-        w-full relative flex items-center space-x-4 hover:bg-neutral-100 transition cursor-pointer p-4 
+      onClick={handleClick}
+      className={clsx(`
+        w-full relative flex items-center overflow-y-auto space-x-4 hover:bg-neutral-100 transition cursor-pointer p-4 
         `, selected ? 'bg-neutral-100' : 'bg-white'
       )}
     >
@@ -106,21 +106,17 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
       <div className='min-w-0 flex-1'>
         <div className='focus:outline-none'>
           <div className='flex justify-between items-center mb-1'>
-            <p className='text-xl font-semibold text-gray-900'>
+            <p className='xl:text-lg 2xl:text-xl font-semibold text-gray-900'>
               {displayName()}
             </p>
           </div>
           <div className='flex justify-between items-center'>
             <p className={clsx(`
-                truncate text-sm  
+                truncate text-sm w-[70%] 
                 `, hasSeen ? 'text-gray-500' : 'text-black font-medium'
               )}
             >
-              {
-                lastMessageText.length > 40 ? 
-                `${lastMessageText.slice(0, 40)}...` :
-                lastMessageText
-              }
+              {lastMessageText}
             </p>
             {lastMessage?.createdAt && (
               <p className='text-sm text-gray-400 font-normal'>

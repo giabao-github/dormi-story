@@ -69,7 +69,7 @@ const Avatar: React.FC<AvatarProps> = ({ user, type }) => {
     if (type === 'messenger') {
       return (
         <div className='relative'>
-          <div className='bg-button h-16 w-16 rounded-full flex items-center justify-center text-white text-xl font-semibold select-none'>
+          <div className='bg-button 2xl:h-16 2xl:w-16 xl:h-12 xl:w-12 rounded-full flex items-center justify-center text-white 2xl:text-2xl xl:text-xl font-semibold select-none'>
             {getAbbreviation(user.name)}
           </div>
           {isActive && (
