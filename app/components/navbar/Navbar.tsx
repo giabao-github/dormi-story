@@ -28,7 +28,8 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
     pathname !== '/messenger' &&
     pathname !== '/conversations' &&
     !pathname?.includes('/conversations/') &&
-    pathname !== '/surveys'
+    pathname !== '/surveys' &&
+    pathname !== '/rules'
   );
 
   if (!is404Page) {

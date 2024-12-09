@@ -75,7 +75,7 @@ export const categories = [
   },
   {
     label: "Dorm's Rules",
-    route: "dorm's%20rules",
+    route: '/rules',
     icon: FaScaleBalanced,
     description: "Follow strictly the dorm's rule"
   },
@@ -113,7 +113,8 @@ const Categories = () => {
     pathname === '/messenger' ||
     pathname === '/conversations' ||
     pathname?.includes('/conversations/') ||
-    pathname === '/surveys'
+    pathname === '/surveys' ||
+    pathname === '/rules'
   );
 
   if (!isMainPage) {

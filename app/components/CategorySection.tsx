@@ -28,7 +28,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ icon: Icon, label, ro
       category: label,
     }
 
-    const url = `/${encodeURIComponent(label.toLowerCase())}`;
+    const url = route || `/${encodeURIComponent(label.toLowerCase())}`;
 
     router.push(url);
   }, [label, params, router]);

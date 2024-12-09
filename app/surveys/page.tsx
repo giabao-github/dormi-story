@@ -11,7 +11,7 @@ const lexend = Lexend({
   weight: '400'
 });
 
-const Survey = async () => {
+const Surveys = async () => {
   const currentUser = await getCurrentUser();
   const surveys = await getSurveys();
 
@@ -52,4 +52,4 @@ const Survey = async () => {
   );
 }
 
-export default Survey;
+export default Surveys;

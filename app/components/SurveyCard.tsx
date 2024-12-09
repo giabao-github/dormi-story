@@ -50,7 +50,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({ data, onAction, disabled, actio
                 }/${new Date(data.createdAt).getFullYear()}`}
               </span>
               <span>
-                {`🕛 ${new Date(data.createdAt).getHours().toString().padStart(2, '0')
+                {`🕒 ${new Date(data.createdAt).getHours().toString().padStart(2, '0')
                 }:${new Date(data.createdAt).getMinutes().toString().padStart(2, '0')}`}
               </span>
             </div>

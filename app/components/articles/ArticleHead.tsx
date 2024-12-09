@@ -31,12 +31,10 @@ const ArticleHead: React.FC<ArticleHeadProps> = ({ title, time, author, id, curr
             <div>{author.name}</div>
           </div>
           <div className='flex flex-row gap-2 font-normal text-neutral-500'>
-            <IoCalendarOutline size={24} />
-            {formattedDate}
+            {`📅 ${formattedDate}`}
           </div>
           <div className='flex flex-row gap-2 font-normal text-neutral-500'>
-            <IoTimeOutline size={24} />
-            {formattedTime}
+            {`🕒 ${formattedTime}`}
           </div>
         </div>
       </div>

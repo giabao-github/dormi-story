@@ -60,7 +60,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
       new URL(url);
       return true;
     } catch (e) {
-        return false;
+      return false;
     }
   }
 

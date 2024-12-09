@@ -8,13 +8,13 @@ import toast from 'react-hot-toast';
 import { IoWarning } from 'react-icons/io5';
 import { GiHammerBreak, GiPerspectiveDiceSixFacesRandom } from 'react-icons/gi';
 import { RiSwordFill } from 'react-icons/ri';
-import { FaHandcuffs, FaPills, FaTrashCan } from 'react-icons/fa6';
+import { FaHandcuffs, FaPills, FaEarDeaf } from 'react-icons/fa6';
+import { MdCleaningServices } from 'react-icons/md';
 import { SafeUser } from '@/app/types';
 import Modal from './Modal'
 import Heading from '../Heading';
 import CategoryInput from '../inputs/CategoryInput';
 import useReportModal from '@/app/hooks/useReportModal'
-import UploadInput from '../inputs/UploadInput';
 import Input from '../inputs/Input';
 
 
@@ -28,16 +28,28 @@ enum STEPS {
 
 export const categories = [
   {
+    label: 'Room Cleanliness',
+    icon: MdCleaningServices,
+    example: 'Leaving messy room...',
+    description: 'Violated conducts about room cleanliness' 
+  },
+  {
+    label: 'Noise Pollution',
+    icon: FaEarDeaf,
+    example: 'Making loud or rude noise..',
+    description: 'Violated conducts about noise pollution' 
+  },
+  {
     label: 'Violent Behaviors',
     icon: RiSwordFill,
-    example: 'Fighting, using weapons...',
+    example: 'Fighting, bullying...',
     description: 'Violated conducts about violent behaviors' 
   },
   {
-    label: 'Property Sabotage',
+    label: 'Property Vandalization',
     icon: GiHammerBreak,
     example: 'Breaking furniture...',
-    description: 'Violated conducts about property sabotage' 
+    description: 'Violated conducts about property vandalization' 
   },
   {
     label: 'Addictive Substances',
@@ -48,7 +60,7 @@ export const categories = [
   {
     label: 'Social Evils',
     icon: FaHandcuffs,
-    example: 'Using or selling drugs...',
+    example: 'Using or selling drugs, gambling...',
     description: 'Violated conducts about social evils' 
   },
   {
@@ -67,8 +79,15 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
   const router = useRouter();
   const reportModal = useReportModal();
   const [step, setStep] = useState(STEPS.REPORTER);
+  const [label, setLabel] = useState('');
+  const [labelInput, setLabelInput] = useState('');
+  const [labelSelected, setLabelSelected] = useState(false);
+  const [categoryError, setCategoryError] = useState(false);
+  const [descriptionError, setDescriptionError] = useState(false);
+  const [timeError, setTimeError] = useState(false);
+  const [locationError, setLocationError] = useState(false);
+  const [urlError, setUrlError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const { register, handleSubmit, setValue, watch, formState: { errors }, reset } = useForm<FieldValues>({
     defaultValues: {
@@ -82,9 +101,9 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
   });
 
   const category = watch('category');
+  const description = watch('description');
   const time = watch('time');
   const location = watch('location');
-  const description = watch('description');
   const proofSrc = watch('proofSrc');
 
   const setCustomValue = (id: string, value: any) => {
@@ -95,21 +114,73 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
     });
   }
 
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   const onBack = () => {
     setStep((value) => value - 1);
   }
 
   const onNext = () => {
     if (step === STEPS.CATEGORY && !category) {
+      setCategoryError(true);
       toast.remove();
-      toast.error('Please select a report category before proceeding');
+      toast.error('Please select or enter a report category before proceeding');
       return;
     }
-    if (step === STEPS.DESCRIPTION && !description) {
+    else if (step === STEPS.DESCRIPTION && !time) {
+      if (description) {
+        setDescriptionError(false);
+      }
+      if (location) {
+        setLocationError(false);
+      }
+      setTimeError(true);
+      toast.remove();
+      toast.error('Please provide the time when the issue happened');
+      return;
+    }
+    else if (step === STEPS.DESCRIPTION && !location) {
+      if (description) {
+        setDescriptionError(false);
+      }
+      if (time) {
+        setTimeError(false);
+      }
+      setLocationError(true);
+      toast.remove();
+      toast.error('Please provide the location where the issue happened');
+      return;
+    }
+    else if (step === STEPS.DESCRIPTION && !description) {
+      if (time) {
+        setTimeError(false);
+      }
+      if (location) {
+        setLocationError(false);
+      }
+      setDescriptionError(true);
       toast.remove();
       toast.error('Please describe the reported issue');
       return;
     }
+    else if (step === STEPS.PROOF && proofSrc.length > 0 && !isValidUrl(proofSrc)) {
+      setUrlError(true);
+      toast.remove();
+      toast.error('Cloud Service link must be a valid URL');
+      return;
+    }
+    setCategoryError(false);
+    setDescriptionError(false);
+    setTimeError(false);
+    setLocationError(false);
+    setUrlError(false);
     setStep((value) => value + 1);
   }
 
@@ -195,15 +266,37 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
             <div key={item.label} className='col-span-1'>
               <CategoryInput
                 onClick={(category) => {
-                  setCustomValue('category', category);
+                  setLabel(category);
+                  setCustomValue('category', category === 'Other' ? labelInput : category);
+                  if (category === 'Other') {
+                    setLabelSelected(true);
+                  } else {
+                    setLabelSelected(false);
+                  }
                 }}
-                selected={category === item.label}
+                selected={item.label === 'Other' && labelSelected ? true : category === item.label}
                 label={item.label}
                 example={item.example}
                 icon={item.icon}
+                type='report'
               />
             </div>
           ))}
+          {label === 'Other' && (
+            <input
+            id='category-input'
+            placeholder='Enter your category...'
+            type='text'
+            value={category}
+            {...register('category')}
+            onChange={(e) => {
+              setLabel('Other');
+              setLabelInput(e.target.value);
+              setCustomValue('category', e.target.value);
+            }}
+            className={`w-full mt-6 h-1/2 px-4 py-3 font-medium border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['category'] || categoryError) && 'border-red-500 focus:border-red-500'}`}  
+          />
+          )}
         </div>
     </div>
     );
@@ -226,7 +319,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
               errors={errors}
               register={register}
               onChange={(e) => setCustomValue('time', e.target.value)}
-              required
+              className={`${(errors['time'] || timeError) && 'border-red-500 focus:border-red-500'}`}
             />
           </div>
           <div className='mx-6'>
@@ -236,14 +329,14 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
               errors={errors}
               register={register}
               onChange={(e) => setCustomValue('location', e.target.value)}
-              required
+              className={`${(errors['location'] || locationError) && 'border-red-500 focus:border-red-500'}`}
             />
           </div>
           <textarea
             id='description'
             title=''
             placeholder='How did the incident take place? Where did it happen? Who were the associated students?...'
-            className='flex mx-6 text-base font-normal rounded-md bg-white border-2 border-neutral-300 focus:border-neutral-800 px-3 py-3 placeholder:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none'
+            className={`flex mx-6 text-base font-normal rounded-md bg-white border-2 border-border focus:border-neutral-800 px-3 py-3 placeholder:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none ${(errors['description'] || descriptionError) && 'border-red-500 focus:border-red-500'}`}
             rows={5}
             value={description}
             {...register('description')}
@@ -268,7 +361,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
             type='text'
             value={proofSrc}
             {...register('proofSrc')}
-            className={`peer w-full px-4 py-3 font-medium border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed`}  
+            className={`w-full px-4 py-3 font-medium border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['proofSrc'] || urlError) && 'border-red-500 focus:border-red-500'}`}  
           />
         </div>
       </div>
