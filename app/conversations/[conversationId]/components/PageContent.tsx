@@ -29,7 +29,7 @@ const PageContent: React.FC<PageContentProps> = ({ currentUser, conversation, in
       <div className='h-full flex flex-col'>
         <Header conversation={conversation} currentUser={currentUser} />
         <Body initialMessages={initialMessages} currentUser={currentUser} />
-        <Form />
+        <Form currentUser={currentUser} />
       </div>
     </div>
   );

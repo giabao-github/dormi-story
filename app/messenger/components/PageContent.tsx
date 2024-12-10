@@ -6,7 +6,7 @@ import MessengerEmptyState from '@/app/components/MessengerEmptyState';
 import useMessengerSidebar from '@/app/hooks/useMessengerSidebar';
 
 
-const ConversationPage = () => {
+const PageContent = () => {
   const sidebarWidth = useMessengerSidebar();
   const width = Math.round(sidebarWidth.width + 247);
 
@@ -27,4 +27,4 @@ const ConversationPage = () => {
   );
 }
 
-export default ConversationPage;
+export default PageContent;

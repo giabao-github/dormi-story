@@ -22,6 +22,53 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
   const session = useSession();
   const router = useRouter();
 
+  const detectFileType = (url: string): string => {
+    const fileTypes: { [key: string]: string } = {
+      // Image file extensions
+      'jpg': 'image',
+      'jpeg': 'image',
+      'png': 'image',
+      'gif': 'image',
+      'bmp': 'image',
+      'svg': 'image',
+      'webp': 'image',
+      // Audio file extensions
+      'mp3': 'audio',
+      'wav': 'audio',
+      'flac': 'audio',
+      'aac': 'audio',
+      'ogg': 'audio',
+      'm4a': 'audio',
+      // Video file extensions
+      'mp4': 'video',
+      'avi': 'video',
+      'mov': 'video',
+      'wmv': 'video',
+      'mkv': 'video',
+      'flv': 'video',
+      'webm': 'video',
+      // Document file extensions
+      'pdf': 'document',
+      'doc': 'document',
+      'docx': 'document',
+      'ppt': 'document',
+      'pptx': 'document',
+      'xls': 'document',
+      'xlsx': 'document',
+      'txt': 'document',
+      'csv': 'document',
+    };
+
+    const extensionMatch = url.split('.').pop()?.toLowerCase();
+
+    // Match the extension to a file type
+    if (extensionMatch && fileTypes[extensionMatch]) {
+      return fileTypes[extensionMatch];
+    }
+
+    return 'unknown';
+  };
+
   const handleClick = useCallback(() => {
     router.push(`/conversations/${data.id}`);
   }, [data.id, router]);
@@ -55,10 +102,30 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
 
   const lastMessageText = useMemo(() => {
     if (lastMessage?.image) {
-      if (lastMessage.sender.email?.toLowerCase() === currentUser?.email?.toLowerCase()) {
-        return 'You sent a photo';
-      } else {
-        return `${lastMessage.sender.name} sent a photo`;
+      if (detectFileType(lastMessage.image) === 'image') {
+        if (lastMessage.sender.email?.toLowerCase() === currentUser?.email?.toLowerCase()) {
+          return 'You sent a photo';
+        } else {
+          return `${lastMessage.sender.name} sent a photo`;
+        }
+      } else if (detectFileType(lastMessage.image) === 'audio') {
+        if (lastMessage.sender.email?.toLowerCase() === currentUser?.email?.toLowerCase()) {
+          return 'You sent an audio';
+        } else {
+          return `${lastMessage.sender.name} sent an audio`;
+        }
+      } else if (detectFileType(lastMessage.image) === 'video') {
+        if (lastMessage.sender.email?.toLowerCase() === currentUser?.email?.toLowerCase()) {
+          return 'You sent a video';
+        } else {
+          return `${lastMessage.sender.name} sent a video`;
+        }
+      } else if (detectFileType(lastMessage.image) === 'document') {
+        if (lastMessage.sender.email?.toLowerCase() === currentUser?.email?.toLowerCase()) {
+          return 'You sent a document';
+        } else {
+          return `${lastMessage.sender.name} sent a document`;
+        }
       }
     }
 

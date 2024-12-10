@@ -44,6 +44,12 @@ const PageContent = () => {
       alt: 'Building B2 - Zone B',
       title: 'Building B2 - Zone B'
     },
+    {
+      id: 6,
+      src: 'https://ss-images.saostar.vn/wwebp1200/pc/1605586229694/125232924_2800846593464014_4595467467104586275_o.jpg',
+      alt: 'Dormitory At Night',
+      title: 'Dormitory At Night'
+    },
   ];
 
   const openModal = (image: any) => {
