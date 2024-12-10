@@ -1,6 +1,6 @@
 import prisma from '@/app/libs/prismadb';
 import getCurrentUser from './getCurrentUser';
-import { SafeUser } from '@/app/types';
+
 
 const getConversationById = async (conversationId: string) => {
   try {

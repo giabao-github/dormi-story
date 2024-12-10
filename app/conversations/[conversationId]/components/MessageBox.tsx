@@ -159,6 +159,27 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
     return parts;
   }
 
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(data.image || '');
+      if (!response.ok) {
+        throw new Error('Failed to fetch the file.');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+  
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = data.image?.split('/').pop() || '';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading the file:', error);
+    }
+  }
+  
   const messageParts = parseMessage(data.body || '');
   const isOwn = currentUser?.email === data?.sender?.email;
   const seenList = (data.seen || [])
@@ -251,10 +272,10 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
             />
           )}
           {data.image && detectFileType(data.image) === 'audio' && (
-            <div className='bg-neutral-200 p-4 rounded-2xl flex flex-col items-center space-y-3 max-w-prose'>
+            <div className='bg-neutral-200 p-4 rounded-2xl flex flex-col items-center space-y-3 max-w-[332px]'>
               {fileMetadata[data.image] && (
                 <div 
-                  className='text-base text-black font-semibold mx-4 max-w-[88%] overflow-hidden whitespace-nowrap relative'
+                  className='text-base text-black font-semibold max-w-[88%] overflow-hidden whitespace-nowrap relative'
                   ref={(element) => {
                     if (!element) return;
                     const content = element.querySelector('.content');
@@ -301,15 +322,12 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
                     <FaArrowUpRightFromSquare size={19} fontWeight={800} className='text-black' />
                   </div>
                 </a>
-                <a
-                  href={data.image}
-                  download
-                  title='Download document'
+                <div 
+                  onClick={handleDownload} 
+                  className='bg-white p-3 shadow-md rounded-full cursor-pointer hover:scale-105'
                 >
-                  <div className='bg-white p-3 shadow-md rounded-full cursor-pointer hover:scale-105'>
-                    <FaArrowRightToBracket size={20} className='text-black transform rotate-90' />
-                  </div>
-                </a>
+                  <FaArrowRightToBracket size={20} className='text-black transform rotate-90' />
+                </div>
               </div>
             </div>
           )}
