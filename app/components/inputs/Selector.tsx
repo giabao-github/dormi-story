@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import ReactSelect from 'react-select';
 
 interface SelectorProps {

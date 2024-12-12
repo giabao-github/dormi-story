@@ -1,15 +1,17 @@
 "use client";
 
-import { useMemo, useState } from 'react';
+import React from 'react';
 import axios from 'axios';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { SafeUser } from '@/app/types';
+import { SafeUser } from '../../types';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import { IoWarning } from 'react-icons/io5';
 import Modal from './Modal'
 import Heading from '../Heading';
-import useSurveyModal from '@/app/hooks/useSurveyModal';
+import useEventModal from '../../hooks/useEventModal';
+
 
 
 enum STEPS {
@@ -20,13 +22,13 @@ enum STEPS {
   CONFIRM = 4
 }
 
-interface SurveyModalProps {
+interface EventModalProps {
   currentUser?: SafeUser | null;
 }
 
-const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
+const EventModal: React.FC<EventModalProps> = ({ currentUser }) => {
   const router = useRouter();
-  const surveyModal = useSurveyModal();
+  const eventModal = useEventModal();
   const [step, setStep] = useState(STEPS.CREATOR);
   const [isLoading, setIsLoading] = useState(false);
   const [categoryError, setCategoryError] = useState(false);
@@ -72,24 +74,24 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
     if (step === STEPS.CATEGORY && !category) {
       setCategoryError(true);
       toast.remove();
-      toast.error('Please provide a survey category before proceeding');
+      toast.error('Please provide an event category before proceeding');
       return;
     }
     else if (step === STEPS.TITLE && !title) {
       setTitleError(true);
       toast.remove();
-      toast.error('Please provide a survey title before proceeding');
+      toast.error('Please provide an event title before proceeding');
       return;
     }
     else if (step === STEPS.LINK && !link) {
       toast.remove();
-      toast.error('Please provide a survey link before proceeding');
+      toast.error('Please provide an event link before proceeding');
       setLinkError(true);
       return;
     }
     else if (step === STEPS.LINK && !isValidUrl(link)) {
       toast.remove();
-      toast.error('Survey link must be a valid URL');
+      toast.error('Event link must be a valid URL');
       setLinkError(true);
       return;
     }
@@ -106,11 +108,11 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
 
     setIsLoading(true);
     console.log(data)
-    axios.post('/api/survey', data)
+    axios.post('/api/event', data)
     .then(() => {
       toast.remove();
-      toast.success('Survey created');
-      surveyModal.onClose();
+      toast.success('Event created');
+      eventModal.onClose();
       router.refresh();
       reset();
       setStep(STEPS.CREATOR);
@@ -127,7 +129,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
 
   const actionLabel = useMemo(() => {
     if (step === STEPS.CONFIRM) {
-      return 'Create';
+      return 'Complete';
     }
     return 'Next';
   }, [step]);
@@ -144,7 +146,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
     <div className='flex flex-col gap-8'>
       <div className='mx-6'>
         <Heading
-          title='Survey Creator Information'
+          title='Event Creator Information'
           subtitle='Creator information is linked to the corresponding account and cannot be modified'
         />
       </div>
@@ -164,14 +166,14 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
       <div className='flex flex-col gap-8'>
         <div className='mx-6'>
           <Heading
-            title='Survey Category'
-            subtitle='Enter a category that best fits your survey (Event Feedback, Technology Usage, Market Research, Customer Satisfaction, Shopping Behavior, Entertainment Preferences...)'
+            title='Event Category'
+            subtitle='Enter a category that best fits your event (Academic Events, Career and Networking Events, Cultural Events, Social Events, Sports and Fitness Events, Recreational Events...)'
           />
         </div>
         <div className='flex flex-col gap-y-4 mx-6'>
           <input
             id='category'
-            placeholder='Your survey category'
+            placeholder='Your event category'
             type='text'
             value={category}
             {...register('category')}
@@ -188,14 +190,14 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
       <div className='flex flex-col gap-8'>
         <div className='mx-6'>
           <Heading
-            title='Survey Title and Survey Description'
-            subtitle='Provide your survey title and description'
+            title='Event Title and Event Description'
+            subtitle='Provide your event title and description'
           />
         </div>
         <div className='flex flex-col gap-y-8 mx-6'>
           <input
             id='title'
-            placeholder='Your survey title'
+            placeholder='Your event title'
             type='text'
             value={title} 
             {...register('title')}
@@ -204,7 +206,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
           />
           <input
             id='description'
-            placeholder='Your survey description (optional)'
+            placeholder='Your event description (optional)'
             type='text'
             value={description} 
             {...register('description')}
@@ -221,7 +223,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
       <div className='flex flex-col gap-8'>
         <div className='mx-6'>
           <Heading
-            title='Provide the survey link'
+            title='Provide the event link'
             subtitle='Remember to set permission to public'
           />
           <input
@@ -244,11 +246,11 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
         <div className='mx-6'>
           <Heading
             title='Confirmation'
-            subtitle='Please carefully check your survey information before creating'
+            subtitle='Please carefully check your event information before creating'
           />
           <div className='w-full py-3 px-5 text-lg font-semibold text-red-500 flex flex-row'>
             <IoWarning size={20} className='text-red-500 mr-2 mt-1' />
-            <span>Note: you might be responsible for any issues related to your survey</span>
+            <span>Note: you might be responsible for any issues related to your event</span>
           </div>
         </div>
       </div>
@@ -257,9 +259,9 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
 
   return (
     <Modal
-      title='Create A Survey'
-      isOpen={surveyModal.isOpen}
-      onClose={ surveyModal.onClose}
+      title='Plan An Event'
+      isOpen={eventModal.isOpen}
+      onClose={ eventModal.onClose}
       onSubmit={handleSubmit(onSubmit)}
       disabled={isLoading}
       actionLabel={actionLabel}
@@ -270,4 +272,4 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
   );
 }
 
-export default SurveyModal;
+export default EventModal;

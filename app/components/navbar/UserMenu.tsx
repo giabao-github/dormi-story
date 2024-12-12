@@ -17,6 +17,7 @@ import useArticleModal from '@/app/hooks/useArticleModal';
 import useProfileModal from '@/app/hooks/useProfileModal';
 import ProfileModal from '../modals/ProfileModal';
 import useSurveyModal from '@/app/hooks/useSurveyModal';
+import useEventModal from '@/app/hooks/useEventModal';
 
 
 interface UserMenuProps {
@@ -32,8 +33,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
   const reportModal = useReportModal();
   const articleModal = useArticleModal();
   const surveyModal = useSurveyModal();
+  const eventModal = useEventModal();
   const [isOpen, setIsOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null); 
   const menuItemRef = useRef<HTMLDivElement>(null); 
 
@@ -75,6 +76,13 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
     }
     surveyModal.onOpen();
   }, [currentUser, loginModal, surveyModal]);
+
+  const handleEventModal = useCallback(() => {
+    if (!currentUser) {
+      return loginModal.onOpen();
+    }
+    eventModal.onOpen();
+  }, [currentUser, loginModal, eventModal]);
 
   const handleClickOutside = (event: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(event.target as Node) && menuItemRef.current && !menuItemRef.current.contains(event.target as Node)) {
@@ -144,8 +152,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
                   label='Create A Survey'
                 />
                 <MenuItem
-                  onClick={articleModal.onOpen}
-                  label='Create An Event'
+                  onClick={handleEventModal}
+                  label='Plan An Event'
                 />
                 <MenuItem
                   onClick={handleMessengerToken}

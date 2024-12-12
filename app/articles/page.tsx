@@ -22,7 +22,13 @@ const Articles = async () => {
   if (articles.length === 0) {
     return (
       <ClientOnly>
-        <EmptyState showReset />
+        <EmptyState  
+          title='No articles found'
+          subtitle="It seems there is nothing to read here yet. Check back later or post an article"
+          buttonLabel='Post an article'
+          type='article'
+          showReset 
+        />
       </ClientOnly>
     );
   }

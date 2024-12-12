@@ -13,6 +13,7 @@ import ReportModal from './components/modals/ReportModal';
 import ArticleModal from './components/modals/ArticleModal';
 import ActiveStatus from './components/ActiveStatus';
 import SurveyModal from './components/modals/SurveyModal';
+import EventModal from './components/modals/EventModal';
 
 
 const nunito = Nunito({
@@ -40,6 +41,7 @@ export default async function RootLayout({
           <ReportModal currentUser={currentUser} />
           <ArticleModal currentUser={currentUser} />
           <SurveyModal currentUser={currentUser} />
+          <EventModal currentUser={currentUser} />
           <Navbar currentUser={currentUser} />
           <IntroductionPage currentUser={currentUser} />
           <Sidebar currentUser={currentUser} />

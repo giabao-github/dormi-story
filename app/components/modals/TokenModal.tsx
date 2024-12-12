@@ -11,6 +11,7 @@ import useTokenModal from '@/app/hooks/useTokenModal';
 import Modal from './Modal';
 import { SafeUser } from '@/app/types';
 import checkCorrectPassword from '@/app/actions/checkCorrectPassword';
+import { useRouter } from 'next/navigation';
 
 
 interface TokenModalProps {
@@ -18,6 +19,7 @@ interface TokenModalProps {
 }
 
 const TokenModal: React.FC<TokenModalProps> = ({ currentUser }) => {
+  const router = useRouter();
   const tokenModal = useTokenModal();
   const [value, setValue] = useState('');
   const [isTokenVisible, setIsTokenVisible] = useState(false);
@@ -55,6 +57,7 @@ const TokenModal: React.FC<TokenModalProps> = ({ currentUser }) => {
         if (callback.status === 200) {
           toast.remove();
           toast.success(callback.data.message);
+          router.refresh();
         }
         
         if (callback.status === 400) {

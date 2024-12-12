@@ -36,6 +36,7 @@ model User {
   personalInformation PersonalInformation[]
   report Report[]
   survey Survey[]
+  event Event[]
   article Article[]
   parkingLotRegistration ParkingLotRegistration[]
 
@@ -105,6 +106,19 @@ model Article {
 }
 
 model Survey {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  category String
+  title String
+  creator String
+  description String
+  link String
+  createdAt DateTime @default(now())
+  userId String @db.ObjectId
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Event {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   category String
   title String
