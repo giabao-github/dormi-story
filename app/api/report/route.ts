@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import prisma from '@/app/libs/prismadb';
 import getCurrentUser from '@/app/actions/getCurrentUser';
-import { sendEmail } from '@/app/libs/mail';
+import { compileReportTemplate, sendEmail } from '@/app/libs/mail';
 
 export async function POST(request: Request) {
   const currentUser = await getCurrentUser();
@@ -38,8 +38,8 @@ export async function POST(request: Request) {
     await sendEmail({ 
       to: 'silverbullet2609@gmail.com', 
       name: currentUser?.name || 'Anonymous User', 
-      subject: 'Violation Report',
-      body: `<h1>Report Information</h1>`
+      subject: `Violation Report from ${currentUser.name}`,
+      body: compileReportTemplate(process.env.SMTP_USERNAME || '', 'http://localhost:3100', currentUser.name, currentUser.email || '', currentUser.studentId, category, time, location, description, proofSrc)
     });
   }
 

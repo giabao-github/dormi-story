@@ -195,7 +195,6 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
     .then(() => {
       toast.remove();
       toast.success('Report submitted');
-      router.refresh();
       reset();
       setStep(STEPS.REPORTER);
       reportModal.onClose();

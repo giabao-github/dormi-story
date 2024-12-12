@@ -123,7 +123,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
           <div className='flex flex-col cursor-pointer select-none'>
             {currentUser ? (
               <>
-                <div className='cursor-default select-text mx-2'>
+                <div className={`cursor-default select-text mx-2`}>
                   <MenuItem label={currentUser.name} />
                 </div>
                 <hr />

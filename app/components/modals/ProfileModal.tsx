@@ -43,7 +43,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, currentUse
     .post('/api/profile', data)
     .then(() => {
       toast.remove();
-      toast.success('Update profile successfully')
+      toast.success('Update profile successfully');
       onClose();
     })
     .catch((error) => {

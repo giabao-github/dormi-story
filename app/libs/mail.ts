@@ -1,4 +1,6 @@
 import nodemailer from 'nodemailer';
+import * as handlebars from 'handlebars';
+import { reportTemplate } from './templates/report';
 
 export async function sendEmail({ to, name, subject, body }: {
   to: string, 
@@ -35,4 +37,21 @@ export async function sendEmail({ to, name, subject, body }: {
   } catch (error) {
     console.log(error);
   }
+}
+
+export function compileReportTemplate(name: string, url: string, reporterName: string, reporterEmail: string, reporterId: string, category: string, time: string, location: string, description: string, link: string) {
+  const template = handlebars.compile(reportTemplate);
+  const htmlBody = template({
+    name: name,
+    url: url,
+    reporterName: reporterName,
+    reporterEmail: reporterEmail,
+    reporterId: reporterId,
+    category: category,
+    time: time,
+    location: location,
+    description: description,
+    link: link
+  });
+  return htmlBody;
 }

@@ -156,7 +156,6 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
     .then(() => {
       toast.remove();
       toast.success('Article posted');
-      router.refresh();
       reset();
       setStep(STEPS.AUTHOR);
       articleModal.onClose();

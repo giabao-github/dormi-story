@@ -110,7 +110,6 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
     .then(() => {
       toast.remove();
       toast.success('Survey created');
-      router.refresh();
       reset();
       setStep(STEPS.CREATOR);
       surveyModal.onClose();

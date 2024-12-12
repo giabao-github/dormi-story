@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { useRouter } from 'next/navigation';
 import { IoCloseCircle } from "react-icons/io5";

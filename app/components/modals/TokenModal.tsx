@@ -11,8 +11,7 @@ import useTokenModal from '@/app/hooks/useTokenModal';
 import Modal from './Modal';
 import { SafeUser } from '@/app/types';
 import checkCorrectPassword from '@/app/actions/checkCorrectPassword';
-import getCurrentUser from '@/app/actions/getCurrentUser';
-import prisma from '@/app/libs/prismadb';
+
 
 interface TokenModalProps {
   currentUser?: SafeUser | null | undefined;
