@@ -39,7 +39,7 @@ export const categories = [
   },
   {
     label: 'Parking Lot Registration',
-    route: '/parking%20lot%20registration',
+    route: '/parking-lot-registration',
     icon: LuParkingCircle,
     description: "Parking lot registration" 
   },
@@ -115,8 +115,10 @@ const Categories = () => {
     pathname?.includes('/conversations/') ||
     pathname === '/surveys' ||
     pathname === '/rules' ||
+    pathname === '/reports' ||
     pathname === '/pictures' ||
-    pathname === '/events'
+    pathname === '/events' || 
+    pathname === '/parking-lot-registration'
   );
 
   if (!isMainPage) {

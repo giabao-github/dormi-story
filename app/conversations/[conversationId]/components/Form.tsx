@@ -49,12 +49,11 @@ const Form: React.FC<FormProps> = ({ currentUser }) => {
 
 
   return (
-    <div className='px-4 bg-white border-t border-l flex items-center gap-4 lg:gap-6 w-full h-[12%] shadow-sm'>
+    <div className='px-4 bg-white border-l flex items-center gap-4 lg:gap-6 w-full h-[12%] shadow-sm'>
       <CldUploadButton
         options={{ 
           maxFiles: 1, 
           resourceType: 'auto',
-          clientAllowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'mp4', 'avi', 'mov', 'wmv', 'mkv', 'flv', 'webm', 'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'csv'],
         }}
         onSuccess={handleUpload}
         uploadPreset='dormistory'

@@ -73,6 +73,13 @@ const EmptyState: React.FC<EmptyStateProps> = ({
               onClick={() => eventModal.onOpen()}
             />  
           )}
+          {showReset && type === 'parking lot' && (
+            <Button
+              outline
+              label={buttonLabel}
+              onClick={() => eventModal.onOpen()}
+            />  
+          )}
         </div>
       </div>
     </div>

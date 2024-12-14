@@ -16,6 +16,7 @@ interface BodyProps {
 const Body: React.FC<BodyProps> = ({ initialMessages, currentUser }) => {
   const [messages, setMessages] = useState(initialMessages);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const isInitialLoad = useRef(true);
 
   const { conversationId } = useConversation();
 
@@ -25,7 +26,6 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser }) => {
 
   useEffect(() => {
     pusherClient.subscribe(conversationId);
-    bottomRef?.current?.scrollIntoView();
 
     const handleNewMessages = (message: FullMessageType) => {
       axios.post(`/api/conversations/${conversationId}/seen`);
@@ -35,7 +35,6 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser }) => {
         }
         return [...current, message];
       });
-      bottomRef?.current?.scrollIntoView();
     }
 
     const handleMessageUpdate = (newMessage: FullMessageType) => {
@@ -58,6 +57,36 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser }) => {
   }, [conversationId]);
 
 
+  useEffect(() => {
+    const container = bottomRef.current?.parentElement;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      return;
+    }
+    if (messages.length > 0) {
+      const timeout = setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ block: 'end' });
+      }, 100);
+      return () => clearTimeout(timeout);
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      const timeout = setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ block: 'end' });
+      }, 170);
+      return () => clearTimeout(timeout);
+    }
+  }, []);
+
+
   return (
     <div className='pt-4 flex-1 overflow-y-auto shadow-sm'>
       {messages.map((message, index) => (
@@ -68,7 +97,7 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser }) => {
           currentUser={currentUser}
         />
       ))}
-      <div ref={bottomRef} className='pt-4' />
+      <div ref={bottomRef} />
     </div>
   );
 }

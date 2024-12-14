@@ -13,6 +13,7 @@ import ImageModal from './ImageModal';
 import Avatar from '@/app/components/Avatar';
 import { FullMessageType, SafeUser } from '@/app/types';
 import useMetadata from '@/app/hooks/useMetadata';
+import toast from 'react-hot-toast';
 
 
 interface MessageBoxProps {
@@ -25,8 +26,6 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
   const router = useRouter();
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [fileMetadata, setFileMetadata] = useState<{ [url: string]: any }>({});
-  const audioMetadata = useMetadata();
-  const documentMetadata = useMetadata();
   const [isSingleLine, setIsSingleLine] = useState(true);
   const messageRef = useRef<HTMLDivElement>(null);
 
@@ -74,7 +73,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
       return fileTypes[extensionMatch];
     }
 
-    return 'unknown';
+    return 'other';
   };
 
   const isValidUrl = (url: string) => {
@@ -90,6 +89,8 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
     try {
       const response = await fetch(fileUrl);
       if (!response.ok) {
+        toast.remove();
+        toast.error('Internet connection issue');
         throw new Error('Network Issue');
       }
 
@@ -132,7 +133,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
     } catch (error) {
       console.error('Error reading document metadata:', error);
     }
-  }
+  };
 
   const urlRegex = /(https?:\/\/[^\s]+)/g;
 
@@ -199,7 +200,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
     isOwn && 'items-end'
   );
 
-  const dataStyle = data.image && (detectFileType(data.image) === 'image' || detectFileType(data.image) === 'video') ? 'rounded-md p-0' : data.image && (detectFileType(data.image) === 'audio' || detectFileType(data.image) === 'document') ? 'p-0 bg-transparent' : isSingleLine ? 'rounded-full py-2 px-3 max-w-full' : 'rounded-2xl py-2 px-4 max-w-[70%]';
+  const dataStyle = data.image && (detectFileType(data.image) === 'image' || detectFileType(data.image) === 'video') ? 'rounded-md p-0' : data.image && (detectFileType(data.image) === 'audio' || detectFileType(data.image) === 'document' || detectFileType(data.image) === 'other') ? 'p-0 bg-transparent' : isSingleLine ? 'rounded-full py-2 px-3 max-w-full' : 'rounded-2xl py-2 px-4 max-w-[70%]';
 
   const message = clsx(
     'text-sm w-fit overflow-hidden break-all whitespace-normal',
@@ -323,6 +324,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
                   </div>
                 </a>
                 <div 
+                  title='Download document'
                   onClick={handleDownload} 
                   className='bg-white p-3 shadow-md rounded-full cursor-pointer hover:scale-105'
                 >
@@ -331,24 +333,33 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
               </div>
             </div>
           )}
-          {data.image && detectFileType(data.image) === 'unknown' && (
-            <div ref={messageRef}>
-            {messageParts.map((part, index) =>
-              part.type === 'text' ? (
-                <span key={index}>{part.content}</span>
-              ) : (
+          {data.image && detectFileType(data.image) === 'other' && (
+            <div className='bg-neutral-200 p-4 rounded-2xl flex flex-col justify-center items-center space-y-3 max-w-prose'>
+              {data.image && (
+                <div className='text-base text-black font-semibold truncate mx-4 max-w-[88%]'>
+                  <p>{`${new URL(data.image).pathname.split('/').pop()}`}</p>
+                </div>
+              )}
+              <div className='flex flex-row px-4 w-full min-w-40 justify-between items-center'>
                 <a
-                  key={index}
-                  href={part.content}
+                  href={data.image}
                   target='_blank'
+                  title='Open file'
                   rel='noopener noreferrer'
-                  className={`underline ${isOwn ? 'hover:text-highlight' : 'hover:text-primary'}`}
                 >
-                  {part.content}
+                  <div className='bg-white p-3 shadow-md rounded-full cursor-pointer hover:scale-105'>
+                    <FaArrowUpRightFromSquare size={19} fontWeight={800} className='text-black' />
+                  </div>
                 </a>
-              )
-            )}
-          </div>
+                <div 
+                  title='Download file'
+                  onClick={handleDownload} 
+                  className='bg-white p-3 shadow-md rounded-full cursor-pointer hover:scale-105'
+                >
+                  <FaArrowRightToBracket size={20} className='text-black transform rotate-90' />
+                </div>
+              </div>
+            </div>
           )}
           {!data.image && (
             <div ref={messageRef}>

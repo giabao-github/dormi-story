@@ -19,7 +19,7 @@ const ArticleClient: React.FC<ArticleClientProps> = ({ article, currentUser }) =
 
   return (
     <Container>
-      <div className='max-w-screen-2xl h-full my-32'>
+      <div className='ml-[248px] max-w-screen-2xl h-full my-32'>
         <div className='flex flex-col gap-6 mx-40'>
           <ArticleHead
             title={article.title}
