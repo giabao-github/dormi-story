@@ -284,18 +284,18 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
           ))}
           {label === 'Other' && (
             <input
-            id='category-input'
-            placeholder='Enter your category...'
-            type='text'
-            value={category}
-            {...register('category')}
-            onChange={(e) => {
-              setLabel('Other');
-              setLabelInput(e.target.value);
-              setCustomValue('category', e.target.value);
-            }}
-            className={`w-full mt-6 h-1/2 px-4 py-3 font-medium border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['category'] || categoryError) && 'border-red-500 focus:border-red-500'}`}  
-          />
+              id='category-input'
+              placeholder='Enter your category...'
+              type='text'
+              value={category}
+              {...register('category')}
+              onChange={(e) => {
+                setLabel('Other');
+                setLabelInput(e.target.value);
+                setCustomValue('category', e.target.value);
+              }}
+              className={`w-full mt-6 h-1/2 px-4 py-3 font-medium border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['category'] || categoryError) && 'border-red-500 focus:border-red-500'}`}  
+            />
           )}
         </div>
     </div>

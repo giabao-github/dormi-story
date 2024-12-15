@@ -27,7 +27,7 @@ const CategoryInput: React.FC<CategoryInputProps> = ({
   return (
     <div 
       onClick={() => onClick(label)}
-      className={`rounded-xl border-2 p-4 flex flex-col gap-3 ${type === 'report' ? 'hover:border-button' : 'hover:border-primary'} transition cursor-pointer ${selected ? type === 'report' ? 'border-button border-4' : 'border-primary border-4' : 'border-neutral-300'}`}
+      className={`rounded-xl border-2 p-4 flex flex-col gap-3 ${type === 'report' ? 'hover:border-button' : 'hover:border-primary'} transition cursor-pointer ${selected ? type === 'report' ? 'border-button border-[3px]' : 'border-primary border-[3px]' : 'border-neutral-300'}`}
     >
       <div className='flex flex-row items-center'>
         <Icon size={size} />

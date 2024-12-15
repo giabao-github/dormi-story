@@ -20,11 +20,10 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   title = 'No exact matches',
   subtitle = 'Try changing some of your keywords',
   type,
-  buttonLabel = 'Reset filters',
+  buttonLabel = 'Reset all filters',
   showReset
 }) => {
   const router = useRouter();
-  const articleModal = useArticleModal();
   const reportModal = useReportModal();
   const surveyModal = useSurveyModal();
   const eventModal = useEventModal();
@@ -49,7 +48,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
             <Button
               outline
               label={buttonLabel}
-              onClick={() => articleModal.onOpen()}
+              onClick={() => router.push('/articles')}
             />  
           )}
           {showReset && type === 'report' && (

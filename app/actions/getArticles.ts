@@ -1,8 +1,58 @@
 import prisma from '@/app/libs/prismadb';
 
-export default async function getArticles() {
+export interface IArticleParams {
+  userId?: string;
+  title?: string;
+  authorName?: string;
+  startDate?: string;
+  endDate?: string;
+  category?: string;
+}
+
+export default async function getArticles(params: IArticleParams) {
   try {
+    const { userId, title, authorName, startDate, endDate, category } = params;
+
+    let query: any = {};
+
+    if (userId) {
+      query.userId = userId;
+    }
+
+    if (title) {
+      query.title = {
+        contains: title,
+        mode: 'insensitive',
+      };
+    }
+
+    if (authorName) {
+      query.author = {
+        contains: authorName,
+        mode: 'insensitive',
+      };
+    }
+
+    if (category && category !== 'all') {
+      const categoriesArray = category.split(',');
+      query.category = {
+        in: categoriesArray,
+      };
+    }
+
+
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) {
+        query.createdAt.gte = new Date(startDate);
+      }
+      if (endDate) {
+        query.createdAt.lte = new Date(endDate);
+      }
+    }
+
     const articles = await prisma.article.findMany({
+      where: query,
       orderBy: {
         createdAt: 'desc'
       },

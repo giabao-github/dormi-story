@@ -22,6 +22,42 @@ export async function POST(request: Request) {
       }
     });
 
+    await prisma.article.updateMany({
+      where: {
+        userId: currentUser.id,
+      },
+      data: {
+        author: name,
+      },
+    });
+
+    await prisma.report.updateMany({
+      where: {
+        userId: currentUser.id,
+      },
+      data: {
+        reporterName: name,
+      },
+    });
+
+    await prisma.survey.updateMany({
+      where: {
+        userId: currentUser.id,
+      },
+      data: {
+        creator: name,
+      },
+    });
+
+    await prisma.event.updateMany({
+      where: {
+        userId: currentUser.id,
+      },
+      data: {
+        creator: name,
+      },
+    });
+
     return NextResponse.json(updatedUser);
   } catch (error: any) {
     console.log('Error at /api/profile:', error);

@@ -59,7 +59,7 @@ export const categories = [
   {
     label: 'Technology and Trends',
     icon: GrTechnology,
-    example: 'Social media use, AI and future career...',
+    example: 'Social media use, new technologies and future career...',
     description: 'Articles about technology and trends' 
   },
   {
@@ -71,7 +71,7 @@ export const categories = [
   {
     label: 'Weathers and environment',
     icon: MdForest,
-    example: 'Environmental campaign...',
+    example: 'Environmental campaigns...',
     description: 'Articles about weathers and environment'
   }, 
   {
