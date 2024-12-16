@@ -10,8 +10,9 @@ module.exports = {
       colors: {
         logo: '#404650',
         primary: '#1EB589',
+        secondary: '#00B0FF',
         button: '#FF6B6B',
-        highlight: '#FFE066',
+        highlight: '#FFD700',
         border: '#CED4DA'
       },
       keyframes: {

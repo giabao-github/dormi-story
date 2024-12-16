@@ -18,7 +18,10 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ data, onAction, disabled, act
 
   return (
     <div className='col-span-1 flex justify-center'>
-      <div className='flex flex-row items-center gap-2 w-[80%] p-2 border-2 border-primary rounded-md'>
+      <div 
+        onClick={() => router.push(`/articles/${data.id}`)}
+        className='flex flex-row items-center gap-2 w-[80%] p-2 border shadow-sm hover:shadow-md rounded-md cursor-pointer'
+      >
         <div className='ml-2 aspect-square w-[10%] relative overflow-hidden rounded-xl'>
           <Image
             fill

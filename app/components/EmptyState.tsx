@@ -3,10 +3,8 @@
 import { useRouter } from 'next/navigation';
 import Heading from './Heading';
 import Button from './Button';
-import useArticleModal from '../hooks/useArticleModal';
-import useReportModal from '../hooks/useReportModal';
-import useSurveyModal from '../hooks/useSurveyModal';
-import useEventModal from '../hooks/useEventModal';
+import useSearchResult from '../hooks/useSearchResult';
+
 
 interface EmptyStateProps {
   title? : string;
@@ -24,13 +22,11 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   showReset
 }) => {
   const router = useRouter();
-  const reportModal = useReportModal();
-  const surveyModal = useSurveyModal();
-  const eventModal = useEventModal();
+  const searchResult = useSearchResult();
 
   return (
     <div className='h-[60vh] ml-[241px] mt-20 flex justify-center items-center'>
-      <div className='flex flex-col gap-3 justify-center items-center'>
+      <div className='flex flex-col gap-3 max-w-[80%] justify-center items-center'>
         <Heading
           center
           title={title}
@@ -41,42 +37,60 @@ const EmptyState: React.FC<EmptyStateProps> = ({
             <Button
               outline
               label={buttonLabel}
-              onClick={() => router.push('/')}
+              onClick={() => {
+                searchResult.offFilter();
+                router.push('/');
+              }}
             />  
           )}
           {showReset && type === 'article' && (
             <Button
               outline
               label={buttonLabel}
-              onClick={() => router.push('/articles')}
+              onClick={() => {
+                searchResult.offFilter();
+                router.push('/articles');
+              }}
             />  
           )}
           {showReset && type === 'report' && (
             <Button
               outline
               label={buttonLabel}
-              onClick={() => reportModal.onOpen()}
+              onClick={() => {
+                searchResult.offFilter();
+                router.push('/reports');
+              }}
             />  
           )}
           {showReset && type === 'survey' && (
             <Button
               outline
               label={buttonLabel}
-              onClick={() => surveyModal.onOpen()}
+              onClick={() => {
+                searchResult.offFilter();
+                router.push('/surveys');
+              }}
             />  
           )}
           {showReset && type === 'event' && (
             <Button
               outline
               label={buttonLabel}
-              onClick={() => eventModal.onOpen()}
+              onClick={() => {
+                searchResult.offFilter();
+                router.push('/events');
+              }}
             />  
           )}
           {showReset && type === 'parking lot' && (
             <Button
               outline
               label={buttonLabel}
-              onClick={() => eventModal.onOpen()}
+              onClick={() => {
+                searchResult.offFilter();
+                router.push('/parking-lot-registration');
+              }}
             />  
           )}
         </div>

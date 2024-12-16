@@ -53,7 +53,7 @@ const PageContent = () => {
         {rules.map((section) => (
           <div
             key={section.id}
-            className='rounded-lg bg-white p-6 shadow-lg transition-transform hover:scale-105'
+            className='rounded-lg bg-white p-6 border shadow-lg transition-transform hover:scale-105'
           >
             <div className='mb-8 flex items-center space-x-3'>
               {section.icon}

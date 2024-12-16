@@ -25,7 +25,7 @@ const ReportCard: React.FC<ReportCardProps> = ({ data, onAction, disabled, actio
           reportCardModal.setReportDetails(data.reporterName, data.reporterStudentId, createdAt, data.category, data.time, data.location, data.description, data.proofSrc);
           reportCardModal.onOpen();
         }}
-        className='flex flex-row items-center gap-2 w-[94%] p-2 border shadow-md rounded-md cursor-pointer hover:scale-105'
+        className='flex flex-row items-center gap-2 w-[94%] p-2 border shadow-sm rounded-md cursor-pointer hover:shadow-md'
       >
         <div className='ml-2 aspect-square h-[90%] relative overflow-hidden rounded-xl'>
           <Image

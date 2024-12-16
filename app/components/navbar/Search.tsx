@@ -3,7 +3,7 @@
 import qs from 'query-string';
 import { FaFilter, FaSearch } from 'react-icons/fa';
 import SearchInput from '../SearchInput';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import useSearchModal from '@/app/hooks/useSearchModal';
 import useSearchResult from '@/app/hooks/useSearchResult';
 import { useCallback } from 'react';
@@ -12,9 +12,15 @@ const Search = () => {
   const router = useRouter();
   const searchModal = useSearchModal();
   const searchResult = useSearchResult();
+  const pathname = usePathname();
   const params = useSearchParams();
+  const allowedUrls = ['/articles', '/reports', '/events', '/surveys'];
 
   const handleSearch = useCallback(() => {
+    if (pathname === '/reports') {
+      return;
+    }
+
     let currentQuery = {};
 
     if (params) {
@@ -38,10 +44,10 @@ const Search = () => {
     .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(filteredQuery[key] as string)}`)
     .join("&");
 
-    const url = `/articles?${orderedQuery}`;
+    const url = `${pathname}?${orderedQuery}`;
 
     router.push(url);
-  }, [router, searchResult.title, params]);
+  }, [router, searchResult.title, params, pathname]);
 
   return (
     <div className='w-full md:w-1/2 py-2 rounded-full hover:shadow-md hover:border transition cursor-pointer flex flex-row'>
@@ -50,14 +56,22 @@ const Search = () => {
         <div className='text-sm pr-5 text-gray-600 flex flex-row items-center gap-3'>
         <div
             title='Filters'
-            onClick={searchModal.onOpen}
-            className='p-3 bg-primary text-white rounded-full hover:scale-105'
+            onClick={() => {
+              if (pathname && allowedUrls.includes(pathname)) {
+                searchModal.onOpen();
+              }
+            }}
+            className={`p-3 ${searchResult.filter ? 'bg-secondary' : 'bg-primary'} text-white rounded-full hover:scale-105`}
           >
             <FaFilter size={24} />
           </div>
           <div
             title='Search'
-            onClick={handleSearch}
+            onClick={() => {
+              if (pathname && allowedUrls.includes(pathname)) {
+                handleSearch();
+              }
+            }}
             className='p-3 bg-primary text-white rounded-full hover:scale-105'
           >
             <FaSearch size={24} />

@@ -13,6 +13,7 @@ const lexend = Lexend({
 });
 
 interface IParams {
+  userId?: string;
   title?: string;
   authorName?: string;
   startDate?: string;
@@ -22,8 +23,10 @@ interface IParams {
 
 const Articles = async ({ searchParams }: { searchParams: IParams }) => {
   const { title, authorName, startDate, endDate, category } = await searchParams;
+    const currentUser = await getCurrentUser();
 
   const orderedParams: IParams = {
+    userId: currentUser?.id,
     title: title || '',
     authorName: authorName || '',
     startDate: startDate || '',
@@ -31,7 +34,6 @@ const Articles = async ({ searchParams }: { searchParams: IParams }) => {
     category: category || ''
   };
 
-  const currentUser = await getCurrentUser();
   const articles = await getArticles(orderedParams);
 
   if (!currentUser) {
@@ -42,8 +44,8 @@ const Articles = async ({ searchParams }: { searchParams: IParams }) => {
     return (
       <ClientOnly>
         <EmptyState  
-          title='No articles found'
-          subtitle='It seems there is nothing to read here. Try changing some of the filters or reset all filters'
+          title='No Articles Available'
+          subtitle='There are no articles to display. This could be due to your current filters or because no articles have been posted yet. Try adjusting your filters or resetting them'
           buttonLabel='Reset all filters'
           type='article'
           showReset 

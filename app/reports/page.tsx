@@ -11,23 +11,39 @@ const lexend = Lexend({
   weight: '400'
 });
 
-const Reports = async () => {
+interface IParams {
+  userId?: string;
+  title?: string;
+  startDate?: string;
+  endDate?: string;
+  category?: string;
+}
+
+const Reports = async ({ searchParams }: { searchParams: IParams }) => {
+  const { title, startDate, endDate, category } = await searchParams;
   const currentUser = await getCurrentUser();
-  
 
   if (!currentUser) {
     return null;
   }
 
-  const reports = await getReportsByUserId(currentUser.id);
+  const orderedParams: IParams = {
+    userId: currentUser.id,
+    title: title || '',
+    startDate: startDate || '',
+    endDate: endDate || '',
+    category: category || ''
+  };
+
+  const reports = await getReportsByUserId(orderedParams);
 
   if (reports?.length === 0) {
     return (
       <ClientOnly>
         <EmptyState
-          title='No reports available'
-          subtitle="You haven't made any reports yet. If you found a violated behavior, you can report it by clicking the button below"
-          buttonLabel='Report a behavior'
+          title='No Reports Available'
+          subtitle="We couldn't find your reports at the moment. This could be due to your current filters or because you haven't submitted any reports yet. Try adjusting the filters or resetting them"
+          buttonLabel='Reset all filters'
           type='report'
           showReset 
         />
@@ -37,7 +53,7 @@ const Reports = async () => {
 
   return (
     <div className={`mt-4 overflow-y-auto max-h-[86%] w-full absolute right-0 ${lexend.className}`}>
-      <title>Dormistory | Surveys</title>
+      <title>Dormistory | Reports</title>
       <ClientOnly>
         <Container>
           <div className={`ml-[248px] mt-4 mb-32 grid grid-cols-1 gap-8`}>

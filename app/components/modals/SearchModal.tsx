@@ -1,16 +1,18 @@
 "use client";
 
-import { useCallback, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import qs from 'query-string';
+import toast from 'react-hot-toast';
 import { formatISO } from 'date-fns';
 import useSearchModal from '@/app/hooks/useSearchModal';
+import useSearchResult from '@/app/hooks/useSearchResult';
 import Modal from './Modal';
 import Heading from '../Heading';
 import Calendar from '../inputs/Calendar';
-import { categories } from './ArticleModal';
 import CategoryInput from '../inputs/CategoryInput';
-import useSearchResult from '@/app/hooks/useSearchResult';
+import { categories as articleCategories } from './ArticleModal';
+import { categories as reportCategories } from './ReportModal';
 
 enum STEPS {
   AUTHOR = 0,
@@ -20,15 +22,20 @@ enum STEPS {
 
 const SearchModal = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useSearchParams();
   const searchModal = useSearchModal();
   const searchResult = useSearchResult();
 
-  const [step, setStep] = useState(STEPS.AUTHOR);
+  const isReportsPath = pathname === '/reports';
+  const [step, setStep] = useState(isReportsPath ? STEPS.DATE : STEPS.AUTHOR);
   const [authorName, setAuthorName] = useState('');
   const [categoriesSelected, setCategoriesSelected] = useState<string[]>([]);
-  const [startDate, setStartDate] = useState<Date | undefined>(new Date(new Date().setFullYear(new Date().getFullYear() - 5)));
-  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
+  const [startDate, setStartDate] = useState<Date>(new Date(new Date().setFullYear(new Date().getFullYear() - 5)));
+  const [endDate, setEndDate] = useState<Date>(new Date());
+  const initialStartDate = useRef<Date>(new Date(new Date().setFullYear(new Date().getFullYear() - 5)));
+  const initialEndDate = useRef<Date>(new Date());
+  const categories = isReportsPath ? reportCategories : articleCategories;
 
   const onBack = useCallback(() => {
     setStep((value) => value - 1);
@@ -36,64 +43,131 @@ const SearchModal = () => {
 
   const onNext = useCallback(() => {
     setStep((value) => value + 1);
-  }, [authorName, startDate, endDate]);
+  }, []);
 
   const onToggleCategory = useCallback((category: string) => {
     setCategoriesSelected((prev) => {
-      if (prev.includes(category)) {
-        return prev.filter((cat) => cat !== category);
-      } else {
-        return [...prev, category];
-      }
-    });
-  }, []);
+      let newCategories: string[];
 
+      if (prev.includes(category)) {
+        // Deselect the category
+        newCategories = prev.filter((cat) => cat !== category);
+      } else {
+        // Select the category
+        newCategories = [...prev, category];
+      }
+
+      // Check if at least 1 category is selected but not all
+      const isNoneSelected = newCategories.length === 0;
+      const isAllSelected = newCategories.length === categories.length;
+      const isPartialSelected = newCategories.length > 0 && newCategories.length < categories.length;
+
+      // Only increment filter count if the number of selected categories is neither 0 nor all
+      if (isPartialSelected && !searchResult.filter) {
+        searchResult.onFilter();
+      } else if ((isNoneSelected || isAllSelected) && searchResult.filter) {
+        searchResult.offFilter();
+      }
+
+      return newCategories;
+    });
+  }, [categories, searchResult]);
+ 
   const onSelectAllCategories = useCallback(() => {
-    if (categoriesSelected.length === categories.length) {
-      setCategoriesSelected([]);
+    setCategoriesSelected((prev) => {
+      let newCategories: string[];
+
+      if (prev.length === categories.length) {
+        newCategories = [];
+      } else {
+        newCategories = categories.map((item) => item.label);
+      }
+
+      // Update filter state
+    if (newCategories.length > 0 && newCategories.length < categories.length) {
+      searchResult.onFilter();
     } else {
-      setCategoriesSelected(categories.map((item) => item.label));
+      searchResult.offFilter();
     }
-  }, [categoriesSelected]);
+
+      return newCategories;
+    });
+  }, [categories, searchResult]);
+  
 
   const onSubmit = useCallback(async () => {
     if (step !== STEPS.CATEGORY) {
       return onNext();
     }
 
+    if (!pathname) {
+      toast.remove();
+      toast.error('Something went wrong. Trying to refresh the page');
+      router.refresh();
+      return;
+    }
+
+    // Check if filters are active
+    const isAuthorFilterActive = authorName.trim().length > 0;
+    const isDateFilterActive =
+      startDate.getDate() !== initialStartDate.current.getDate() ||
+      endDate.getDate() !== initialEndDate.current.getDate();
+    const isCategoryFilterActive =
+      categoriesSelected.length > 0 && categoriesSelected.length < categories.length;
+
+    // Update filter state
+    if (isAuthorFilterActive || isDateFilterActive || isCategoryFilterActive) {
+      searchResult.onFilter();
+    } else {
+      searchResult.offFilter();
+    }
+
+    // Prepare query parameters
     let currentQuery = {};
 
     if (params) {
       currentQuery = qs.parse(params.toString());
     }
 
-    const updatedQuery: any = {
+    
+    const updatedQuery: Record<string, string | undefined> = {
       ...currentQuery,
-      title: searchResult.title || '',
-      authorName,
-      startDate: startDate ? formatISO(startDate) : undefined,
-      endDate: endDate ? formatISO(endDate) : undefined,
-      category: categoriesSelected.length === categories.length ? 'all' : categoriesSelected.join(',')
+      authorName: isAuthorFilterActive ? authorName : undefined,
+      startDate: isDateFilterActive ? formatISO(startDate) : undefined,
+      endDate: isDateFilterActive ? formatISO(endDate) : undefined,
+      category: isCategoryFilterActive
+        ? categoriesSelected.join(',')
+        : categoriesSelected.length === categories.length
+        ? 'all'
+        : undefined,
     };
 
-     // Filter out empty values
+    // Filter out empty values
     const filteredQuery = Object.fromEntries(
       Object.entries(updatedQuery).filter(([_, value]) => value != null && value !== '')
     );
 
-    // Manually construct the query string in the desired order
-    const orderedKeys = ['title', 'authorName', 'startDate', 'endDate', 'category'];
-    const orderedQuery = orderedKeys
-    .filter((key) => key in filteredQuery)
-    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(filteredQuery[key] as string)}`)
-    .join("&");
+    // Dynamically select allowed keys based on the pathname
+    const queryKeysByPathname: Record<string, string[]> = {
+      '/articles': ['title', 'authorName', 'startDate', 'endDate', 'category'],
+      '/reports': ['startDate', 'endDate', 'category'],
+      '/events': ['title', 'creator', 'startDate', 'endDate', 'category'],
+      '/surveys': ['title', 'creator', 'startDate', 'endDate', 'category'],
+    };
 
-    const url = `/articles?${orderedQuery}`;
+    const allowedKeys = queryKeysByPathname[pathname] || [];
+    const orderedQuery = allowedKeys
+      .filter((key: string) => key in filteredQuery)
+      .map((key: string) => `${encodeURIComponent(key)}=${encodeURIComponent(filteredQuery[key] as string)}`)
+      .join("&");
 
-    setStep(STEPS.AUTHOR);
+
+    const url = `${pathname}?${orderedQuery}`;
+
+    setStep(isReportsPath ? STEPS.DATE : STEPS.AUTHOR);
     searchModal.onClose();
     router.push(url);
-  }, [step, searchModal, router, searchResult.title, authorName, startDate, endDate, categoriesSelected, categories, params, onNext]);
+  }, [step, searchModal, router, searchResult, authorName, startDate, endDate, categoriesSelected, articleCategories, params, pathname, isReportsPath, onNext]);
 
   const actionLabel = useMemo(() => {
     if (step === STEPS.CATEGORY) {
@@ -103,11 +177,35 @@ const SearchModal = () => {
   }, [step]);
 
   const secondaryActionLabel = useMemo(() => {
-    if (step === STEPS.AUTHOR) {
+    if (step === (isReportsPath ? STEPS.DATE : STEPS.AUTHOR)) {
       return undefined;
     }
     return 'Back';
-  }, [step]);
+  }, [step, isReportsPath]);
+
+  useEffect(() => {
+    if (params) {
+      const currentQuery = qs.parse(params.toString());
+
+      const hasAuthorFilter = pathname !== '/reports' && !!currentQuery.authorName;
+      const hasDateFilter = currentQuery.startDate || currentQuery.endDate;
+      const hasCategoryFilter = currentQuery.category && currentQuery.category !== 'all';
+
+      if (hasAuthorFilter || hasDateFilter || hasCategoryFilter) {
+        searchResult.onFilter();
+      } else {
+        searchResult.offFilter();
+      }
+    }
+  }, [params, pathname, searchResult]);
+
+  useEffect(() => {
+    if (pathname !== '/reports') {
+      setStep(STEPS.AUTHOR);
+    } else {
+      setStep(STEPS.DATE);
+    }
+  }, [pathname]);
 
   let bodyContent = (
     <div className='flex flex-col gap-8'>
@@ -124,6 +222,11 @@ const SearchModal = () => {
           onChange={(event) => {
             const inputValue = event.target.value;
             setAuthorName(inputValue);
+            if (inputValue.trim().length > 0) {
+              searchResult.onFilter();
+            } else {
+              searchResult.offFilter();
+            }
           }}
           className={`w-full px-4 py-3 font-medium border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed`}  
         />

@@ -11,21 +11,43 @@ const lexend = Lexend({
   weight: '400'
 });
 
-const Surveys = async () => {
+interface IParams {
+  userId?: string;
+  title?: string;
+  creator?: string;
+  startDate?: string;
+  endDate?: string;
+  category?: string;
+}
+
+const Surveys = async ({ searchParams }: { searchParams: IParams }) => {
+  const { title, creator, startDate, endDate, category } = await searchParams;
   const currentUser = await getCurrentUser();
-  const surveys = await getSurveys();
 
   if (!currentUser) {
     return null;
   }
 
+  const orderedParams: IParams = {
+    userId: currentUser.id,
+    title: title || '',
+    creator: creator || '',
+    startDate: startDate || '',
+    endDate: endDate || '',
+    category: category || ''
+  };
+
+  const surveys = await getSurveys(orderedParams);
+
+  
+
   if (surveys.length === 0) {
     return (
       <ClientOnly>
         <EmptyState
-          title='No surveys available'
-          subtitle="We couldn't find any surveys at the moment. Try checking back later or create a new one"
-          buttonLabel='Create a survey'
+          title='No Surveys Available'
+          subtitle="We couldn't find any surveys at the moment. This could be due to your current filters or because no surveys have been created yet. Try adjusting the filters or resetting them"
+          buttonLabel='Reset all filters'
           type='survey'
           showReset 
         />

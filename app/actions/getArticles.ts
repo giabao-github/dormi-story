@@ -13,6 +13,10 @@ export default async function getArticles(params: IArticleParams) {
   try {
     const { userId, title, authorName, startDate, endDate, category } = params;
 
+    if (!userId) {
+      throw new Error('User ID is not found');
+    }
+
     let query: any = {};
 
     if (userId) {

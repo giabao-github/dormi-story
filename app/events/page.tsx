@@ -12,21 +12,41 @@ const lexend = Lexend({
   weight: '400'
 });
 
-const Events = async () => {
+interface IParams {
+  userId?: string;
+  title?: string;
+  creator?: string;
+  startDate?: string;
+  endDate?: string;
+  category?: string;
+}
+
+const Events = async ({ searchParams }: { searchParams: IParams }) => {
+  const { title, creator, startDate, endDate, category } = await searchParams || {};
   const currentUser = await getCurrentUser();
-  const events = await getEvents();
 
   if (!currentUser) {
     return null;
   }
 
+  const orderedParams: IParams = {
+    userId: currentUser.id,
+    title: title || '',
+    creator: creator || '',
+    startDate: startDate || '',
+    endDate: endDate || '',
+    category: category || ''
+  };
+
+  const events = await getEvents(orderedParams);
+
   if (events.length === 0) {
     return (
       <ClientOnly>
         <EmptyState
-          title='No upcoming events'
-          subtitle="It looks like there are no events planned for now. Stay tuned for updates or plan your own"
-          buttonLabel='Plan an event'
+          title='No Upcoming Events'
+          subtitle="There are no events to display. This could be due to your current filters or because no events have been scheduled yet. Try adjusting your filters or resetting them"
+          buttonLabel='Reset all filters'
           type='event'
           showReset 
         />
