@@ -24,17 +24,41 @@ export default async function getArticles(params: IArticleParams) {
     }
 
     if (title) {
-      query.title = {
-        contains: title,
-        mode: 'insensitive',
-      };
+      const normalizedTitle = title.trim().toLowerCase();
+      const titleTerms = normalizedTitle.split(/\s+/);
+
+      // Create an array of conditions for each term
+      const titleConditions = titleTerms.map(term => ({
+        title: {
+          contains: term,
+          mode: 'insensitive',
+        }
+      }));
+
+      // Combine title conditions with AND logic
+      query.AND = query.AND || [];
+      query.AND.push({
+        OR: titleConditions
+      });
     }
 
     if (authorName) {
-      query.author = {
-        contains: authorName,
-        mode: 'insensitive',
-      };
+      const normalizedAuthor = authorName.trim().toLowerCase();
+      const authorTerms = normalizedAuthor.split(/\s+/);
+
+      // Create an array of conditions for each term
+      const authorConditions = authorTerms.map(term => ({
+        author: {
+          contains: term,
+          mode: 'insensitive',
+        }
+      }));
+
+      // Combine author conditions with AND logic
+      query.AND = query.AND || [];
+      query.AND.push({
+        OR: authorConditions
+      });
     }
 
     if (category && category !== 'all') {

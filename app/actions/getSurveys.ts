@@ -24,17 +24,41 @@ export default async function getSurveys(params: ISurveyParams) {
     }
 
     if (title) {
-      query.title = {
-        contains: title,
-        mode: 'insensitive',
-      };
+      const normalizedTitle = title.trim().toLowerCase();
+      const titleTerms = normalizedTitle.split(/\s+/);
+
+      // Create an array of conditions for each term
+      const titleConditions = titleTerms.map(term => ({
+        title: {
+          contains: term,
+          mode: 'insensitive',
+        }
+      }));
+
+      // Combine title conditions with AND logic
+      query.AND = query.AND || [];
+      query.AND.push({
+        OR: titleConditions
+      });
     }
 
     if (creator) {
-      query.author = {
-        contains: creator,
-        mode: 'insensitive',
-      };
+      const normalizedCreator = creator.trim().toLowerCase();
+      const creatorTerms = normalizedCreator.split(/\s+/);
+
+      // Create an array of conditions for each term
+      const creatorConditions = creatorTerms.map(term => ({
+        creator: {
+          contains: term,
+          mode: 'insensitive',
+        }
+      }));
+
+      // Combine creator conditions with AND logic
+      query.AND = query.AND || [];
+      query.AND.push({
+        OR: creatorConditions
+      });
     }
 
     if (category && category !== 'all') {

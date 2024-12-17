@@ -2,8 +2,8 @@ import getArticleById from '@/app/actions/getArticleById';
 import getCurrentUser from '@/app/actions/getCurrentUser';
 import ClientOnly from '@/app/components/ClientOnly';
 import EmptyState from '@/app/components/EmptyState';
-import ArticleClient from './ArticleClient';
 import { Lexend } from 'next/font/google';
+import PageContent from './components/PageContent';
 
 
 const lexend = Lexend({
@@ -35,12 +35,7 @@ const ArticlePage = async ({ params } : { params: IParams }) => {
   return (
     <div className={`mt-4 overflow-y-auto max-h-[86%] w-full absolute right-0 ${lexend.className}`}>
       <title>{`Dormistory | ${article.title}`}</title>
-      <ClientOnly>
-        <ArticleClient
-          article={article}
-          currentUser={currentUser}
-        />
-      </ClientOnly>
+      <PageContent article={article} currentUser={currentUser} />
     </div>
   );
 }

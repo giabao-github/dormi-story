@@ -21,13 +21,13 @@ const MenuItem: React.FC<MenuItemProps> = ({ onClick, label }) => {
     Icon = TbLogout;
   } else if (label === 'Edit Profile') {
     Icon = HiOutlineUserCircle;
-  } else if (label === 'Make A Report') {
+  } else if (label === 'Submit A Report') {
     Icon = MdOutlineReport;
   } else if (label === 'Messenger Token') {
     Icon = MdOutlineToken;
   } else if (label === 'Post An Article') {
     Icon = BiNews;
-  } else if (label === 'Plan An Event') {
+  } else if (label === 'Schedule An Event') {
     Icon = MdEventAvailable;
   } else if (label === 'Create A Survey') {
     Icon = RiSurveyLine;

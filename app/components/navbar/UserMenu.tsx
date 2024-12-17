@@ -141,7 +141,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
                 />
                 <MenuItem
                   onClick={handleReportModal}
-                  label='Make A Report'
+                  label='Submit A Report'
                 />
                 <MenuItem
                   onClick={handleArticleModal}
@@ -153,7 +153,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
                 />
                 <MenuItem
                   onClick={handleEventModal}
-                  label='Plan An Event'
+                  label='Schedule An Event'
                 />
                 <MenuItem
                   onClick={handleMessengerToken}

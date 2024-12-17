@@ -45,7 +45,7 @@ const Articles = async ({ searchParams }: { searchParams: IParams }) => {
       <ClientOnly>
         <EmptyState  
           title='No Articles Available'
-          subtitle='There are no articles to display. This could be due to your current filters or because no articles have been posted yet. Try adjusting your filters or resetting them'
+          subtitle='There are no articles to display. This could be due to your current filters or because no articles have been posted yet. Try adjusting your filters or posting a new article'
           buttonLabel='Reset all filters'
           type='article'
           showReset 

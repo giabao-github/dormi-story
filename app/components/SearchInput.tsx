@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { useRouter } from 'next/navigation';
 import { IoCloseCircle } from "react-icons/io5";
@@ -21,6 +21,14 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({ className,
     router.push(`?${params.toString()}`);
   };
 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const titleParam = urlParams.get('title');
+    if (titleParam) {
+      setValue(titleParam);
+      searchResult.setTitle(titleParam);
+    }
+  }, []);
 
   if (paragraph) {
     return (

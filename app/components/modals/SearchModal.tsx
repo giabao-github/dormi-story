@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import qs from 'query-string';
 import toast from 'react-hot-toast';
-import { formatISO } from 'date-fns';
+import { format, formatISO } from 'date-fns';
 import useSearchModal from '@/app/hooks/useSearchModal';
 import useSearchResult from '@/app/hooks/useSearchResult';
 import Modal from './Modal';
@@ -132,9 +132,9 @@ const SearchModal = () => {
     
     const updatedQuery: Record<string, string | undefined> = {
       ...currentQuery,
-      authorName: isAuthorFilterActive ? authorName : undefined,
-      startDate: isDateFilterActive ? formatISO(startDate) : undefined,
-      endDate: isDateFilterActive ? formatISO(endDate) : undefined,
+      authorName: isAuthorFilterActive ? authorName.trim() : undefined,
+      startDate: isDateFilterActive ? format(startDate, 'yyyy-MM-dd') : undefined,
+      endDate: isDateFilterActive ? format(endDate, 'yyyy-MM-dd') : undefined,
       category: isCategoryFilterActive
         ? categoriesSelected.join(',')
         : categoriesSelected.length === categories.length

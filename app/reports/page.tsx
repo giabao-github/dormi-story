@@ -42,7 +42,7 @@ const Reports = async ({ searchParams }: { searchParams: IParams }) => {
       <ClientOnly>
         <EmptyState
           title='No Reports Available'
-          subtitle="We couldn't find your reports at the moment. This could be due to your current filters or because you haven't submitted any reports yet. Try adjusting the filters or resetting them"
+          subtitle="We couldn't find your reports at the moment. This could be due to your current filters or because you haven't submitted any reports yet. Try adjusting your filters or submitting a report"
           buttonLabel='Reset all filters'
           type='report'
           showReset 

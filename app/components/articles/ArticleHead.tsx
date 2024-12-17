@@ -7,12 +7,13 @@ import { IoCalendarOutline, IoTimeOutline } from 'react-icons/io5';
 interface ArticleHeadProps {
   title: string;
   time: string;
+  category: string;
   author: SafeUser;
   id: string;
   currentUser?: SafeUser | null;
 }
 
-const ArticleHead: React.FC<ArticleHeadProps> = ({ title, time, author, id, currentUser }) => {
+const ArticleHead: React.FC<ArticleHeadProps> = ({ title, time, author, category, id, currentUser }) => {
   const formattedDate = `${new Date(time).getDate().toString().padStart(2, '0')}/${
     (new Date(time).getMonth() + 1).toString().padStart(2, '0')
     }/${new Date(time).getFullYear()}`;
@@ -35,6 +36,9 @@ const ArticleHead: React.FC<ArticleHeadProps> = ({ title, time, author, id, curr
           </div>
           <div className='flex flex-row gap-2 font-normal text-neutral-500'>
             {`🕒 ${formattedTime}`}
+          </div>
+          <div className='flex flex-row gap-2 font-normal text-neutral-500'>
+            {`🏷️ ${category}`}
           </div>
         </div>
       </div>

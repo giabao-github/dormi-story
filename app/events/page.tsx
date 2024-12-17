@@ -45,7 +45,7 @@ const Events = async ({ searchParams }: { searchParams: IParams }) => {
       <ClientOnly>
         <EmptyState
           title='No Upcoming Events'
-          subtitle="There are no events to display. This could be due to your current filters or because no events have been scheduled yet. Try adjusting your filters or resetting them"
+          subtitle="There are no events to display. This could be due to your current filters or because no events have been scheduled yet. Try adjusting your filters or scheduling an event"
           buttonLabel='Reset all filters'
           type='event'
           showReset 

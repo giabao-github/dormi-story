@@ -46,7 +46,7 @@ const Surveys = async ({ searchParams }: { searchParams: IParams }) => {
       <ClientOnly>
         <EmptyState
           title='No Surveys Available'
-          subtitle="We couldn't find any surveys at the moment. This could be due to your current filters or because no surveys have been created yet. Try adjusting the filters or resetting them"
+          subtitle="We couldn't find any surveys at the moment. This could be due to your current filters or because no surveys have been created yet. Try adjusting your filters or creating a survey"
           buttonLabel='Reset all filters'
           type='survey'
           showReset 

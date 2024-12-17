@@ -29,7 +29,7 @@ const Search = () => {
 
     const updatedQuery: any = {
       ...currentQuery,
-      title: searchResult.title || '',
+      title: searchResult.title.trim() || '',
     };
 
     // Filter out empty values

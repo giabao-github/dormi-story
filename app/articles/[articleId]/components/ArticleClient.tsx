@@ -7,6 +7,7 @@ import Container from '@/app/components/Container';
 import { categories } from '@/app/components/modals/ArticleModal';
 import ArticleInfo from '@/app/components/articles/ArticleInfo';
 
+
 interface ArticleClientProps {
   article: SafeArticle & { user: SafeUser };
   currentUser?: SafeUser | null;
@@ -19,11 +20,12 @@ const ArticleClient: React.FC<ArticleClientProps> = ({ article, currentUser }) =
 
   return (
     <Container>
-      <div className='ml-[248px] max-w-screen-2xl h-full my-32'>
+      <div className='ml-[248px] max-w-screen-2xl h-full mt-16 mb-32'>
         <div className='flex flex-col gap-6 mx-40'>
           <ArticleHead
             title={article.title}
             time={article.createdAt}
+            category={article.category}
             author={article.user}
             id={article.id}
             currentUser={currentUser}

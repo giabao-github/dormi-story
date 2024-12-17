@@ -23,11 +23,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({ icon: Icon, label, ro
       currentQuery = qs.parse(params.toString());
     }
 
-    const updatedQuery: any = {
-      ...currentQuery,
-      category: label,
-    }
-
     const url = route || `/${encodeURIComponent(label.toLowerCase())}`;
 
     router.push(url);
