@@ -53,6 +53,9 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ data, onAction, disabled, act
                 {`🕒 ${new Date(data.createdAt).getHours().toString().padStart(2, '0')
                 }:${new Date(data.createdAt).getMinutes().toString().padStart(2, '0')}`}
               </span>
+              <span>
+                {`🏷️ ${data.category}`}
+              </span>
             </div>
           </div>
         </div>

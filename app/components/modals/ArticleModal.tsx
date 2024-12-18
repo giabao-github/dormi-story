@@ -92,6 +92,10 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
   const [step, setStep] = useState(STEPS.AUTHOR);
   const [isLoading, setIsLoading] = useState(false);
   const [inputError, setInputError] = useState(false);
+  const [label, setLabel] = useState('');
+  const [labelInput, setLabelInput] = useState('');
+  const [labelSelected, setLabelSelected] = useState(false);
+  const [categoryError, setCategoryError] = useState(false);
 
   const { register, handleSubmit, setValue, watch, formState: { errors }, reset } = useForm<FieldValues>({
     defaultValues: {
@@ -125,20 +129,21 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
 
   const onNext = () => {
     if (step === STEPS.CATEGORY && !category) {
+      setCategoryError(true);
       toast.remove();
-      toast.error('Please select an article category before proceeding');
+      toast.error('Please select or enter an article category before proceeding');
       return;
     }
     else if (step === STEPS.TITLE && !title) {
       setInputError(true);
       toast.remove();
-      toast.error('Please provide an article title before proceeding');
+      toast.error('Please provide your article title before proceeding');
       return;
     }
     else if (step === STEPS.CONTENT && !content) {
       setInputError(true);
       toast.remove();
-      toast.error('Please write an article content before proceeding');
+      toast.error('Please write your article content before proceeding');
       return;
     }
     setInputError(false);
@@ -210,24 +215,49 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
       <div className='flex flex-col gap-8'>
         <div className='mx-6'>
           <Heading
-            title='Articles Category'
+            title='Article Categories'
             subtitle='Choose a category that best fits your article'
           />
         </div>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto mx-6'>
-          {categories.map((item) => (
-            <div key={item.label} className='col-span-1'>
-              <CategoryInput
-                onClick={(category) => {
-                  setCustomValue('category', category);
+        <div className='overflow-y-auto'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[50vh] mx-6'>
+            {categories.map((item) => (
+              <div key={item.label} className='col-span-1'>
+                <CategoryInput
+                  onClick={(category) => {
+                    setLabel(category);
+                    setCustomValue('category', category === 'Other' ? labelInput : category);
+                    if (category === 'Other') {
+                      setLabelSelected(true);
+                    } else {
+                      setLabelSelected(false);
+                    }
+                  }}
+                  selected={item.label === 'Other' && labelSelected ? true : category === item.label}
+                  label={item.label}
+                  example={item.example}
+                  icon={item.icon}
+                  type='article'
+                />
+              </div>
+            ))}
+            {label === 'Other' && (
+              <input
+                id='category-input'
+                placeholder='Enter your category...'
+                type='text'
+                value={category}
+                {...register('category')}
+                onChange={(e) => {
+                  setLabel('Other');
+                  setLabelInput(e.target.value);
+                  setCustomValue('category', e.target.value);
                 }}
-                selected={category === item.label}
-                label={item.label}
-                example={item.example}
-                icon={item.icon}
+                className={`relative w-full mt-6 h-2/3 px-4 py-3 font-medium border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['category'] || categoryError) && 'border-red-500 focus:border-red-500'}`}  
               />
-            </div>
-          ))}
+            )}
+
+        </div>
         </div>
     </div>
     );

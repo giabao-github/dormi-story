@@ -212,7 +212,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
 
   const actionLabel = useMemo(() => {
     if (step === STEPS.CONFIRM) {
-      return 'Report';
+      return 'Submit';
     }
     return 'Next';
   }, [step]);
@@ -257,7 +257,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
       <div className='flex flex-col gap-8'>
         <div className='mx-6'>
           <Heading
-            title='Behavior Category'
+            title='Behavior Categories'
             subtitle='Choose a category that best fits the reported issue'
           />
         </div>
