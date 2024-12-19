@@ -86,7 +86,7 @@ export default async function getArticles(params: IArticleParams) {
       },
       include: {
         user: true
-      }
+      },
     });
 
     const safeArticles = articles.map(article => ({

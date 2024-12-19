@@ -18,13 +18,15 @@ import useProfileModal from '@/app/hooks/useProfileModal';
 import ProfileModal from '../modals/ProfileModal';
 import useSurveyModal from '@/app/hooks/useSurveyModal';
 import useEventModal from '@/app/hooks/useEventModal';
+import useRequestsModal from '@/app/hooks/useRequestsModal';
 
 
 interface UserMenuProps {
   currentUser?: SafeUser | null; 
+  notification: number;
 }
 
-const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
+const UserMenu: React.FC<UserMenuProps> = ({ currentUser, notification }) => {
   const pathname = usePathname();
   const loginModal = useLoginModal();
   const profileModal = useProfileModal();
@@ -34,6 +36,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
   const articleModal = useArticleModal();
   const surveyModal = useSurveyModal();
   const eventModal = useEventModal();
+  const requestsModal = useRequestsModal();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null); 
   const menuItemRef = useRef<HTMLDivElement>(null); 
@@ -83,6 +86,13 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
     }
     eventModal.onOpen();
   }, [currentUser, loginModal, eventModal]);
+
+  const handleRequestsModal = useCallback(() => {
+    if (!currentUser) {
+      return loginModal.onOpen();
+    }
+    requestsModal.onOpen();
+  }, [currentUser, loginModal, requestsModal]);
 
   const handleClickOutside = (event: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(event.target as Node) && menuItemRef.current && !menuItemRef.current.contains(event.target as Node)) {
@@ -156,8 +166,9 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
                   label='Schedule An Event'
                 />
                 <MenuItem
-                  onClick={handleMessengerToken}
-                  label='Messenger Token'
+                  onClick={handleRequestsModal}
+                  label='Friend Requests'
+                  notification={notification}
                 />
                 <hr />
                 <MenuItem

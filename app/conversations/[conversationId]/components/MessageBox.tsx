@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
-import { format } from 'date-fns';
+import toast from 'react-hot-toast';
+import { format, isToday, isThisWeek, isYesterday, isThisYear } from 'date-fns';
 import { parseBlob } from 'music-metadata';
 import { PDFDocument } from 'pdf-lib';
 import { BsDot } from 'react-icons/bs';
@@ -12,8 +13,6 @@ import { FaArrowUpRightFromSquare, FaArrowRightToBracket } from 'react-icons/fa6
 import ImageModal from './ImageModal';
 import Avatar from '@/app/components/Avatar';
 import { FullMessageType, SafeUser } from '@/app/types';
-import useMetadata from '@/app/hooks/useMetadata';
-import toast from 'react-hot-toast';
 
 
 interface MessageBoxProps {
@@ -180,7 +179,21 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
       console.error('Error downloading the file:', error);
     }
   }
-  
+
+  const formatDate = (date: Date) => {
+    if (isToday(date)) {
+      return `Today at ${format(date, 'p')}`;
+    } else if (isYesterday(date)) {
+      return `Yesterday at ${format(date, 'p')}`;
+    } else if (isThisWeek(date)) {
+      return `${format(date, 'EEEE')} at ${format(date, 'p')}`;
+    } else if (isThisYear(date)) {
+      return `${format(date, 'MMM d')} at ${format(date, 'p')}`;
+    } else {
+      return `${format(date, 'MMM d, yyyy')} at ${format(date, 'p')}`;
+    }
+  };
+
   const messageParts = parseMessage(data.body || '');
   const isOwn = currentUser?.email === data?.sender?.email;
   const seenList = (data.seen || [])
@@ -253,7 +266,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
           </div>
           <BsDot className='text-gray-400' />
           <div className='text-xs text-gray-400'>
-            {format(new Date(data.createdAt), 'p')}
+            {formatDate(new Date(data.createdAt))}
           </div>
         </div>
         <div className={message}>

@@ -20,7 +20,7 @@ const GroupChatModal: React.FC<GroupChatModalProps> = ({ isOpen, onClose, users 
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit, setValue, watch, formState: { errors} } = useForm<FieldValues>({
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FieldValues>({
     defaultValues: {
       groupName: '',
       members: []
@@ -96,14 +96,14 @@ const GroupChatModal: React.FC<GroupChatModalProps> = ({ isOpen, onClose, users 
           type='button'
           disabled={isLoading}
           onClick={onClose}
-          className='py-2 px-3 bg-neutral-300 hover:opacity-80 rounded-md select-none disabled:opacity-50 disabled:cursor-not-allowed'
+          className='py-2 px-4 bg-neutral-300 hover:opacity-80 rounded-md select-none disabled:opacity-50 disabled:cursor-not-allowed'
         >
           <span className='text-gray-700 text-base font-semibold'>Cancel</span>
         </button>
         <button
           type='submit'
           disabled={isLoading || members.length < 2}
-          className='py-2 px-3 bg-primary hover:opacity-80 rounded-md select-none disabled:opacity-50 disabled:cursor-not-allowed'
+          className='py-2 px-4 bg-primary hover:opacity-80 rounded-md select-none disabled:opacity-50 disabled:cursor-not-allowed'
         >
           <span className='text-white text-base font-semibold'>Create</span>
         </button>

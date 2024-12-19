@@ -6,6 +6,7 @@ import ConversationList from './components/ConversationList';
 import getCurrentUser from '../actions/getCurrentUser';
 import getUsers from '../actions/getUsers';
 import MessengerTab from '../components/MessengerTab';
+import getFriendsByUserId from '../actions/getFriendsByUserId';
 
 
 const lexend = Lexend({
@@ -17,6 +18,7 @@ export default async function ConversationsLayout({ children }: { children: Reac
   const currentUser = await getCurrentUser();
   const conversations = await getConversations();
   const users = await getUsers();
+  const friendList = await getFriendsByUserId();
 
   if (!currentUser) {
     return null;
@@ -29,7 +31,7 @@ export default async function ConversationsLayout({ children }: { children: Reac
         <div className={`h-full ml-[248px] flex flex-col ${lexend.className}`}>
           <ConversationList
             currentUser={currentUser}
-            users={users}
+            users={friendList}
             initialItems={conversations}
           />
           <MessengerTab />

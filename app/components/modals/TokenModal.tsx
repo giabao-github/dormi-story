@@ -131,7 +131,7 @@ const TokenModal: React.FC<TokenModalProps> = ({ currentUser }) => {
         <div className='flex justify-center'>
           <div className='w-11/12 flex justify-center text-lg font-bold text-red-500'>
             <IoWarning size={30} className='text-red-500' />
-            Important Note:&nbsp;&nbsp;DO NOT share your Messenger Token to strangers, only share it to who you want to connect on Messenger
+            Important Note:&nbsp;&nbsp;DO NOT share your Messenger Token to strangers, only share it to your friends
           </div>
         </div>
         <div className='flex flex-col justify-center items-center'>

@@ -1,16 +1,22 @@
 import ReactSelect from 'react-select';
 
 interface SelectorProps {
+  type?: string;
   label: string;
   value?: Record<string, any>;
+  placeholder?: string;
+  noOptionsMessage?: string;
   onChange: (value: Record<string, any>) => void;
   options: Record<string, any>[];
   disabled?: boolean;
 }
 
 const Selector: React.FC<SelectorProps> = ({
+  type,
   label,
   value,
+  placeholder = 'Invite friends',
+  noOptionsMessage = 'No friends to invite',
   onChange,
   options,
   disabled
@@ -23,8 +29,8 @@ const Selector: React.FC<SelectorProps> = ({
       <div className='mt-2 mx-1'>
         <ReactSelect
           isDisabled={disabled}
-          placeholder='Search friends'
-          noOptionsMessage={() => 'No members to invite'}
+          placeholder={placeholder}
+          noOptionsMessage={() => noOptionsMessage}
           value={value}
           onChange={onChange}
           isMulti

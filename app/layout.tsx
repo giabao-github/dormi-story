@@ -16,6 +16,9 @@ import SurveyModal from './components/modals/SurveyModal';
 import EventModal from './components/modals/EventModal';
 import ReportCardModal from './components/modals/ReportCardModal';
 import SearchModal from './components/modals/SearchModal';
+import FriendRequestsModal from './components/modals/FriendRequestsModal';
+import { getSentFriendRequests } from './actions/getSentFriendRequests';
+import { getReceivedFriendRequests } from './actions/getReceivedFriendRequests';
 
 
 const nunito = Nunito({
@@ -29,6 +32,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const currentUser = await getCurrentUser();
+  const sentRequests = await getSentFriendRequests(currentUser?.id || '');
+  const receivedRequests = await getReceivedFriendRequests(currentUser?.id || '');
 
   return (
     <html lang='en'>
@@ -41,12 +46,13 @@ export default async function RootLayout({
           <RegisterModal />
           <SearchModal />
           <ReportCardModal />
+          <FriendRequestsModal sentRequests={sentRequests} receivedRequests={receivedRequests} />
           <TokenModal currentUser={currentUser} />
           <ReportModal currentUser={currentUser} />
           <ArticleModal currentUser={currentUser} />
           <SurveyModal currentUser={currentUser} />
           <EventModal currentUser={currentUser} />
-          <Navbar currentUser={currentUser} />
+          <Navbar currentUser={currentUser} notification={receivedRequests.length} />
           <IntroductionPage currentUser={currentUser} />
           <Sidebar currentUser={currentUser} />
           <div className='pb-20 pt-28'>

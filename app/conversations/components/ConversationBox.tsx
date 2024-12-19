@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { format } from 'date-fns';
+import { format, isToday, isYesterday, isThisWeek, isThisYear } from 'date-fns';
 import { useSession } from 'next-auth/react';
 import clsx from 'clsx';
 
@@ -127,7 +127,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
           return `${lastMessage.sender.name} sent a document`;
         }
       }
-    }
+    };
 
     if (lastMessage?.body) {
       if (lastMessage.sender.email?.toLowerCase() === currentUser?.email?.toLowerCase()) {
@@ -155,7 +155,21 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
     } else {
       return 'Anonymous User';
     }
-  }
+  };
+
+  const formatDate = (date: Date) => {
+    if (isToday(date)) {
+      return `${format(date, 'p')}`;
+    } else if (isYesterday(date)) {
+      return 'Yesterday';
+    } else if (isThisWeek(date)) {
+      return `${format(date, 'EEEE')}`;
+    }  else if (isThisYear(date)) {
+      return `${format(date, 'MMM d')}`;
+    } else {
+      return `${format(date, 'MMM d, yyyy')}`;
+    }
+  };
 
   return (
     <div 
@@ -187,7 +201,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
             </p>
             {lastMessage?.createdAt && (
               <p className='text-sm text-gray-400 font-normal'>
-                {format(new Date(lastMessage.createdAt), 'p')}
+                {formatDate(new Date(lastMessage.createdAt))}
               </p>
             )}
           </div>

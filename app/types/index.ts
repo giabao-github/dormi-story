@@ -1,4 +1,4 @@
-import { Article, Survey, User, Conversation, Message, Report } from '@prisma/client';
+import { Article, Survey, User, Conversation, Message, Report, Friend } from '@prisma/client';
 
 export type SafeArticle = Omit<
   Article,
@@ -28,6 +28,24 @@ export type SafeUser = Omit<
   createdAt: string;
   updatedAt: string;
   emailVerified: string | null;
+};
+
+export type SafeSentRequest = Omit<
+  Friend,
+  'createdAt' | 'updatedAt'
+> & {
+  createdAt: string;
+  updatedAt: string;
+  receiver: SafeUser;
+};
+
+export type SafeReceivedRequest = Omit<
+  Friend,
+  'createdAt' | 'updatedAt'
+> & {
+  createdAt: string;
+  updatedAt: string;
+  sender: SafeUser;
 };
 
 export type FullMessageType = Omit<Message, 'createdAt'> & {
