@@ -8,11 +8,12 @@ import { IoClose } from 'react-icons/io5';
 interface MessengerModalProps {
   isOpen?: boolean;
   onClose: () => void;
+  disabled?: boolean;
   children: React.ReactNode;
   type?: string;
 }
 
-const MessengerModal: React.FC<MessengerModalProps> = ({ isOpen, onClose, children, type }) => {
+const MessengerModal: React.FC<MessengerModalProps> = ({ isOpen, onClose, disabled, children, type }) => {
   return (
     <Transition
       show={isOpen}
@@ -52,7 +53,8 @@ const MessengerModal: React.FC<MessengerModalProps> = ({ isOpen, onClose, childr
                   <button
                     type='button'
                     onClick={onClose}
-                    className={`text-gray-400 hover:text-button focus:outline-none`}
+                    disabled={disabled}
+                    className={`text-gray-400 hover:text-button disabled:text-gray-400 focus:outline-none`}
                   >
                     <span className='sr-only'>Close</span>
                     <IoClose size={24} className='h-6 w-6' />

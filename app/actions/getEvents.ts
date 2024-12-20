@@ -14,7 +14,7 @@ export default async function getEvents(params: IEventParams) {
     const { userId, title, creator, startDate, endDate, category } = params;
 
     if (!userId) {
-      throw new Error('User ID is not found');
+      return [];
     }
 
     let query: any = {};

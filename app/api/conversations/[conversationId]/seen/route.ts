@@ -8,14 +8,14 @@ interface IParams {
 }
 
 export async function POST(request: Request, { params } : { params: IParams }) {
+  const currentUser = await getCurrentUser();
+  const { conversationId } = await params;
+
+  if(!currentUser?.id || !currentUser?.email) {
+    return new NextResponse('Unauthorized', { status: 401 });
+  }
+
   try {
-    const currentUser = await getCurrentUser();
-    const { conversationId } = await params;
-
-    if(!currentUser?.id || !currentUser?.email) {
-      return new NextResponse('Unauthorized', { status: 401 });
-    }
-
     const conversation = await prisma.conversation.findUnique({
       where: {
         id: conversationId
@@ -70,7 +70,7 @@ export async function POST(request: Request, { params } : { params: IParams }) {
 
     return NextResponse.json(updatedMessage);
   } catch (error: any) {
-    console.log('Error from /api/conversations/[conversationId]/seen:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.log(`Error at /api/conversations/${conversationId}/seen:`, error);
+    return new NextResponse(error.message || 'Internal Server Error', { status: 500 });
   }
 }

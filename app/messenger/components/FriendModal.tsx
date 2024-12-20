@@ -1,20 +1,23 @@
 "use client";
 
 import { ChangeEvent, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { FaCheck } from 'react-icons/fa6';
-import { SafeSentRequest, SafeUser } from '@/app/types';
+import { SafeReceivedRequest, SafeSentRequest, SafeUser } from '@/app/types';
 import MessengerModal from '@/app/components/modals/MessengerModal';
 import ProfileInput from '@/app/components/inputs/ProfileInput';
 import FetchedUserCard from './FetchedUserCard';
+
 
 interface FriendModalProps {
   isOpen?: boolean;
   onClose: () => void;
   currentUser: SafeUser;
   sentRequests: SafeSentRequest[];
+  receivedRequests: SafeReceivedRequest[];
   friendList: SafeUser[];
   users: SafeUser[];
 }
@@ -24,15 +27,19 @@ const FriendModal: React.FC<FriendModalProps> = ({
   onClose, 
   currentUser, 
   sentRequests, 
+  receivedRequests,
   friendList, 
   users 
 }) => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [hasSent, setHasSent] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const [isFriend, setIsFriend] = useState(false);
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
   const [label, setLabel] = useState('');
+  const [requestId, setRequestId] = useState('');
   const [matchedEmail, setMatchedEmail] = useState(false);
   const [searchedUser, setSearchedUser] = useState<SafeUser | undefined>(undefined);
 
@@ -73,17 +80,61 @@ const FriendModal: React.FC<FriendModalProps> = ({
       toast.error('An unexpected error occurred');   
     })
     .finally(() => setIsLoading(false));
-  }
+  };
+
+  const handleAccept = (id: string) => {
+    setIsLoading(true);
+
+    axios.post('/api/friend/accept', {
+      requestId: id,
+    })
+    .then(() => {
+      toast.remove();
+      toast.success('Friend request accepted');
+      router.refresh();
+    })
+    .catch((error) => {
+      console.log(error);
+      toast.remove();
+      toast.error('An unexpected error occurred');   
+    })
+    .finally(() => setIsLoading(false));
+  };
+
+  const handleReject = (id: string) => {
+    setIsLoading(true);
+
+    axios.delete('/api/friend/reject', {
+      data: { requestId: id },
+    })
+    .then(() => {
+      toast.remove();
+      toast.success('Friend request rejected');
+      router.refresh();
+    })
+    .catch((error) => {
+      console.log(error);
+      toast.remove();
+      toast.error('An unexpected error occurred');   
+    })
+    .finally(() => setIsLoading(false));
+  };
 
   useEffect(() => {
     const displayLabel = () => {
       const currentId = searchedUser?.id;
       const hasSent = sentRequests.find((request) => request.receiverId === currentId);
+      const isPending = receivedRequests.find((request) => request.senderId === currentId);
       const isFriend = friendList.length > 0 && friendList.find((friend) => friend.id === currentId);
-
+      console.log('pending: ', sentRequests)
       if (isFriend) {
         setLabel('Friend');
         setIsFriend(true);
+      } else if (isPending) {
+        console.log('pending request')
+        setLabel('Accept');
+        setIsPending(true);
+        setRequestId(isPending.id);
       } else if (hasSent) {
         setLabel('Request sent');
         setHasSent(true);
@@ -91,6 +142,7 @@ const FriendModal: React.FC<FriendModalProps> = ({
         setLabel('Add friend');
         setHasSent(false);
         setIsFriend(false);
+        setIsPending(false);
       }
     }
     displayLabel();
@@ -144,9 +196,16 @@ const FriendModal: React.FC<FriendModalProps> = ({
                   setToken(event.target.value);
                 }}
               />
-              {isValidEmail(email) && token && (
-                <FetchedUserCard user={searchedUser} matchedEmail={matchedEmail} currentUser={currentUser} />
-              )}
+              <div className='flex flex-col gap-y-4'>
+                {isValidEmail(email) && token && (
+                  <FetchedUserCard user={searchedUser} matchedEmail={matchedEmail} currentUser={currentUser} />
+                )}
+                {searchedUser && isPending && !isFriend && (
+                  <p className='mx-4 text-lg font-semibold text-gray-700'>
+                    {`${searchedUser?.name} has sent you a friend request`}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -160,7 +219,12 @@ const FriendModal: React.FC<FriendModalProps> = ({
           <span className='text-gray-700 text-base font-semibold'>Cancel</span>
         </button>
         <button
-          type='submit'
+          type={label === 'Accept' ? 'button' : 'submit'}
+          onClick={() => {
+            if (label === 'Accept') {
+              handleAccept(requestId);
+            }
+          }}
           disabled={isLoading || !searchedUser || !currentUser || hasSent || isFriend}
           className='py-2 px-4 bg-primary hover:opacity-80 rounded-md select-none disabled:opacity-50 disabled:cursor-not-allowed'
         >
@@ -175,6 +239,18 @@ const FriendModal: React.FC<FriendModalProps> = ({
             </span>
           }
         </button>
+        {isPending && !isFriend && (
+          <button
+          type='button'
+          disabled={isLoading}
+          onClick={() => handleReject(requestId)}
+          className='py-2 px-4 bg-button hover:opacity-80 rounded-md select-none disabled:opacity-50 disabled:cursor-not-allowed'
+          >
+            <span className='text-white text-base font-semibold'>
+              Reject
+            </span>
+          </button>
+        )}
         </div>
       </form>
     </MessengerModal>

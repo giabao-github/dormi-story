@@ -20,16 +20,21 @@ export async function POST(request: Request) {
     }
   });
 
-  const event = await prisma.event.create({
-    data: {
-      category,
-      title,
-      description,
-      link,
-      creator: currentUser.name,
-      userId: currentUser.id
-    }
-  });
-
-  return NextResponse.json(event);
+  try {
+    const event = await prisma.event.create({
+      data: {
+        category,
+        title,
+        description,
+        link,
+        creator: currentUser.name,
+        userId: currentUser.id
+      }
+    });
+  
+    return NextResponse.json(event);
+  } catch (error: any) {
+    console.log('Error at /api/event', error);
+    return new NextResponse(error.message || 'Internal Server Error', { status: 500 });
+  }
 }

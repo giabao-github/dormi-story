@@ -14,7 +14,7 @@ export default async function getArticles(params: IArticleParams) {
     const { userId, title, authorName, startDate, endDate, category } = params;
 
     if (!userId) {
-      throw new Error('User ID is not found');
+      return [];
     }
 
     let query: any = {};

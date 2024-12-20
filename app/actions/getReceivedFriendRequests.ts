@@ -1,11 +1,15 @@
 import prisma from '@/app/libs/prismadb';
 
 export async function getReceivedFriendRequests(userId: string) {
+  if (!userId) {
+    return [];
+  }
+
   try {
     const requests = await prisma.friend.findMany({
       where: {
         receiverId: userId, 
-        status: 'Pending',   
+        status: { in: ['Accepted', 'Pending', 'Rejected'] }, 
       },
       include: {
         sender: true,       

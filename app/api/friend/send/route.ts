@@ -3,17 +3,29 @@ import getCurrentUser from '@/app/actions/getCurrentUser';
 import prisma from '@/app/libs/prismadb';
 
 export async function POST(request: Request) {
+  const currentUser = await getCurrentUser();
+  const body = await request.json();
+  const { receiverId } = body;
+
+  if (!currentUser?.id || !currentUser?.email) {
+    return new NextResponse('Unauthorized', { status: 401 });
+  }
+
+  if (!receiverId) {
+    return new NextResponse('Unknown send request', { status: 400 });
+  }
+
   try {
-    const currentUser = await getCurrentUser();
-    const body = await request.json();
-    const { receiverId } = body;
+    const existingRequest = await prisma.friend.findFirst({
+      where: {
+        senderId: currentUser.id,
+        receiverId: receiverId,
+        status: 'Pending',
+      },
+    });
 
-    if (!currentUser?.id || !currentUser?.email) {
-      return new NextResponse('Unauthorized', { status: 401 });
-    }
-
-    if (!receiverId) {
-      return new NextResponse('Unknown user', { status: 400 });
+    if (existingRequest) {
+      return NextResponse.json(existingRequest);
     }
 
     const friendRequest = await prisma.friend.create({
@@ -26,7 +38,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(friendRequest);
   } catch (error: any) {
-    console.log('Error from /api/friend/send:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.log('Error at /api/friend/send:', error);
+    return new NextResponse(error.message || 'Internal Server Error', { status: 500 });
   }
 }

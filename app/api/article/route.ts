@@ -19,19 +19,24 @@ export async function POST(request: Request) {
     }
   });
 
-  const article = await prisma.article.create({
-    data: {
-      category,
-      title,
-      introduction,
-      content,
-      files, 
-      sources, 
-      tags,
-      author: currentUser.name,
-      userId: currentUser.id
-    }
-  });
+  try {
+    const article = await prisma.article.create({
+      data: {
+        category,
+        title,
+        introduction,
+        content,
+        files, 
+        sources, 
+        tags,
+        author: currentUser.name,
+        userId: currentUser.id
+      }
+    });
 
-  return NextResponse.json(article);
+    return NextResponse.json(article);
+  } catch (error: any) {
+    console.log('Error at /api/article:', error);
+    return new NextResponse(error.message || 'Internal Server Error', { status: 500 });
+  }
 }

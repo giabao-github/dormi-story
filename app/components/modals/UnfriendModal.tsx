@@ -1,46 +1,48 @@
 "use client";
 
-import MessengerModal from '@/app/components/modals/MessengerModal';
-import useConversation from '@/app/hooks/useConversation';
-import { DialogTitle } from '@headlessui/react';
-import axios from 'axios';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import axios from 'axios';
 import toast from 'react-hot-toast';
 import { FiAlertTriangle } from 'react-icons/fi';
+import MessengerModal from '@/app/components/modals/MessengerModal';
+import { DialogTitle } from '@headlessui/react';
 
-interface ConfirmModalProps {
+interface UnfriendModalProps {
   isOpen?: boolean;
   onClose: () => void;
+  requestId: string;
 }
 
-const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose }) => {
+const UnfriendModal: React.FC<UnfriendModalProps> = ({ isOpen, onClose, requestId }) => {
   const router = useRouter();
-  const { conversationId } = useConversation();
   const [isLoading, setIsLoading] = useState(false);
 
-  const onDelete = useCallback(() => {
+  const handleUnfriend = () => {
     setIsLoading(true);
 
-    axios.delete(`/api/conversations/${conversationId}`)
+    axios.delete('/api/friend/unfriend', {
+      data: { requestId: requestId },
+    })
     .then(() => {
-      onClose();
       toast.remove();
-      toast.success('Conversation deleted');
+      toast.success(`Unfriend successfully`);
       router.refresh();
     })
-    .catch(() => {
+    .catch((error) => {
+      console.log(error);
       toast.remove();
-      toast.error('Failed to delete conversation');
+      toast.error('An unexpected error occurred');   
     })
     .finally(() => setIsLoading(false));
-  }, [conversationId, router, onClose]);
+  }
 
 
   return (
     <MessengerModal
       isOpen={isOpen}
       onClose={onClose}
+      disabled={isLoading}
     >
       <div className='sm:flex sm:items-start p-2'>
         <div className='mx-auto flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-red-200 sm:mx-0 sm:h-12 sm:w-12'>
@@ -53,11 +55,11 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose }) => {
             as='h3'
             className='text-xl font-semibold leading-6 text-gray-900'
           >
-            Delete conversation
+            Unfriend
           </DialogTitle>
           <div className='mt-3 mr-6'>
             <p className='text-base text-gray-700'>
-              Are you sure to permanently delete this chat? This action cannot be undone
+              Are you sure to unfriend this person? This action cannot be undone
             </p>
           </div>
         </div>
@@ -66,10 +68,10 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose }) => {
         <button
           type='button'
           disabled={isLoading}
-          onClick={onDelete}
+          onClick={() => handleUnfriend()}
           className='py-2 px-3 bg-red-500 hover:opacity-80 rounded-md select-none disabled:opacity-50'
         >
-          <span className='text-white text-base font-semibold'>Delete</span>
+          <span className='text-white text-base font-semibold'>Unfriend</span>
         </button>
         <button
           type='button'
@@ -84,4 +86,4 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose }) => {
   );
 }
 
-export default ConfirmModal;
+export default UnfriendModal;

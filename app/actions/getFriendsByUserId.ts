@@ -6,15 +6,21 @@ export default async function getFriendsByUserId() {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
-    throw new Error('Unauthorized');
+    return [];
   }
 
   try {
     const friendships = await prisma.friend.findMany({
       where: {
         OR: [
-          { senderId: currentUser.id, status: 'Accepted' },
-          { receiverId: currentUser.id, status: 'Accepted' },
+          { 
+            senderId: currentUser.id, 
+            status: { in: ['Accepted', 'Dismissed'] } 
+          },
+          { 
+            receiverId: currentUser.id, 
+            status: { in: ['Accepted', 'Dismissed'] } 
+          }
         ],
       },
       include: {

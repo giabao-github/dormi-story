@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import getCurrentUser from '@/app/actions/getCurrentUser';
 import prisma from '@/app/libs/prismadb';
 
-export async function POST(request: Request) {
+export async function DELETE(request: Request) {
   const currentUser = await getCurrentUser();
   const body = await request.json();
   const { requestId } = body;
@@ -12,25 +12,20 @@ export async function POST(request: Request) {
   }
 
   if (!requestId) {
-    return new NextResponse('Unknown accept request', { status: 400 });
+    return new NextResponse('Unknown cancel request', { status: 400 });
   }
 
   try {
-    const acceptedRequest = await prisma.friend.update({
+    const canceledRequest = await prisma.friend.deleteMany({
       where: {
         id: requestId,
-      },
-      data: {
-        status: 'Accepted'
-      },
-      include: {
-        receiver: true, 
-      },
+        status: 'Pending'
+      }
     });
 
-    return NextResponse.json(acceptedRequest);
+    return NextResponse.json(canceledRequest);
   } catch (error: any) {
-    console.log('Error at /api/friend/accept:', error);
+    console.log('Error at /api/friend/cancel:', error);
     return new NextResponse(error.message || 'Internal Server Error', { status: 500 });
   }
 }

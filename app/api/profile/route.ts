@@ -61,6 +61,6 @@ export async function POST(request: Request) {
     return NextResponse.json(updatedUser);
   } catch (error: any) {
     console.log('Error at /api/profile:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return new NextResponse(error.message || 'Internal Server Error', { status: 500 });
   }
 }

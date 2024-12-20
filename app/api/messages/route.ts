@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newMessage);
   } catch (error: any) {
-    console.log('Error from /api/messages:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.log('Error at /api/messages:', error);
+    return new NextResponse(error.message || 'Internal Server Error', { status: 500 });
   }
 }

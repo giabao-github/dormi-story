@@ -1,7 +1,7 @@
 "use client";
 
 import { BiNews } from 'react-icons/bi';
-import { MdEventAvailable, MdOutlineReport, MdOutlineMailOutline,  MdOutlineGrade } from 'react-icons/md';
+import { MdEventAvailable, MdOutlineReport,  MdOutlineGrade } from 'react-icons/md';
 import { RiSurveyLine, RiMessengerLine } from 'react-icons/ri';
 import { LuParkingCircle } from 'react-icons/lu';
 import { HiOutlineWrench } from 'react-icons/hi2';
@@ -9,7 +9,7 @@ import { IoNotificationsOutline, IoImageOutline } from 'react-icons/io5';
 import { FaRegUserCircle } from 'react-icons/fa';
 import { FaRegAddressCard, FaWpforms, FaScaleBalanced  } from 'react-icons/fa6';
 import CategorySection from '../CategorySection';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 
 export const categories = [

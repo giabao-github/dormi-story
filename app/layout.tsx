@@ -19,6 +19,7 @@ import SearchModal from './components/modals/SearchModal';
 import FriendRequestsModal from './components/modals/FriendRequestsModal';
 import { getSentFriendRequests } from './actions/getSentFriendRequests';
 import { getReceivedFriendRequests } from './actions/getReceivedFriendRequests';
+import getFriendsByUserId from './actions/getFriendsByUserId';
 
 
 const nunito = Nunito({
@@ -34,6 +35,9 @@ export default async function RootLayout({
   const currentUser = await getCurrentUser();
   const sentRequests = await getSentFriendRequests(currentUser?.id || '');
   const receivedRequests = await getReceivedFriendRequests(currentUser?.id || '');
+  const friendList = await getFriendsByUserId();
+  const pendingRequests = receivedRequests.filter((request) => request.status === 'Pending');
+  const notification = receivedRequests.length > 0 ? pendingRequests.length : 0;
 
   return (
     <html lang='en'>
@@ -46,13 +50,13 @@ export default async function RootLayout({
           <RegisterModal />
           <SearchModal />
           <ReportCardModal />
-          <FriendRequestsModal sentRequests={sentRequests} receivedRequests={receivedRequests} />
+          <FriendRequestsModal sentRequests={sentRequests} receivedRequests={receivedRequests} friendList={friendList} />
           <TokenModal currentUser={currentUser} />
           <ReportModal currentUser={currentUser} />
           <ArticleModal currentUser={currentUser} />
           <SurveyModal currentUser={currentUser} />
           <EventModal currentUser={currentUser} />
-          <Navbar currentUser={currentUser} notification={receivedRequests.length} />
+          <Navbar currentUser={currentUser} notification={notification} />
           <IntroductionPage currentUser={currentUser} />
           <Sidebar currentUser={currentUser} />
           <div className='pb-20 pt-28'>

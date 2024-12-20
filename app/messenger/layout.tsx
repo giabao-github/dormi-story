@@ -30,7 +30,7 @@ export default async function MessengerLayout({ children } : { children: React.R
     <ClientOnly>
       <MessengerSidebar>
         <div className={`h-[86vh] ml-[248px] flex flex-col justify-between ${lexend.className}`}>
-          <UserList currentUser={currentUser} sentRequests={sentRequests} friendList={friendList} allUsers={allUsers} />
+          <UserList currentUser={currentUser} sentRequests={sentRequests} receivedRequests={receivedRequests} friendList={friendList} allUsers={allUsers} />
           <MessengerTab />
           {children}
         </div>

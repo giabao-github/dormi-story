@@ -11,6 +11,7 @@ import FriendModal from './FriendModal';
 interface UserListProps {
   currentUser: SafeUser;
   sentRequests: SafeSentRequest[];
+  receivedRequests: SafeReceivedRequest[];
   friendList: SafeUser[];
   allUsers: SafeUser[];
 }
@@ -18,6 +19,7 @@ interface UserListProps {
 const UserList: React.FC<UserListProps> = ({ 
   currentUser, 
   sentRequests,
+  receivedRequests,
   friendList, 
   allUsers
 }) => {
@@ -60,6 +62,7 @@ const UserList: React.FC<UserListProps> = ({
       <FriendModal
         currentUser={currentUser}
         sentRequests={sentRequests}
+        receivedRequests={receivedRequests}
         friendList={friendList}
         users={allUsers}
         isOpen={isModalOpen} 
@@ -79,7 +82,7 @@ const UserList: React.FC<UserListProps> = ({
           </div>
           {
             friendList.length === 0 ?
-            <div className='px-8 py-10 flex justify-center items-center h-[calc(100vh-300px)] w-full'>
+            <div className='px-8 py-10 flex justify-center items-center h-[calc(100vh-310px)] w-full'>
               <p className='text-gray-500 text-base'>
                 You have no friends. Let's add a friend to start chatting
               </p>
