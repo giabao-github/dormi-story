@@ -9,7 +9,10 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+<<<<<<< HEAD
 .env
+=======
+>>>>>>> 2ef7ecb3dbaacaa192881bbef2b6a3178e890f01
 
 
 # testing

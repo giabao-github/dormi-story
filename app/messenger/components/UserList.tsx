@@ -83,6 +83,7 @@ const UserList: React.FC<UserListProps> = ({
           {
             friendList.length === 0 ?
             <div className='px-8 py-10 flex justify-center items-center h-[calc(100vh-310px)] w-full'>
+
               <p className='text-gray-500 text-base text-center'>
                 You have no friends. Let's add a friend to start chatting
               </p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useEffect } from 'react';
+import { ChangeEvent } from 'react';
 import { IconType } from 'react-icons';
 import { GrUserWorker } from 'react-icons/gr';
 
