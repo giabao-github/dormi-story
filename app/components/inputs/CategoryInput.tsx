@@ -1,32 +1,39 @@
 "use client";
 
 import { ChangeEvent } from 'react';
+import { FieldValues, UseFormRegister } from 'react-hook-form';
 import { IconType } from 'react-icons';
 import { GrUserWorker } from 'react-icons/gr';
 
 
 interface CategoryInputProps {
+  id?: string;
   icon: IconType;
   label: string;
+  hasInputField?: boolean;
   example: string;
   selected?: boolean;
   type?: string;
+  value?: string;
+  register?: UseFormRegister<FieldValues>;
   onClick: (value: string) => void;
   onChange?: (value: ChangeEvent<HTMLInputElement>) => void;
-  value?: string;
-  hasInputField?: boolean;
+  className?: string;
 }
 
 const CategoryInput: React.FC<CategoryInputProps> = ({
+  id,
   icon: Icon,
   label,
+  hasInputField,
   example,
   selected,
   type,
+  value,
+  register,
   onClick,
   onChange,
-  value,
-  hasInputField
+  className
 }) => {
 
   const size = Icon === GrUserWorker ? 36 : 30;
@@ -35,7 +42,7 @@ const CategoryInput: React.FC<CategoryInputProps> = ({
     <>
       <div 
         onClick={() => onClick(label)}
-        className={`rounded-xl border-2 p-4 flex flex-col gap-3 ${type === 'report' ? 'hover:border-button' : 'hover:border-primary'} transition cursor-pointer ${selected ? type === 'report' ? 'border-button border-[3px]' : 'border-primary border-[3px]' : 'border-neutral-300'}`}
+        className={`rounded-xl border-2 p-4 flex flex-col gap-3 ${(type === 'report' || type === 'article') ? 'hover:border-button' : 'hover:border-primary'} transition cursor-pointer ${selected ? (type === 'report' || type === 'article') ? 'border-button border-[3px]' : 'border-primary border-[3px]' : 'border-neutral-300'}`}
       >
         <div className='flex flex-row items-center'>
           <Icon size={size} />
@@ -45,14 +52,15 @@ const CategoryInput: React.FC<CategoryInputProps> = ({
           {label}
         </div>
       </div>
-      {hasInputField && label === 'Other' && (
+      {hasInputField && label === 'Other' && id && register && (
         <input
-          id='category-input'
+          id={id}
           placeholder='Enter your category...'
           type='text'
           value={value}
+          {...register(id)}
           onChange={onChange}
-          className={`w-full mt-4 px-4 py-3 font-medium border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed`}  
+          className={className}
         />
       )}
     </>

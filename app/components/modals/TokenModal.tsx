@@ -161,7 +161,7 @@ const TokenModal: React.FC<TokenModalProps> = ({ currentUser }) => {
           </div>
           <button
             title='Change Messenger Token'
-            disabled={!isTokenVisible}
+            disabled={!isTokenVisible || isLoading}
             type='button'
             className='flex items-center mx-6 hover:opacity-70 disabled:opacity-50'
             onClick={() => setToken(generateRandomToken())}
@@ -170,7 +170,7 @@ const TokenModal: React.FC<TokenModalProps> = ({ currentUser }) => {
           </button>
           <button
             title='Copy Messenger Token'
-            disabled={!isTokenVisible}
+            disabled={!isTokenVisible || isLoading}
             type='button'
             className='flex items-center p-2 rounded-full bg-primary hover:opacity-70 disabled:opacity-50'
             onClick={copyToken}
@@ -179,7 +179,7 @@ const TokenModal: React.FC<TokenModalProps> = ({ currentUser }) => {
           </button>
           <button
             title={`${tokenModal.label === 'update' ? 'Update Messenger Token' : 'Create Messenger Token'}`}
-            disabled={!isTokenVisible}
+            disabled={!isTokenVisible || isLoading}
             type='button'
             className='flex items-center mx-6 p-2 rounded-full bg-primary hover:opacity-70 disabled:opacity-50'
             onClick={updateToken}

@@ -11,6 +11,8 @@ module.exports = {
         logo: '#404650',
         primary: '#1EB589',
         secondary: '#00B0FF',
+        special: '#007BFF',
+        lock: '#D4AC0D',
         button: '#FF6B6B',
         highlight: '#FFD700',
         border: '#CED4DA'

@@ -26,10 +26,15 @@ const ArticlePage = async ({ params } : { params: IParams }) => {
   if (!article) {
     return (
       <ClientOnly>
-        <title>Dormistory | Article</title>
-        <EmptyState />
+        <EmptyState  
+          title='This article is no longer available'
+          subtitle='This article could be removed, or the current link contains an invalid article ID'
+          buttonLabel='Return to articles'
+          type='article'
+          showReset 
+        />
       </ClientOnly>
-    )
+    );
   }
 
   return (

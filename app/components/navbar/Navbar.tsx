@@ -52,7 +52,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser, notification }) => {
               {currentUser && <Search />}
               {currentUser && <UserMenu currentUser={currentUser} notification={notification} />}
               {!currentUser && (
-                <div className='flex flex-row min-w-[20%]'>
+                <div className='flex flex-row 2xl:min-w-[10%] xl:min-w-[20%]'>
                   <button
                     type='button' 
                     onClick={loginModal.onOpen} 

@@ -1,25 +1,29 @@
 import ClientOnly from '../components/ClientOnly';
 import Container from '../components/Container';
 import EmptyState from '../components/EmptyState';
-import ArticleCard from '../components/articles/ArticleCard';
 import getCurrentUser from '../actions/getCurrentUser';
 import { Lexend } from 'next/font/google';
-import getEvents from '../actions/getEvents';
+import getParkingSpotByUserId from '../actions/getParkingSpotByUserId';
+
 
 const lexend = Lexend({
   subsets: ['latin', 'vietnamese'],
   weight: '400'
 });
 
+interface IParams {
+  userId: string;
+} 
+
 const ParkingLotRegistration = async () => {
   const currentUser = await getCurrentUser();
-  const events = await getEvents();
+  const parkingSpot = await getParkingSpotByUserId();
 
   if (!currentUser) {
     return null;
   }
 
-  if (events.length === 0) {
+  if (parkingSpot.length === 0) {
     return (
       <ClientOnly>
         <EmptyState  

@@ -10,6 +10,7 @@ import MessengerModal from './MessengerModal';
 import ProfileInput from '../inputs/ProfileInput';
 import Image from 'next/image';
 import { CldUploadButton } from 'next-cloudinary';
+import Avatar from '../Avatar';
 
 interface ProfileModalProps {
   isOpen?: boolean;
@@ -30,27 +31,39 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, currentUse
 
   const image = watch('image');
 
+  const sanitizeData = (data: FieldValues) => {
+    const sanitizedData: FieldValues = {};
+    Object.keys(data).forEach((key) => {
+      sanitizedData[key] =
+        typeof data[key] === 'string' ? data[key].replace(/\s+/g, ' ').trim() : data[key];
+    });
+    return sanitizedData;
+  };
+
   const handleUpload = (result: any) => {
     setValue('image', result?.info?.secure_url, {
       shouldValidate: true
     });
-  }
+  };
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     setIsLoading(true);
 
+    const sanitizedData = sanitizeData(data);
+
     axios
-    .post('/api/profile', data)
-    .then(() => {
-      toast.remove();
-      toast.success('Update profile successfully');
-      onClose();
-    })
-    .catch((error) => {
-      toast.remove();
-      toast.error(error);
-    })
-    .finally(() => setIsLoading(false));
+      .post('/api/profile', sanitizedData)
+      .then(() => {
+        toast.remove();
+        toast.success('Update profile successfully');
+        onClose();
+        router.refresh();
+      })
+      .catch((error) => {
+        toast.remove();
+        toast.error(error);
+      })
+      .finally(() => setIsLoading(false));
   }
 
   return (
@@ -78,16 +91,20 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, currentUse
                   Avatar
                 </label>
                 <div className='mt-2 mx-1 flex items-center gap-x-3'>
-                  <Image
-                    width={48}
-                    height={48}
-                    className='rounded-full aspect-square object-cover'
-                    src={image
-                      ? `${image}?c_crop,g_face,h_48,w_48`
-                      : currentUser?.image || '/images/placeholder.jpg'
-                    }
-                    alt='Avatar'
-                  />
+                  {currentUser?.image ? (
+                    <Image
+                      width={48}
+                      height={48}
+                      className='rounded-full aspect-square object-cover'
+                      src={image
+                        ? `${image}?c_crop,g_face,h_48,w_48`
+                        : currentUser?.image
+                      }
+                      alt='Avatar'
+                    />
+                  ) : (
+                    <Avatar user={currentUser} type='panel' />
+                  )}
                   <CldUploadButton
                     options={{ 
                       maxFiles: 1, 
@@ -121,7 +138,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, currentUse
             <button
               type='submit'
               disabled={isLoading}
-              className='py-[6px] px-4 mr-4 bg-primary hover:opacity-80 rounded-md select-none'
+              className='py-[6px] px-5 mr-4 bg-primary hover:opacity-80 rounded-md select-none'
             >
               <span className='text-white text-base font-semibold'>Save</span>
             </button>

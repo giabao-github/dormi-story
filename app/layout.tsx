@@ -20,6 +20,10 @@ import FriendRequestsModal from './components/modals/FriendRequestsModal';
 import { getSentFriendRequests } from './actions/getSentFriendRequests';
 import { getReceivedFriendRequests } from './actions/getReceivedFriendRequests';
 import getFriendsByUserId from './actions/getFriendsByUserId';
+import BuildingModal from './components/modals/BuildingModal';
+import ParkingLotModal from './components/modals/ParkingLotModal';
+import getBuildings from './actions/getBuildings';
+import getParkingSpotsByBuildingId from './actions/getParkingSpotsByBuildingId';
 
 
 const nunito = Nunito({
@@ -38,6 +42,8 @@ export default async function RootLayout({
   const friendList = await getFriendsByUserId();
   const pendingRequests = receivedRequests.filter((request) => request.status === 'Pending');
   const notification = receivedRequests.length > 0 ? pendingRequests.length : 0;
+  const buildings = await getBuildings();
+
 
   return (
     <html lang='en'>
@@ -56,6 +62,8 @@ export default async function RootLayout({
           <ArticleModal currentUser={currentUser} />
           <SurveyModal currentUser={currentUser} />
           <EventModal currentUser={currentUser} />
+          <BuildingModal currentUser={currentUser} />
+          <ParkingLotModal currentUser={currentUser} buildings={buildings} />
           <Navbar currentUser={currentUser} notification={notification} />
           <IntroductionPage currentUser={currentUser} />
           <Sidebar currentUser={currentUser} />

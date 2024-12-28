@@ -40,8 +40,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({ className, id, label, 
         ref={(element) => {
           if (element) {
             register(id).ref(element);
-            if (typeof inputRef === "function") inputRef(element);
-            else if (inputRef) inputRef.current = element;
+            if (typeof inputRef === "function") {
+              inputRef(element);
+            } else if (inputRef) {
+              inputRef.current = element;
+            }
           }
         }}
         onKeyDown={onKeyDown}

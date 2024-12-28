@@ -121,26 +121,35 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
       shouldDirty: true,
       shouldTouch: true,
     });
-  }
+  };
+
+  const sanitizeData = (data: FieldValues) => {
+    const sanitizedData: FieldValues = {};
+    Object.keys(data).forEach((key) => {
+      sanitizedData[key] =
+        typeof data[key] === 'string' ? data[key].replace(/\s+/g, ' ').trim() : data[key];
+    });
+    return sanitizedData;
+  };
 
   const onBack = () => {
     setStep((value) => value - 1);
-  }
+  };
 
   const onNext = () => {
-    if (step === STEPS.CATEGORY && !category) {
+    if (step === STEPS.CATEGORY && !category.trim()) {
       setCategoryError(true);
       toast.remove();
       toast.error('Please select or enter an article category before proceeding');
       return;
     }
-    else if (step === STEPS.TITLE && !title) {
+    else if (step === STEPS.TITLE && !title.trim()) {
       setInputError(true);
       toast.remove();
       toast.error('Please provide your article title before proceeding');
       return;
     }
-    else if (step === STEPS.CONTENT && !content) {
+    else if (step === STEPS.CONTENT && !content.trim()) {
       setInputError(true);
       toast.remove();
       toast.error('Please write your article content before proceeding');
@@ -148,7 +157,7 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
     }
     setInputError(false);
     setStep((value) => value + 1);
-  }
+  };
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     if (step !== STEPS.CONFIRM) {
@@ -157,24 +166,26 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
 
     setIsLoading(true);
 
-    axios.post('/api/article', data)
-    .then(() => {
-      toast.remove();
-      toast.success('Article posted');
-      articleModal.onClose();
-      router.refresh();
-      reset();
-      setStep(STEPS.AUTHOR);
-    })
-    .catch((error) => {
-      console.log(error);
-      toast.remove();
-      toast.error('An error occurred. Please try again');
-    })
-    .finally(() => {
-      setIsLoading(false);
-    })
-  }
+    const sanitizedData = sanitizeData(data);
+
+    axios.post('/api/article', sanitizedData)
+      .then(() => {
+        toast.remove();
+        toast.success('Article posted');
+        articleModal.onClose();
+        reset();
+        setStep(STEPS.AUTHOR);
+        router.refresh();
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.remove();
+        toast.error('An error occurred. Please try again');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      })
+  };
 
   const actionLabel = useMemo(() => {
     if (step === STEPS.CONFIRM) {
@@ -200,10 +211,10 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
         />
       </div>
       <div className='flex flex-row items-center mx-6'>
-        <p className='text-2xl font-semibold w-1/4'>
+        <p className='text-xl font-semibold w-1/4 px-2'>
           Author name
         </p>
-        <div className='ml-8 w-2/3 py-3 px-6 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
+        <div className='ml-8 w-2/3 py-2 px-4 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
           {currentUser?.name}
         </div>
       </div>
@@ -223,40 +234,53 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ currentUser }) => {
           <div className='grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[50vh] mx-6'>
             {categories.map((item) => (
               <div key={item.label} className='col-span-1'>
-                <CategoryInput
-                  onClick={(category) => {
-                    setLabel(category);
-                    setCustomValue('category', category === 'Other' ? labelInput : category);
-                    if (category === 'Other') {
-                      setLabelSelected(true);
-                    } else {
-                      setLabelSelected(false);
-                    }
-                  }}
-                  selected={item.label === 'Other' && labelSelected ? true : category === item.label}
-                  label={item.label}
-                  example={item.example}
-                  icon={item.icon}
-                  type='article'
-                />
+                {label === 'Other' ? (
+                  <CategoryInput
+                    id='category'
+                    icon={item.icon}
+                    label={item.label}
+                    hasInputField={label === 'Other'}
+                    example={item.example}
+                    selected={item.label === 'Other' && labelSelected}
+                    type='article'
+                    value={category}
+                    register={register}
+                    onClick={(category) => {
+                      setLabel(category);
+                      setCustomValue('category', category === 'Other' ? labelInput : category);
+                      if (category === 'Other') {
+                        setLabelSelected(true);
+                      } else {
+                        setLabelSelected(false);
+                      }
+                    }}
+                    onChange={(e) => {
+                      setLabel('Other');
+                      setLabelInput(e.target.value);
+                      setCustomValue('category', e.target.value);
+                    }}
+                    className={`w-full mt-4 px-4 py-3 font-medium border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['category'] || categoryError) && 'border-red-500 focus:border-red-500'}`}
+                  />
+                ) : (
+                  <CategoryInput
+                    icon={item.icon}
+                    label={item.label}
+                    example={item.example}
+                    selected={category === item.label}
+                    type='article'
+                    onClick={(category) => {
+                      setLabel(category);
+                      setCustomValue('category', category === 'Other' ? labelInput : category);
+                      if (category === 'Other') {
+                        setLabelSelected(true);
+                      } else {
+                        setLabelSelected(false);
+                      }
+                    }}
+                  />
+                )}
               </div>
             ))}
-            {label === 'Other' && (
-              <input
-                id='category-input'
-                placeholder='Enter your category...'
-                type='text'
-                value={category}
-                {...register('category')}
-                onChange={(e) => {
-                  setLabel('Other');
-                  setLabelInput(e.target.value);
-                  setCustomValue('category', e.target.value);
-                }}
-                className={`relative w-full mt-6 h-2/3 px-4 py-3 font-medium border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['category'] || categoryError) && 'border-red-500 focus:border-red-500'}`}  
-              />
-            )}
-
         </div>
         </div>
     </div>

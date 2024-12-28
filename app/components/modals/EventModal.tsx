@@ -55,37 +55,46 @@ const EventModal: React.FC<EventModalProps> = ({ currentUser }) => {
       shouldDirty: true,
       shouldTouch: true,
     });
-  }
+  };
+
+  const sanitizeData = (data: FieldValues) => {
+    const sanitizedData: FieldValues = {};
+    Object.keys(data).forEach((key) => {
+      sanitizedData[key] =
+        typeof data[key] === 'string' ? data[key].replace(/\s+/g, ' ').trim() : data[key];
+    });
+    return sanitizedData;
+  };
 
   const isValidUrl = (url: string) => {
     try {
-      new URL(url);
+      new URL(url.trim());
       return true;
     } catch (e) {
       return false;
     }
-  }
+  };
 
   const onBack = () => {
     setStep((value) => value - 1);
-  }
+  };
 
   const onNext = () => {
-    if (step === STEPS.CATEGORY && !category) {
+    if (step === STEPS.CATEGORY && !category.trim()) {
       setCategoryError(true);
       toast.remove();
-      toast.error('Please provide an event category before proceeding');
+      toast.error('Please provide the event category before proceeding');
       return;
     }
-    else if (step === STEPS.TITLE && !title) {
+    else if (step === STEPS.TITLE && !title.trim()) {
       setTitleError(true);
       toast.remove();
-      toast.error('Please provide an event title before proceeding');
+      toast.error('Please provide the event title before proceeding');
       return;
     }
-    else if (step === STEPS.LINK && !link) {
+    else if (step === STEPS.LINK && !link.trim()) {
       toast.remove();
-      toast.error('Please provide an event link before proceeding');
+      toast.error('Please provide the event link before proceeding');
       setLinkError(true);
       return;
     }
@@ -99,7 +108,7 @@ const EventModal: React.FC<EventModalProps> = ({ currentUser }) => {
     setTitleError(false);
     setLinkError(false);
     setStep((value) => value + 1);
-  }
+  };
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     if (step !== STEPS.CONFIRM) {
@@ -107,25 +116,27 @@ const EventModal: React.FC<EventModalProps> = ({ currentUser }) => {
     }
 
     setIsLoading(true);
-    console.log(data)
-    axios.post('/api/event', data)
-    .then(() => {
-      toast.remove();
-      toast.success('Event created');
-      eventModal.onClose();
-      router.refresh();
-      reset();
-      setStep(STEPS.CREATOR);
-    })
-    .catch((error) => {
-      console.log(error);
-      toast.remove();
-      toast.error('An error occurred. Please try again');
-    })
-    .finally(() => {
-      setIsLoading(false);
-    })
-  }
+
+    const sanitizedData = sanitizeData(data);
+
+    axios.post('/api/event', sanitizedData)
+      .then(() => {
+        toast.remove();
+        toast.success('Event created');
+        eventModal.onClose();
+        reset();
+        setStep(STEPS.CREATOR);
+        router.refresh();
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.remove();
+        toast.error('An error occurred. Please try again');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      })
+  };
 
   const actionLabel = useMemo(() => {
     if (step === STEPS.CONFIRM) {
@@ -151,10 +162,10 @@ const EventModal: React.FC<EventModalProps> = ({ currentUser }) => {
         />
       </div>
       <div className='flex flex-row items-center mx-6'>
-        <p className='2xl:text-2xl xl:text-xl font-semibold w-1/4'>
+        <p className='2xl:text-xl font-semibold w-1/4 px-2'>
           Creator name
         </p>
-        <div className='ml-8 w-2/3 py-3 px-6 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
+        <div className='ml-8 w-2/3 py-2 px-4 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
           {currentUser?.name}
         </div>
       </div>

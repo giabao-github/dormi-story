@@ -19,12 +19,15 @@ import ProfileModal from '../modals/ProfileModal';
 import useSurveyModal from '@/app/hooks/useSurveyModal';
 import useEventModal from '@/app/hooks/useEventModal';
 import useRequestsModal from '@/app/hooks/useRequestsModal';
+import useBuildingModal from '@/app/hooks/useBuildingModal';
 
 
 interface UserMenuProps {
   currentUser?: SafeUser | null; 
   notification: number;
 }
+
+const adminAccounts = ['ITITIU13579@student.hcmiu.edu.vn'];
 
 const UserMenu: React.FC<UserMenuProps> = ({ currentUser, notification }) => {
   const pathname = usePathname();
@@ -36,6 +39,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, notification }) => {
   const articleModal = useArticleModal();
   const surveyModal = useSurveyModal();
   const eventModal = useEventModal();
+  const buildingModal = useBuildingModal();
   const requestsModal = useRequestsModal();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null); 
@@ -86,6 +90,13 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, notification }) => {
     }
     eventModal.onOpen();
   }, [currentUser, loginModal, eventModal]);
+
+  const handleBuildingModal = useCallback(() => {
+    if (!currentUser) {
+      return loginModal.onOpen();
+    }
+    buildingModal.onOpen();
+  }, [currentUser, loginModal, buildingModal]);
 
   const handleRequestsModal = useCallback(() => {
     if (!currentUser) {
@@ -154,10 +165,6 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, notification }) => {
                   label='Submit A Report'
                 />
                 <MenuItem
-                  onClick={handleArticleModal}
-                  label='Post An Article'
-                />
-                <MenuItem
                   onClick={handleSurveyModal}
                   label='Create A Survey'
                 />
@@ -165,6 +172,18 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, notification }) => {
                   onClick={handleEventModal}
                   label='Schedule An Event'
                 />
+                {currentUser.email && adminAccounts.includes(currentUser.email) && (
+                  <>
+                    <MenuItem
+                      onClick={handleArticleModal}
+                      label='Post An Article'
+                    />
+                    <MenuItem
+                      onClick={handleBuildingModal}
+                      label='Create A Building'
+                    />
+                  </>
+                )}
                 <MenuItem
                   onClick={handleRequestsModal}
                   label='Friend Requests'

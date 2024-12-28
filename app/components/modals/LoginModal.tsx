@@ -9,7 +9,7 @@ import Heading from '../Heading';
 import Input from '../inputs/Input';
 import useLoginModal from '@/app/hooks/useLoginModal';
 import useRegisterModal from '@/app/hooks/useRegisterModal';
-import { redirect, usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 
 const LoginModal = ({ title = 'Sign In' }) => {
@@ -28,6 +28,7 @@ const LoginModal = ({ title = 'Sign In' }) => {
     bs: { major: 'BS', subMajors: ['BS'] },
     ee: { major: 'EE', subMajors: ['EE'] },
   };
+
   const curriculumLists = ['WE', 'IU'];
 
   const { register, handleSubmit, formState: { errors } } = useForm<FieldValues>({
@@ -36,6 +37,15 @@ const LoginModal = ({ title = 'Sign In' }) => {
       password: '',
     }
   });
+
+  const sanitizeData = (data: FieldValues) => {
+    const sanitizedData: FieldValues = {};
+    Object.keys(data).forEach((key) => {
+      sanitizedData[key] =
+        typeof data[key] === 'string' ? data[key].replace(/\s+/g, ' ').trim() : data[key];
+    });
+    return sanitizedData;
+  };
 
   const checkValidStudentId = (
     studentId: string,
@@ -126,7 +136,7 @@ const LoginModal = ({ title = 'Sign In' }) => {
     }
   
     return { isValid: true, message: 'Valid password' };
-  }
+  };
   
   const checkValidPassword = (password: string, data: FieldValues) => {
     const { studentId } = data;
@@ -136,7 +146,7 @@ const LoginModal = ({ title = 'Sign In' }) => {
       return message;
     }
     return true;
-  }
+  };
 
   const validateFields = (data: FieldValues) => {
     const errors = [];
@@ -163,7 +173,6 @@ const LoginModal = ({ title = 'Sign In' }) => {
   };
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    console.log('Data submitted: ', data);
     // Validate fields
     const validationErrors = validateFields(data);
     if (validationErrors.length > 0) {
@@ -175,8 +184,10 @@ const LoginModal = ({ title = 'Sign In' }) => {
 
     setIsLoading(true);
 
+    const sanitizedData = sanitizeData(data);
+
     signIn('credentials', {
-      ...data,
+      ...sanitizedData,
       redirect: false
     })
     .then((callback) => {

@@ -19,10 +19,6 @@ export default async function getSurveys(params: ISurveyParams) {
 
     let query: any = {};
 
-    if (userId) {
-      query.userId = userId;
-    }
-
     if (title) {
       const normalizedTitle = title.trim().toLowerCase();
       const titleTerms = normalizedTitle.split(/\s+/);

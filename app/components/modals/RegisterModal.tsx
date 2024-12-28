@@ -29,9 +29,10 @@ const RegisterModal = ({ title = 'Sign Up' }) => {
     bs: { major: 'BS', subMajors: ['BS'] },
     ee: { major: 'EE', subMajors: ['EE'] },
   };
-  const curriculumLists = ['WE', 'IU'];
-  const acceptedDomains = ['hcmiu'];
 
+  const curriculumLists = ['WE', 'IU'];
+
+  const acceptedDomains = ['hcmiu'];
 
   const checkValidName = (name: string): { isValid: boolean; message: string } => {
     // Regular expression to check if name contains only alphabetic characters and spaces
@@ -46,13 +47,13 @@ const RegisterModal = ({ title = 'Sign Up' }) => {
     }
   
     // Check if the name contains at least two words
-  const words = name.trim().split(/\s+/);
-  if (words.length < 2) {
-    return { isValid: false, message: 'Full name must contain at least two words' };
-  }
+    const words = name.trim().split(/\s+/);
+    if (words.length < 2) {
+      return { isValid: false, message: 'Full name must contain at least two words' };
+    }
 
     return { isValid: true, message: 'Valid name' };
-  }
+  };
   
   const checkValidStudentId = (
     studentId: string,
@@ -101,7 +102,7 @@ const RegisterModal = ({ title = 'Sign Up' }) => {
     }
 
     return { isValid: true, message: 'Valid student ID' };
-  }
+  };
   
   const checkValidStudentEmail = (
     email: string,
@@ -135,7 +136,7 @@ const RegisterModal = ({ title = 'Sign Up' }) => {
     }
   
     return { isValid: true, message: 'Valid student email' };
-  }
+  };
   
   const checkStrongPassword = (
     password: string, 
@@ -158,7 +159,7 @@ const RegisterModal = ({ title = 'Sign Up' }) => {
   
     // Check password length
     if (password.length < 8) {
-        return { isValid: false, message: 'Password must contain at least 8 characters' };
+      return { isValid: false, message: 'Password must contain at least 8 characters' };
     }
   
     // Check for at least one uppercase letter, one lowercase letter, and one digit
@@ -177,7 +178,7 @@ const RegisterModal = ({ title = 'Sign Up' }) => {
     }
   
     return { isValid: true, message: 'Valid password' };
-  }
+  };
   
   const checkValidPassword = (password: string, data: FieldValues) => {
     const { studentId } = data;
@@ -187,7 +188,7 @@ const RegisterModal = ({ title = 'Sign Up' }) => {
       return message;
     }
     return true;
-  }
+  };
   
   const { register, handleSubmit, formState: { errors } } = useForm<FieldValues>({
     defaultValues: {
@@ -197,6 +198,15 @@ const RegisterModal = ({ title = 'Sign Up' }) => {
       password: '',
     }
   });
+
+  const sanitizeData = (data: FieldValues) => {
+    const sanitizedData: FieldValues = {};
+    Object.keys(data).forEach((key) => {
+      sanitizedData[key] =
+        typeof data[key] === 'string' ? data[key].replace(/\s+/g, ' ').trim() : data[key];
+    });
+    return sanitizedData;
+  };
 
   const validateFields = (data: FieldValues) => {
     const errors = [];
@@ -238,7 +248,7 @@ const RegisterModal = ({ title = 'Sign Up' }) => {
     }
   
     return errors;
-  }
+  };
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     // Validate fields
@@ -250,11 +260,12 @@ const RegisterModal = ({ title = 'Sign Up' }) => {
       return;
     }
 
-    console.log("Form submitted:", data);
     setIsLoading(true);
 
+    const sanitizedData = sanitizeData(data);
+
     axios
-      .post('/api/register', data)
+      .post('/api/register', sanitizedData)
       .then(() => {
         return signIn('credentials', {
           studentId: data.studentId,
@@ -268,8 +279,8 @@ const RegisterModal = ({ title = 'Sign Up' }) => {
         if (callback?.ok) {
           toast.remove();
           toast.success('Signed up successfully');
-          router.refresh();
           registerModal.onClose();
+          router.refresh();
         }
         
         if (callback?.error) {

@@ -112,29 +112,38 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
       shouldDirty: true,
       shouldTouch: true,
     });
-  }
+  };
+
+  const sanitizeData = (data: FieldValues) => {
+    const sanitizedData: FieldValues = {};
+    Object.keys(data).forEach((key) => {
+      sanitizedData[key] =
+        typeof data[key] === 'string' ? data[key].replace(/\s+/g, ' ').trim() : data[key];
+    });
+    return sanitizedData;
+  };
 
   const isValidUrl = (url: string) => {
     try {
-      new URL(url);
+      new URL(url.trim());
       return true;
     } catch (e) {
       return false;
     }
-  }
+  };
 
   const onBack = () => {
     setStep((value) => value - 1);
-  }
+  };
 
   const onNext = () => {
-    if (step === STEPS.CATEGORY && !category) {
+    if (step === STEPS.CATEGORY && !category.trim()) {
       setCategoryError(true);
       toast.remove();
       toast.error('Please select or enter a report category before proceeding');
       return;
     }
-    else if (step === STEPS.DESCRIPTION && !time) {
+    else if (step === STEPS.DESCRIPTION && !time.trim()) {
       if (description) {
         setDescriptionError(false);
       }
@@ -146,7 +155,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
       toast.error('Please provide the time when the issue happened');
       return;
     }
-    else if (step === STEPS.DESCRIPTION && !location) {
+    else if (step === STEPS.DESCRIPTION && !location.trim()) {
       if (description) {
         setDescriptionError(false);
       }
@@ -158,7 +167,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
       toast.error('Please provide the location where the issue happened');
       return;
     }
-    else if (step === STEPS.DESCRIPTION && !description) {
+    else if (step === STEPS.DESCRIPTION && !description.trim()) {
       if (time) {
         setTimeError(false);
       }
@@ -170,7 +179,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
       toast.error('Please describe the reported issue');
       return;
     }
-    else if (step === STEPS.PROOF && proofSrc.length > 0 && !isValidUrl(proofSrc)) {
+    else if (step === STEPS.PROOF && !isValidUrl(proofSrc)) {
       setUrlError(true);
       toast.remove();
       toast.error('Cloud Service link must be a valid URL');
@@ -182,7 +191,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
     setLocationError(false);
     setUrlError(false);
     setStep((value) => value + 1);
-  }
+  };
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     if (step !== STEPS.CONFIRM) {
@@ -191,7 +200,9 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
 
     setIsLoading(true);
 
-    axios.post('/api/report', data)
+    const sanitizedData = sanitizeData(data);
+
+    axios.post('/api/report', sanitizedData)
     .then(() => {
       toast.remove();
       toast.success('Report submitted');
@@ -234,18 +245,18 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
         />
       </div>
       <div className='flex flex-row items-center mx-6'>
-        <p className='text-2xl font-semibold w-1/4'>
+        <p className='text-xl font-semibold w-1/4 px-2'>
           Student name
         </p>
-        <div className='ml-8 w-2/3 py-3 px-6 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
+        <div className='ml-8 w-2/3 py-2 px-4 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
           {currentUser?.name}
         </div>
       </div>
       <div className='flex flex-row items-center mx-6'>
-        <p className='text-2xl font-semibold w-1/4'>
+        <p className='text-xl font-semibold w-1/4 px-2'>
           Student ID
         </p>
-        <div className='ml-8 w-2/3 py-3 px-6 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
+        <div className='ml-8 w-2/3 py-2 px-4 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
           {currentUser?.studentId}
         </div>
       </div>
@@ -263,41 +274,55 @@ const ReportModal: React.FC<ReportModalProps> = ({ currentUser }) => {
         </div>
         <div className='overflow-y-auto'>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[50vh] mx-6'>
-            {categories.map((item) => (
+          {categories.map((item) => (
               <div key={item.label} className='col-span-1'>
-                <CategoryInput
-                  onClick={(category) => {
-                    setLabel(category);
-                    setCustomValue('category', category === 'Other' ? labelInput : category);
-                    if (category === 'Other') {
-                      setLabelSelected(true);
-                    } else {
-                      setLabelSelected(false);
-                    }
-                  }}
-                  selected={item.label === 'Other' && labelSelected ? true : category === item.label}
-                  label={item.label}
-                  example={item.example}
-                  icon={item.icon}
-                  type='report'
-                />
+                {label === 'Other' ? (
+                  <CategoryInput
+                    id='category'
+                    icon={item.icon}
+                    label={item.label}
+                    hasInputField={label === 'Other'}
+                    example={item.example}
+                    selected={item.label === 'Other' && labelSelected}
+                    type='report'
+                    value={category}
+                    register={register}
+                    onClick={(category) => {
+                      setLabel(category);
+                      setCustomValue('category', category === 'Other' ? labelInput : category);
+                      if (category === 'Other') {
+                        setLabelSelected(true);
+                      } else {
+                        setLabelSelected(false);
+                      }
+                    }}
+                    onChange={(e) => {
+                      setLabel('Other');
+                      setLabelInput(e.target.value);
+                      setCustomValue('category', e.target.value);
+                    }}
+                    className={`w-full mt-4 px-4 py-3 font-medium border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['category'] || categoryError) && 'border-red-500 focus:border-red-500'}`}
+                  />
+                ) : (
+                  <CategoryInput
+                    icon={item.icon}
+                    label={item.label}
+                    example={item.example}
+                    selected={category === item.label}
+                    type='article'
+                    onClick={(category) => {
+                      setLabel(category);
+                      setCustomValue('category', category === 'Other' ? labelInput : category);
+                      if (category === 'Other') {
+                        setLabelSelected(true);
+                      } else {
+                        setLabelSelected(false);
+                      }
+                    }}
+                  />
+                )}
               </div>
             ))}
-            {label === 'Other' && (
-              <input
-                id='category-input'
-                placeholder='Enter your category...'
-                type='text'
-                value={category}
-                {...register('category')}
-                onChange={(e) => {
-                  setLabel('Other');
-                  setLabelInput(e.target.value);
-                  setCustomValue('category', e.target.value);
-                }}
-                className={`w-full mt-6 h-1/2 px-4 py-3 font-medium border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['category'] || categoryError) && 'border-red-500 focus:border-red-500'}`}  
-              />
-            )}
           </div>
         </div>
     </div>

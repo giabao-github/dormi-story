@@ -53,37 +53,46 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
       shouldDirty: true,
       shouldTouch: true,
     });
-  }
+  };
+
+  const sanitizeData = (data: FieldValues) => {
+    const sanitizedData: FieldValues = {};
+    Object.keys(data).forEach((key) => {
+      sanitizedData[key] =
+        typeof data[key] === 'string' ? data[key].replace(/\s+/g, ' ').trim() : data[key];
+    });
+    return sanitizedData;
+  };
 
   const isValidUrl = (url: string) => {
     try {
-      new URL(url);
+      new URL(url.trim());
       return true;
     } catch (e) {
       return false;
     }
-  }
+  };
 
   const onBack = () => {
     setStep((value) => value - 1);
-  }
+  };
 
   const onNext = () => {
-    if (step === STEPS.CATEGORY && !category) {
+    if (step === STEPS.CATEGORY && !category.trim()) {
       setCategoryError(true);
       toast.remove();
-      toast.error('Please provide a survey category before proceeding');
+      toast.error('Please provide the survey category before proceeding');
       return;
     }
-    else if (step === STEPS.TITLE && !title) {
+    else if (step === STEPS.TITLE && !title.trim()) {
       setTitleError(true);
       toast.remove();
-      toast.error('Please provide a survey title before proceeding');
+      toast.error('Please provide the survey title before proceeding');
       return;
     }
-    else if (step === STEPS.LINK && !link) {
+    else if (step === STEPS.LINK && !link.trim()) {
       toast.remove();
-      toast.error('Please provide a survey link before proceeding');
+      toast.error('Please provide the survey link before proceeding');
       setLinkError(true);
       return;
     }
@@ -97,7 +106,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
     setTitleError(false);
     setLinkError(false);
     setStep((value) => value + 1);
-  }
+  };
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     if (step !== STEPS.CONFIRM) {
@@ -105,24 +114,26 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
     }
 
     setIsLoading(true);
-    console.log(data)
-    axios.post('/api/survey', data)
-    .then(() => {
-      toast.remove();
-      toast.success('Survey created');
-      surveyModal.onClose();
-      router.refresh();
-      reset();
-      setStep(STEPS.CREATOR);
-    })
-    .catch((error) => {
-      console.log(error);
-      toast.remove();
-      toast.error('An error occurred. Please try again');
-    })
-    .finally(() => {
-      setIsLoading(false);
-    })
+
+    const sanitizedData = sanitizeData(data);
+
+    axios.post('/api/survey', sanitizedData)
+      .then(() => {
+        toast.remove();
+        toast.success('Survey created');
+        surveyModal.onClose();
+        reset();
+        setStep(STEPS.CREATOR);
+        router.refresh();
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.remove();
+        toast.error('An error occurred. Please try again');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      })
   }
 
   const actionLabel = useMemo(() => {
@@ -149,10 +160,10 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ currentUser }) => {
         />
       </div>
       <div className='flex flex-row items-center mx-6'>
-        <p className='text-2xl font-semibold w-1/4'>
+        <p className='text-xl font-semibold w-1/4 px-2'>
           Creator name
         </p>
-        <div className='ml-8 w-2/3 py-3 px-6 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
+        <div className='ml-8 w-2/3 py-2 px-4 text-lg font-semibold text-neutral-700 border-2 border-neutral-700 rounded-md'>
           {currentUser?.name}
         </div>
       </div>

@@ -41,9 +41,10 @@ model User {
   survey Survey[]
   event Event[]
   article Article[]
-  parkingLotRegistration ParkingLotRegistration[]
+  building Building[]
+  parkingSpot ParkingSpot[]
 
-   @@index([messengerSecretToken], map: "User_messengerSecretToken_key")
+  @@index([messengerSecretToken], map: "User_messengerSecretToken_key")
 }
 
 model Account {
@@ -134,16 +135,33 @@ model Event {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model ParkingLotRegistration {
+model Building {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  userId String @db.ObjectId
-  startDate DateTime
-  endDate DateTime
+  name String
+  capacity Int
+  availableSlots Int
   price Int
-  licensePlateImage String
+  parkingSpot ParkingSpot[]
+  userId String @db.ObjectId
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ParkingSpot {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String? @db.ObjectId
+  buildingId String @db.ObjectId
+  month Int?
+  startDate DateTime?
+  endDate DateTime?
+  licensePlateImage String?
+  spot String?
+  status String
+  createdAt DateTime @default(now())
+
+  building Building @relation(fields: buildingId, references: id)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Conversation {

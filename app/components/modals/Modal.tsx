@@ -84,10 +84,11 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, body, f
               {/* HEADER */}
               <div className='flex items-center p-6 rounded-t justify-center relative border-b-[1px]'>
                 <button 
-                  onClick={handleClose}
                   type='button' 
                   title='Close' 
-                  className='p-1 border-0 hover:text-red-500 transition absolute right-9 top-4'>
+                  disabled={disabled}
+                  onClick={handleClose}
+                  className='p-1 border-0 hover:text-red-500 disabled:text-black transition absolute right-9 top-4'>
                   <IoCloseCircleOutline size={24} />
                 </button>
                 <div className={`text-4xl font-semibold ${rowdies.className}`}>
@@ -104,7 +105,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, body, f
                   {secondaryAction && secondaryActionLabel && (
                     <Button primary outline label={secondaryActionLabel} onClick={handleSecondaryAction} disabled={disabled} />
                   )}
-                  {(title === 'Sign In' || title === 'Messenger Token' || title === 'Post An Article' || title === 'Create A Survey' || title === 'Plan An Event' || title === 'Filters') ? 
+                  {(title === 'Sign In' || title === 'Messenger Token' || title === 'Create A Survey' || title === 'Plan An Event' || title === 'Filters') ? 
                     <Button primary label={actionLabel} onClick={handleSubmit} disabled={disabled} /> : 
                     <Button label={actionLabel} onClick={handleSubmit} disabled={disabled} />
                   }

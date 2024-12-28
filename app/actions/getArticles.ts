@@ -19,10 +19,6 @@ export default async function getArticles(params: IArticleParams) {
 
     let query: any = {};
 
-    if (userId) {
-      query.userId = userId;
-    }
-
     if (title) {
       const normalizedTitle = title.trim().toLowerCase();
       const titleTerms = normalizedTitle.split(/\s+/);

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Heading from './Heading';
 import Button from './Button';
 import useSearchResult from '../hooks/useSearchResult';
+import useParkingLotModal from '../hooks/useParkingLotModal';
 
 
 interface EmptyStateProps {
@@ -23,6 +24,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   const router = useRouter();
   const searchResult = useSearchResult();
+  const parkingLotModal = useParkingLotModal();
 
   return (
     <div className='h-[60vh] ml-[241px] mt-20 flex justify-center items-center'>
@@ -87,10 +89,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
             <Button
               outline
               label={buttonLabel}
-              onClick={() => {
-                searchResult.offFilter();
-                router.push('/parking-lot-registration');
-              }}
+              onClick={() => parkingLotModal.onOpen()}
             />  
           )}
         </div>

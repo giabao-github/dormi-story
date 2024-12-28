@@ -6,6 +6,7 @@ import { BiNews } from 'react-icons/bi';
 import { HiOutlineUserCircle } from 'react-icons/hi2';
 import { RiSurveyLine } from 'react-icons/ri';
 import { FaRegHandshake } from 'react-icons/fa6';
+import { BsBuildingAdd } from 'react-icons/bs';
 import { IconType } from 'react-icons';
 
 interface MenuItemProps {
@@ -33,6 +34,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ onClick, label, notification }) => 
     Icon = MdEventAvailable;
   } else if (label === 'Create A Survey') {
     Icon = RiSurveyLine;
+  } else if (label === 'Create A Building') {
+    Icon = BsBuildingAdd;
   }
 
   if (onClick) {
