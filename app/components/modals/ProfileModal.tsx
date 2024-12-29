@@ -131,14 +131,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, currentUse
               type='button'
               disabled={isLoading}
               onClick={onClose}
-              className='py-[6px] px-4 bg-neutral-200 hover:opacity-80 rounded-md select-none'
+              className='py-[6px] px-4 bg-neutral-200 hover:opacity-70 rounded-md select-none'
             >
               <span className='text-black text-base font-semibold'>Cancel</span>
             </button>
             <button
               type='submit'
               disabled={isLoading}
-              className='py-[6px] px-5 mr-4 bg-primary hover:opacity-80 rounded-md select-none'
+              className='py-[6px] px-5 mr-4 bg-primary hover:opacity-70 rounded-md select-none'
             >
               <span className='text-white text-base font-semibold'>Save</span>
             </button>

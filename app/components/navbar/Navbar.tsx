@@ -32,9 +32,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser, notification }) => {
     pathname !== '/surveys' &&
     pathname !== '/rules' &&
     pathname !== '/reports' &&
-    pathname !== '/pictures' &&
+    pathname !== '/gallery' &&
     pathname !== '/events' &&
-    pathname !== '/parking-lot-registration'
+    pathname !== '/parking-spot-registration'
   );
 
   if (!is404Page) {

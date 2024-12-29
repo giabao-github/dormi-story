@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import getCurrentUser from '@/app/actions/getCurrentUser';
 import prisma from '@/app/libs/prismadb';
 import getParkingSpotsByBuildingId from '@/app/actions/getParkingSpotsByBuildingId';
+import { handleSpotLock, notifySpotUpdate } from '@/app/libs/socket';
 
 export async function POST(request: Request) {
   const currentUser = await getCurrentUser();

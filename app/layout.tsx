@@ -16,14 +16,13 @@ import SurveyModal from './components/modals/SurveyModal';
 import EventModal from './components/modals/EventModal';
 import ReportCardModal from './components/modals/ReportCardModal';
 import SearchModal from './components/modals/SearchModal';
+import ParkingSpotModal from './components/modals/ParkingSpotModal';
 import FriendRequestsModal from './components/modals/FriendRequestsModal';
 import { getSentFriendRequests } from './actions/getSentFriendRequests';
 import { getReceivedFriendRequests } from './actions/getReceivedFriendRequests';
 import getFriendsByUserId from './actions/getFriendsByUserId';
 import BuildingModal from './components/modals/BuildingModal';
-import ParkingLotModal from './components/modals/ParkingLotModal';
 import getBuildings from './actions/getBuildings';
-import getParkingSpotsByBuildingId from './actions/getParkingSpotsByBuildingId';
 
 
 const nunito = Nunito({
@@ -63,7 +62,7 @@ export default async function RootLayout({
           <SurveyModal currentUser={currentUser} />
           <EventModal currentUser={currentUser} />
           <BuildingModal currentUser={currentUser} />
-          <ParkingLotModal currentUser={currentUser} buildings={buildings} />
+          <ParkingSpotModal currentUser={currentUser} buildings={buildings} />
           <Navbar currentUser={currentUser} notification={notification} />
           <IntroductionPage currentUser={currentUser} />
           <Sidebar currentUser={currentUser} />

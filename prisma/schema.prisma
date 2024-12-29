@@ -157,6 +157,7 @@ model ParkingSpot {
   endDate DateTime?
   licensePlateImage String?
   spot String?
+  time Int?
   status String
   createdAt DateTime @default(now())
 

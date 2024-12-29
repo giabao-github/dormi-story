@@ -105,7 +105,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, body, f
                   {secondaryAction && secondaryActionLabel && (
                     <Button primary outline label={secondaryActionLabel} onClick={handleSecondaryAction} disabled={disabled} />
                   )}
-                  {(title === 'Sign In' || title === 'Messenger Token' || title === 'Create A Survey' || title === 'Plan An Event' || title === 'Filters') ? 
+                  {(title === 'Sign In' || title === 'Messenger Token' || title === 'Create A Survey' || title === 'Plan An Event' || title === 'Filters' || title === 'Register A Parking Spot') ? 
                     <Button primary label={actionLabel} onClick={handleSubmit} disabled={disabled} /> : 
                     <Button label={actionLabel} onClick={handleSubmit} disabled={disabled} />
                   }

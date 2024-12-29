@@ -5,9 +5,12 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { Candal } from 'next/font/google';
 import { RiEBikeFill } from 'react-icons/ri';
 import { GiOpenGate } from 'react-icons/gi';
 import { IoInformationCircle } from 'react-icons/io5';
+import { MdContentCopy, MdAccountBalance, MdAttachMoney } from 'react-icons/md';
+import { BsQrCodeScan } from 'react-icons/bs';
 import { SafeUser } from '@/app/types';
 import Modal from './Modal'
 import Heading from '../Heading';
@@ -15,21 +18,27 @@ import useParkingLotModal from '@/app/hooks/useParkingLotModal';
 import { Building, ParkingSpot } from '@prisma/client';
 import Calendar from '../inputs/Calendar';
 import ResourceUpload from '../inputs/ResourceUpload';
+import ActionModal from './ActionModal';
 
+
+const candal = Candal({
+  subsets: ['latin'],
+  weight: ['400']
+});
 
 enum STEPS {
   INFORMATION = 0,
   BUILDING = 1,
   DATE = 2,
   SPOT = 3,
-  LICENSE = 4,
-  PAYMENT = 5
+  PAYMENT = 4,
+  LICENSE = 5,
 }
 
 const SLOTS_PER_LINE = 5;
 let matrix: ParkingSpot[][] = [];
 
-interface ParkingLotModalProps {
+interface ParkingSpotModalProps {
   currentUser?: SafeUser | null;
   buildings: Building[];
 }
@@ -61,7 +70,7 @@ const period = [
   },
 ];
 
-const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, buildings }) => {
+const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildings }) => {
   const router = useRouter();
   const parkingLotModal = useParkingLotModal();
   const [step, setStep] = useState(STEPS.INFORMATION);
@@ -74,6 +83,18 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
   const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [hoveredSpot, setHoveredSpot] = useState<ParkingSpot | null>(null);
+  const [timeLeft, setTimeLeft] = useState(600);
+  const [isTimeout, setIsTimeout] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [activeTab, setActiveTab] = useState('cash');
+  const [validTime, setValidTime] = useState('');
+  const [isRed, setIsRed] = useState(false);
+  const [difference, setDifference] = useState(0);
+
+  const tabs = [
+    { id: 'cash', label: 'Cash' },
+    { id: 'banking', label: 'Internet Banking' }
+  ];
 
   const { handleSubmit, setValue, watch, reset } = useForm<FieldValues>({
     defaultValues: {
@@ -108,8 +129,14 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
     return sanitizedData;
   };
 
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.remove();
+    toast.success('Copied to clipboard!');
+  };
+
   const fetchParkingSpots = useCallback(async (buildingId: string): Promise<ParkingSpot[]>  => {
-    const response = await axios.post('/api/parking-lot/fetch', { buildingId: buildingId })
+    const response = await axios.post('/api/parking-spot/fetch', { buildingId: buildingId })
     return response.data;
   }, []);
 
@@ -131,7 +158,7 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
         if (spot.userId === currentUser?.id) {
           return 'text-special';
         }
-        else if (spot.userId !== currentUser?.id) {
+        else if (!spot.userId || spot.userId !== currentUser?.id) {
           return 'text-lock';
         }
       default:
@@ -172,13 +199,17 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
     setIsLoading(true);
 
     try {
-      const response = await axios.post('/api/parking-lot/select', {
+      const parkingSpots = await axios.post('/api/parking-spot/select', {
         id: spot.id,
         buildingId,
         userId: currentUser.id
       });
-      setParkingSpots(response.data);
+      setParkingSpots(parkingSpots.data);
       setSelectedSpot(spot);
+      if (!isActive) {
+        setTimeLeft(600);
+        setIsActive(true);
+      }
     } catch (error) {
       console.error('Error selecting spot:', error);
       toast.remove();
@@ -196,6 +227,18 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
     return `${day}/${month}/${year}`;
   };
 
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    if (hours > 0) {
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    } else {
+      return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+  };
+
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     if (step !== STEPS.PAYMENT) {
       return onNext();
@@ -205,7 +248,7 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
 
     const sanitizedData = sanitizeData(data);
 
-    axios.post('/api/parking-lot/register', sanitizedData)
+    axios.post('/api/parking-spot/register', sanitizedData)
     .then(() => {
       toast.remove();
       toast.success('Parking lot registered successfully');
@@ -261,50 +304,96 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
       matrix.push(parkingSpots.slice(i, i + SLOTS_PER_LINE));
     }
     setCustomValue('status', selectedSpot?.status);
+    console.log(
+      matrix.map(row => 
+        row.map(({ id, userId, status, time }) => ({ id, userId, status, time }))
+      )
+    );    
   }, [parkingSpots])
 
   useEffect(() => {
     const resetData = async () => {
-      await axios.post('/api/parking-lot/reset', {
+      await axios.post('/api/parking-spot/reset', {
         userId: currentUser?.id
       });
     }
     resetData();
   }, []);
 
-  // useEffect(() => {
-  //   if (step === STEPS.SPOT && selectedSpot) {
-  //     const timer = setTimeout(async () => {
-  //       try {
-  //         await axios.post('/api/parking-lot/reset', {
-  //           userId: currentUser?.id
-  //         });
-  //         parkingSpots.map((spot) => {
-  //           if (spot.status === 'locked' && spot.userId === currentUser?.id) {
-  //             spot.userId = null;
-  //             spot.status = 'available';
-  //           }
-  //         })
-  //         setCustomValue('status', '');
-  //       } catch (error) {
-  //         console.error('Error resetting spot:', error);
-  //       }
-  //     }, 5000);
-
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [step, selectedSpot, buildingId, currentUser]);
+  useEffect(() => {
+    let timer: any;
+    if (isActive && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      setIsTimeout(true);
+      setIsActive(false);
+    }
+    return () => clearInterval(timer);
+  }, [isActive, timeLeft]);
 
   useEffect(() => {
-    console.log(parkingSpots)
-  }, [step])
+    if (step === STEPS.DATE && matrix.length <= 0) {
+      setIsLoading(true);
+    } else if (step === STEPS.DATE && matrix.length > 0) {
+      setIsLoading(false);
+    }
+  }, [matrix.length, step]);
+
+  useEffect(() => {
+    const initializeTime = async () => {
+      const startDate = new Date();
+      const endDate = new Date(startDate);
+      endDate.setHours(23, 59, 59, 999);
+      endDate.setDate(endDate.getDate() + 3); 
+      setDifference(endDate.getTime() - new Date().getTime());
+      const updatedSpot = await axios.post('/api/parking-spot/time', {
+        id: selectedSpot?.id,
+        buildingId,
+        userId: currentUser?.id,
+        time: difference
+      });
+      setSelectedSpot(updatedSpot.data);
+    }
+    if (step === STEPS.SPOT && status) {
+      initializeTime();
+    }
+    const intervalId = setInterval(() => {
+      setDifference(prevDifference => prevDifference - 1000);
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [step, status]);
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      if (difference <= 0) {
+        setValidTime('Time Expired');
+        return;
+      }
+
+      const hours = Math.floor(difference / (1000 * 60 * 60));
+
+      setIsRed(hours < 3);
+    };
+
+    if (step === STEPS.SPOT && status) {
+      calculateTimeLeft();
+      const timer = setInterval(calculateTimeLeft, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [step, status, difference]);
+
 
   let bodyContent = (
     <div className='flex flex-col gap-8'>
       <div className='mx-6'>
         <Heading
           title='Student Information'
-          subtitle='These information will be used to register your parking lot'
+          subtitle='These information will be used to register your parking spot'
         />
       </div>
       <div className='flex flex-row items-center mx-6'>
@@ -331,7 +420,7 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
       <div className='flex flex-col gap-y-6 mb-10'>
         <div className='mx-6'>
           <Heading
-            title='Select a building of your parking lot'
+            title='Select a building of your parking spot'
             subtitle="Building marked as 'Full' cannot be chosen"
           />
         </div>
@@ -340,10 +429,10 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
             <div className='relative'>
               <button
                 onClick={() => setIsBuildingOpen(!isBuildingOpen)}
-                className='w-1/2 border border-gray-400 rounded-md p-3 text-base shadow-sm hover:shadow-md focus:outline-none'
+                className={`w-2/3 border ${selectedBuilding ? 'border-primary' : 'border-gray-400 hover:border-gray-700'} rounded-md p-3 text-base shadow-sm hover:shadow-md focus:outline-none`}
               >
                 <div className={`flex items-center ${selectedBuilding ? 'justify-between px-2' : 'justify-center'}`}>
-                  <span>
+                  <span className={`${selectedBuilding ? 'text-primary' : ''}`}>
                     {selectedBuilding ? `Building ${selectedBuilding}` : 'Select a building'}
                   </span>
                   {selectedBuilding && (
@@ -352,7 +441,7 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
                 </div>
               </button>
               {isBuildingOpen && (
-                <ul className='absolute mt-1 py-2 z-10 w-1/2 border border-gray-400 bg-white rounded-md shadow-lg'>
+                <ul className='absolute mt-1 py-2 z-10 w-2/3 border border-gray-400 bg-white rounded-md shadow-lg'>
                   {buildings.map((building) => (
                     <li
                       key={building.id}
@@ -365,7 +454,7 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
                       <span>
                         {building.name} ({building.availableSlots} slots available)
                       </span>
-                      {building.availableSlots === 0 ? (
+                      {building.availableSlots <= 0 ? (
                         <span className='text-sm text-rose-500'>Full</span>
                       ) : (
                         <span className='text-sm text-primary'>Available</span>
@@ -413,10 +502,10 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
                   <div className='relative'>
                     <button
                       onClick={() => setIsPeriodOpen(!isPeriodOpen)}
-                      className='w-full border border-gray-400 rounded-md p-3 text-base shadow-sm hover:shadow-md focus:outline-none'
+                      className={`w-full border ${selectedMonth ? 'border-primary' : 'border-gray-400'} rounded-md p-3 text-base shadow-sm hover:shadow-md focus:outline-none`}
                     >
                       <div className='flex items-center justify-center'>
-                        <span>
+                        <span className={`${selectedMonth ? 'text-primary' : ''}`}>
                           {selectedMonth ? `${selectedMonth}` : 'Select a period'}
                         </span>
                       </div>
@@ -446,7 +535,7 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
               </div>
               {month && (
                 <div className='h-1/2'>
-                  <div className='flex flex-col justify-start gap-y-4 py-4 rounded-md border border-neutral-300 hover:shadow-md'>
+                  <div className='flex flex-col justify-start gap-y-4 py-4 rounded-md border border-primary text-primary hover:shadow-md'>
                     <h3 className='text-lg text-center font-medium mb-4'>Parking Lot Period</h3>
                     <div className='px-8 w-2/3 flex justify-between items-center'>
                       <p className='text-base'>From:</p>
@@ -469,10 +558,17 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
   if (step === STEPS.SPOT) {
     bodyContent = (
       <div className='flex flex-col gap-8 mx-6'>
-        <Heading
-          title='Choose an available spot'
-          subtitle='Available spots are those in green'
-        />
+        <div className='flex justify-between'>
+          <Heading
+            title='Choose an available spot'
+            subtitle='Please complete the registration process within 10 minutes'
+          />
+          {timeLeft > 0 && !isTimeout && isActive && (
+            <div className={`flex items-center justify-center h-fit w-36 text-3xl font-bold border shadow-sm bg-gray-50 px-4 py-3 rounded ${timeLeft > 10 ? 'text-secondary' : 'text-button'} ${candal.className}`}>
+              {formatTime(timeLeft)}
+          </div>
+          )}
+        </div>
         <div className='flex-1'>
           <div className='flex justify-start mb-8'>
             <GiOpenGate className='text-4xl text-gray-600' />
@@ -486,7 +582,6 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
                 {line.map((spot, spotIndex) => (
                   <div key={spot.id} className='relative'>
                     <div
-                      title={`${String.fromCharCode(65 + lineIndex)}${spotIndex + 1}`}
                       key={spot.id}
                       onClick={() => handleSpotClick(spot, buildingId)}
                       onMouseEnter={() => setHoveredSpot(spot)}
@@ -571,25 +666,136 @@ const ParkingLotModal: React.FC<ParkingLotModalProps> = ({ currentUser, building
             title='Choose a payment method'
             subtitle='Please carefully check the payment information'
           />
-        
+          <div className='max-w-3xl max-h-[55vh] mx-auto p-6 bg-white overflow-y-auto'>
+            <div className='mb-8'>
+              <div className='flex border-b border-gray-200' role='tablist'>
+                {tabs.map((tab) => (
+                  <button
+                    type='button'
+                    title={tab.label}
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-6 py-3 text-lg font-medium transition-colors duration-200 relative ${activeTab === tab.id ? 'text-secondary' : 'text-gray-500 hover:text-gray-700'}`}
+                    role='tab'
+                  >
+                    <div className='flex items-center'>
+                      {tab.label === 'Cash' ? (
+                        <MdAttachMoney className='mr-2 text-xl' />
+                      ) : (
+                        <MdAccountBalance className='mr-2 text-xl' />
+                      )}
+                      {tab.label}
+                    </div>
+                    {activeTab === tab.id && (
+                      <div className='absolute bottom-0 left-0 w-full h-0.5 bg-secondary'></div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className='mt-4' role='tabpanel'>
+              <div className='mb-4 text-center'>
+                <p className='text-xl font-bold text-gray-800'>Payment Amount: 30,000 VND</p>
+              </div>
+              {activeTab === 'cash' ? (
+                <div className='space-y-6'>
+                  <p className='text-lg text-gray-700 px-4'>
+                    Please go to Finance Office to pay your parking fee and complete the registration in the next 3 days.
+                  </p>
+                  <div className='text-center'>
+                    <p className='text-lg font-semibold mb-2'>Time Remaining:</p>
+                    <p
+                      className={`text-4xl font-bold ${isRed ? 'text-button' : 'text-primary'} ${candal.className}`}
+                    >
+                      {difference > 0 ? formatTime(Math.floor(difference / 1000)) : validTime}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className='space-y-6'>
+                  <div className='flex flex-col items-center p-6 border-2 border-dashed border-gray-300 rounded-lg'>
+                    <div className='bg-gray-100 p-8 rounded-lg mb-4'>
+                      <BsQrCodeScan className='w-32 h-32 text-gray-400' />
+                    </div>
+                    <p className='text-sm text-gray-500 mt-2'>
+                      If the QR code does not work, please contact the admin.
+                    </p>
+                  </div>
+                  <div className='space-y-4'>
+                    <div className='p-4 bg-gray-50 rounded-lg flex justify-between items-center'>
+                      <div>
+                        <p className='text-sm text-gray-500 mb-1'>Account Holder</p>
+                        <p className='text-lg font-medium'>Dormistory Admin</p>
+                      </div>
+                      <div
+                        onClick={() => handleCopy('Dormistory Admin')}
+                        className='p-2 cursor-pointer hover:bg-gray-200 rounded-full'
+                      >
+                        <MdContentCopy className='text-gray-500' />
+                      </div>
+                    </div>
+                    <div className='p-4 bg-gray-50 rounded-lg flex justify-between items-center'>
+                      <div>
+                        <p className='text-sm text-gray-500 mb-1'>Account Number</p>
+                        <p className='text-lg font-medium'>1027 313 598</p>
+                      </div>
+                      <div
+                        onClick={() => handleCopy('1027 313 598')}
+                        className='p-2 cursor-pointer hover:bg-gray-200 rounded-full'
+                      >
+                        <MdContentCopy className='text-gray-500' />
+                      </div>
+                    </div>
+                    <div className='p-4 bg-gray-50 rounded-lg'>
+                      <p className='text-sm text-gray-500 mb-1'>Transfer Description Format</p>
+                      <p className='text-lg font-medium'>[Student name] - [Student ID]</p>
+                      <p className='text-sm text-gray-500 mt-1'>Example: Nguyen Van A - ITITDS12345</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <Modal
-      title='Register A Parking Lot'
-      isOpen={parkingLotModal.isOpen}
-      onClose={parkingLotModal.onClose}
-      onSubmit={handleSubmit(onSubmit)}
-      disabled={isLoading}
-      actionLabel={actionLabel}
-      secondaryActionLabel={secondaryActionLabel}
-      secondaryAction={step === STEPS.INFORMATION ? undefined : onBack}
-      body={bodyContent}
-    />
+    <>
+      {timeLeft === 0 && (
+        <ActionModal isOpen={isTimeout}>
+          <div className='border-b border-gray-900/10 pb-4 flex flex-col gap-y-8 justify-center items-center'>
+            <p className='text-2xl font-semibold text-gray-900'>
+              Time's Up!
+            </p>
+            <p className='text-lg font-medium text-gray-700 my-2 mx-2 text-center'>
+              Your spot registration has expired. Please click 'OK' to reload the page.
+            </p>
+            <button
+              type='button'
+              onClick={() => window.location.reload()}
+              className='py-[6px] px-5 mr-4 bg-primary hover:opacity-70 rounded-md select-none'
+            >
+              <span className='text-white text-base font-semibold'>OK</span>
+            </button>
+          </div>  
+        </ActionModal>
+      )}
+      <Modal
+        title='Register A Parking Spot'
+        isOpen={parkingLotModal.isOpen}
+        onClose={parkingLotModal.onClose}
+        onSubmit={handleSubmit(onSubmit)}
+        disabled={isLoading}
+        actionLabel={actionLabel}
+        secondaryActionLabel={secondaryActionLabel}
+        secondaryAction={step === STEPS.INFORMATION ? undefined : onBack}
+        body={bodyContent}
+      />
+    </>
   );
 }
 
-export default ParkingLotModal;
+export default ParkingSpotModal;

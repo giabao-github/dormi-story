@@ -28,7 +28,7 @@ const ParkingLotRegistration = async () => {
       <ClientOnly>
         <EmptyState  
           title='No registered information'
-          subtitle="It seems you haven't registered a parking lot yet. You can register by clicking the button below"
+          subtitle="It seems you haven't registered a parking spot yet. You can register one by clicking the button below"
           buttonLabel='Register now'
           type='parking lot'
           showReset 
@@ -39,7 +39,7 @@ const ParkingLotRegistration = async () => {
 
   return (
     <div className={`mt-4 overflow-y-auto max-h-[86%] w-full absolute right-0 ${lexend.className}`}>
-      <title>Dormistory | Parking Lot Registration</title>
+      <title>Dormistory | Parking Spot Registration</title>
       <ClientOnly>
         <Container>
           <div className={`ml-[248px] mt-4 mb-32 grid grid-cols-1 gap-8`}>

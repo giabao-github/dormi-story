@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import getCurrentUser from '@/app/actions/getCurrentUser';
 import getParkingSpotsByBuildingId from '@/app/actions/getParkingSpotsByBuildingId';
+import { notifySpotUpdate } from '@/app/libs/socket';
 
 export async function POST(request: Request) {
   try {
@@ -8,6 +9,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { buildingId } = body;
     const parkingSpots = await getParkingSpotsByBuildingId(buildingId);
+    notifySpotUpdate(buildingId, parkingSpots);
 
     if (!currentUser?.id || !currentUser?.email) {
       return new NextResponse('Unauthorized', { status: 401 });

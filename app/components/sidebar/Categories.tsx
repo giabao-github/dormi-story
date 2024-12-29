@@ -38,10 +38,10 @@ export const categories = [
     description: "Declare medical insurance" 
   },
   {
-    label: 'Parking Lot Registration',
-    route: '/parking-lot-registration',
+    label: 'Parking Spot Registration',
+    route: '/parking-spot-registration',
     icon: LuParkingCircle,
-    description: "Parking lot registration" 
+    description: "Parking spot registration" 
   },
   {
     label: 'Articles',
@@ -95,7 +95,7 @@ export const categories = [
   },
   {
     label: 'Gallery',
-    route: '/pictures',
+    route: '/gallery',
     icon: IoImageOutline,
     description: "Dorm's Gallery"
   },
@@ -116,9 +116,9 @@ const Categories = () => {
     pathname === '/surveys' ||
     pathname === '/rules' ||
     pathname === '/reports' ||
-    pathname === '/pictures' ||
+    pathname === '/gallery' ||
     pathname === '/events' || 
-    pathname === '/parking-lot-registration'
+    pathname === '/parking-spot-registration'
   );
 
   if (!isMainPage) {

@@ -15,11 +15,14 @@ export async function POST(request: Request) {
     const resetData = await prisma.parkingSpot.updateMany({
       where: {
         userId,
-        status: 'locked',
+        status: {
+          in: ['locked', 'available'],
+        },
       },
       data: {
         userId: null,
         status: 'available',
+        time: null
       },
     });
 
