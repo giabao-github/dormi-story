@@ -31,8 +31,9 @@ enum STEPS {
   BUILDING = 1,
   DATE = 2,
   SPOT = 3,
-  PAYMENT = 4,
-  LICENSE = 5,
+  LICENSE = 4,
+  PAYMENT = 5,
+  COMPLETE = 6,
 }
 
 const SLOTS_PER_LINE = 5;
@@ -41,6 +42,9 @@ let matrix: ParkingSpot[][] = [];
 interface ParkingSpotModalProps {
   currentUser?: SafeUser | null;
   buildings: Building[];
+  registeredSpot?: ParkingSpot;
+  hasRegistered?: boolean | undefined;
+  registeredBuilding?: Building;
 }
 
 const period = [
@@ -70,10 +74,15 @@ const period = [
   },
 ];
 
-const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildings }) => {
-  const router = useRouter();
+const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ 
+  currentUser, 
+  buildings, 
+  registeredSpot, 
+  registeredBuilding, 
+  hasRegistered 
+}) => {
   const parkingLotModal = useParkingLotModal();
-  const [step, setStep] = useState(STEPS.INFORMATION);
+  const [step, setStep] = useState(hasRegistered ? STEPS.COMPLETE : STEPS.INFORMATION);
   const [selectedBuilding, setSelectedBuilding] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [isBuildingOpen, setIsBuildingOpen] = useState(false);
@@ -89,7 +98,13 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
   const [activeTab, setActiveTab] = useState('cash');
   const [validTime, setValidTime] = useState('');
   const [isRed, setIsRed] = useState(false);
-  const [difference, setDifference] = useState(0);
+  const [difference, setDifference] = useState(() => {
+    if (registeredSpot?.expiresAt && registeredSpot?.registeredAt) {
+      return Math.floor((new Date(registeredSpot.expiresAt).getTime() - new Date(registeredSpot.registeredAt).getTime()) / 1000);
+    }
+    return 0;
+  });
+  const [price, setPrice] = useState(50);
 
   const tabs = [
     { id: 'cash', label: 'Cash' },
@@ -98,11 +113,16 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
 
   const { handleSubmit, setValue, watch, reset } = useForm<FieldValues>({
     defaultValues: {
+      id: '',
       buildingId: '',
+      startDate: new Date(),
+      endDate: new Date(),
       month: '',
       status: '',
       licensePlateImage: '',
       spot: '',
+      price: 0,
+      bill: '',
     }
   });
 
@@ -110,7 +130,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
   const month = watch('month');
   const status = watch('status');
   const license = watch('licensePlateImage');
-  const spot = watch('spot');
+  const bill = watch('bill');
 
   const setCustomValue = (id: string, value: any) => {
     setValue(id, value, {
@@ -138,13 +158,14 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
   const fetchParkingSpots = useCallback(async (buildingId: string): Promise<ParkingSpot[]>  => {
     const response = await axios.post('/api/parking-spot/fetch', { buildingId: buildingId })
     return response.data;
-  }, []);
+  }, [buildingId]);
 
   const handleSelectBuilding = (building: Building) => {
-    if (building.availableSlots > 0) {
+    if (building.availableSpots > 0) {
       setCustomValue('buildingId', building.id);
       setSelectedBuilding(building.name);
       setIsBuildingOpen(false);
+      setPrice(building.price / 1000);
     }
   };
 
@@ -153,6 +174,8 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
       case 'available':
         return 'text-primary';
       case 'taken':
+        return 'text-button';
+      case 'registered':
         return 'text-button';
       case 'locked':
         if (spot.userId === currentUser?.id) {
@@ -191,12 +214,14 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
     setStep((value) => value + 1);
   };
 
-  const handleSpotClick = useCallback(async (spot: ParkingSpot, buildingId: string) => {
+  const handleSpotClick = useCallback(async (spot: ParkingSpot, buildingId: string, lineIndex: number, spotIndex: number) => {
     if (isLoading || !currentUser || spot.status !== 'available' || spot.userId !== null) {
       return;
     }
 
     setIsLoading(true);
+
+    const spotPosition = `${String.fromCharCode(65 + lineIndex)}${spotIndex + 1}`
 
     try {
       const parkingSpots = await axios.post('/api/parking-spot/select', {
@@ -204,6 +229,8 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
         buildingId,
         userId: currentUser.id
       });
+      setCustomValue('id', spot.id);
+      setCustomValue('spot', spotPosition);
       setParkingSpots(parkingSpots.data);
       setSelectedSpot(spot);
       if (!isActive) {
@@ -218,7 +245,6 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
       setIsLoading(false);
     }
   }, [buildingId, isLoading]);
-  
 
   const formatDate = (date: Date): string => {
     const day = String(date.getDate()).padStart(2, '0');
@@ -240,8 +266,16 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
   };
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    if (step !== STEPS.PAYMENT) {
+    if (step === STEPS.COMPLETE) {
+      return parkingLotModal.onClose();
+    } else if (step !== STEPS.PAYMENT) {
       return onNext();
+    }
+
+    if (step === STEPS.PAYMENT && activeTab === 'banking' && !bill) {
+      toast.remove();
+      toast.error('Please upload your transaction receipt image before proceeding');
+      return;
     }
 
     setIsLoading(true);
@@ -251,11 +285,11 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
     axios.post('/api/parking-spot/register', sanitizedData)
     .then(() => {
       toast.remove();
-      toast.success('Parking lot registered successfully');
+      toast.success('Parking spot registered successfully');
       parkingLotModal.onClose();
-      router.refresh();
       reset();
-      setStep(STEPS.INFORMATION);
+      setStep(STEPS.COMPLETE);
+      window.location.reload();
     })
     .catch((error) => {
       console.log(error);
@@ -270,12 +304,14 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
   const actionLabel = useMemo(() => {
     if (step === STEPS.PAYMENT) {
       return 'Complete';
+    } else if (step === STEPS.COMPLETE) {
+      return 'Close';
     }
     return 'Next';
   }, [step]);
 
   const secondaryActionLabel = useMemo(() => {
-    if (step === STEPS.INFORMATION) {
+    if (step === STEPS.INFORMATION || step === STEPS.COMPLETE) {
       return undefined;
     }
     return 'Back';
@@ -287,6 +323,10 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
     }
     return startDate;
   }, [startDate, month]);
+
+  useEffect(() => {
+    setCustomValue('endDate', endDate);
+  }, [endDate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -303,12 +343,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
     for (let i = 0; i < parkingSpots.length; i += SLOTS_PER_LINE) {
       matrix.push(parkingSpots.slice(i, i + SLOTS_PER_LINE));
     }
-    setCustomValue('status', selectedSpot?.status);
-    console.log(
-      matrix.map(row => 
-        row.map(({ id, userId, status, time }) => ({ id, userId, status, time }))
-      )
-    );    
+    setCustomValue('status', selectedSpot?.status);  
   }, [parkingSpots])
 
   useEffect(() => {
@@ -342,47 +377,30 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
   }, [matrix.length, step]);
 
   useEffect(() => {
-    const initializeTime = async () => {
-      const startDate = new Date();
-      const endDate = new Date(startDate);
-      endDate.setHours(23, 59, 59, 999);
-      endDate.setDate(endDate.getDate() + 3); 
-      setDifference(endDate.getTime() - new Date().getTime());
-      const updatedSpot = await axios.post('/api/parking-spot/time', {
-        id: selectedSpot?.id,
-        buildingId,
-        userId: currentUser?.id,
-        time: difference
-      });
-      setSelectedSpot(updatedSpot.data);
-    }
-    if (step === STEPS.SPOT && status) {
-      initializeTime();
-    }
-    const intervalId = setInterval(() => {
-      setDifference(prevDifference => prevDifference - 1000);
-    }, 1000);
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [step, status]);
-
-  useEffect(() => {
     const calculateTimeLeft = () => {
       if (difference <= 0) {
         setValidTime('Time Expired');
         return;
       }
-
-      const hours = Math.floor(difference / (1000 * 60 * 60));
-
+      const hours = Math.floor(difference / 3600);
       setIsRed(hours < 3);
     };
 
-    if (step === STEPS.SPOT && status) {
+    let timer: NodeJS.Timeout;
+
+    if (difference > 0) {
       calculateTimeLeft();
-      const timer = setInterval(calculateTimeLeft, 1000);
+      timer = setInterval(() => {
+        setDifference((prevDifference) => {
+          if (prevDifference > 0) {
+            return prevDifference - 1;
+          } else {
+            clearInterval(timer);
+            setValidTime('Time Expired');
+            return 0;
+          }
+        });
+      }, 1000);
       return () => clearInterval(timer);
     }
   }, [step, status, difference]);
@@ -390,11 +408,21 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
 
   let bodyContent = (
     <div className='flex flex-col gap-8'>
-      <div className='mx-6'>
-        <Heading
-          title='Student Information'
-          subtitle='These information will be used to register your parking spot'
-        />
+      <div className='mx-6 flex justify-between'>
+        <div className='max-w-[70%]'>
+          <Heading
+            title='Student Information'
+            subtitle='These information will be used to register your parking spot'
+          />
+        </div>
+        {timeLeft > 0 && !isTimeout && isActive && (
+          <div className={`flex items-center justify-center h-fit 2xl:w-44 md:w-36 2xl:text-3xl md:text-xl font-bold shadow-sm bg-neutral-50 py-3 rounded-md ${timeLeft > 10 ? 'text-secondary' : 'text-button'} ${candal.className}`}>
+            <div className='flex items-center flex-row gap-x-2 w-[90%]'>
+              <span className='p-0'>⏱️</span>
+              <span className='2xl:w-24 md:w-16'>{formatTime(timeLeft)}</span>
+            </div>
+          </div>
+        )}
       </div>
       <div className='flex flex-row items-center mx-6'>
         <p className='text-xl font-semibold w-1/4 px-2'>
@@ -418,11 +446,21 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
   if (step === STEPS.BUILDING) {
     bodyContent = (
       <div className='flex flex-col gap-y-6 mb-10'>
-        <div className='mx-6'>
-          <Heading
-            title='Select a building of your parking spot'
-            subtitle="Building marked as 'Full' cannot be chosen"
-          />
+        <div className='mx-6 flex justify-between'>
+          <div className='max-w-[70%]'>
+            <Heading
+              title='Select a building of your parking spot'
+              subtitle="Building marked as 'Full' cannot be chosen"
+            />
+          </div>
+          {timeLeft > 0 && !isTimeout && isActive && (
+            <div className={`flex items-center justify-center h-fit 2xl:w-44 md:w-36 2xl:text-3xl md:text-xl font-bold shadow-sm bg-neutral-50 py-3 rounded-md ${timeLeft > 10 ? 'text-secondary' : 'text-button'} ${candal.className}`}>
+              <div className='flex items-center flex-row gap-x-2 w-[90%]'>
+                <span className='p-0'>⏱️</span>
+                <span className='2xl:w-24 md:w-16'>{formatTime(timeLeft)}</span>
+              </div>
+            </div>
+          )}
         </div>
         <div className='flex flex-col gap-y-4'>
           <div className='mx-6'>
@@ -442,33 +480,34 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
               </button>
               {isBuildingOpen && (
                 <ul className='absolute mt-1 py-2 z-10 w-2/3 border border-gray-400 bg-white rounded-md shadow-lg'>
-                  {buildings.map((building) => (
-                    <li
-                      key={building.id}
-                      onClick={() => handleSelectBuilding(building)}
-                      className={`py-2 px-4 flex items-center justify-between ${
-                        building.availableSlots === 0 ? 'text-gray-400' : 'text-gray-700 cursor-pointer hover:bg-neutral-200'
-                      }`}
-                      style={{ pointerEvents: building.availableSlots === 0 ? 'none' : 'auto' }}
-                    >
-                      <span>
-                        {building.name} ({building.availableSlots} slots available)
-                      </span>
-                      {building.availableSlots <= 0 ? (
-                        <span className='text-sm text-rose-500'>Full</span>
-                      ) : (
-                        <span className='text-sm text-primary'>Available</span>
-                      )}
+                  {buildings.length > 0 ? (
+                    buildings.map((building) => (
+                      <li
+                        key={building.id}
+                        onClick={() => handleSelectBuilding(building)}
+                        className={`py-2 px-4 flex items-center justify-between ${
+                          building.availableSpots === 0 ? 'text-gray-400' : 'text-gray-700 cursor-pointer hover:bg-neutral-200'
+                        }`}
+                        style={{ pointerEvents: building.availableSpots === 0 ? 'none' : 'auto' }}
+                      >
+                        <span>
+                          {building.name} ({building.availableSpots} spots available)
+                        </span>
+                        {building.availableSpots <= 0 ? (
+                          <span className='text-sm text-rose-500'>Full</span>
+                        ) : (
+                          <span className='text-sm text-primary'>Available</span>
+                        )}
+                      </li>
+                    ))
+                  ) : (
+                    <li className='py-2 px-4 text-gray-400 text-center'>
+                      No buildings available for registration
                     </li>
-                  ))}
+                  )}
                 </ul>
               )}
             </div>
-            {!buildings.length && (
-              <p className='text-sm text-gray-500'>
-                No buildings available for registration.
-              </p>
-            )}
           </div>
         </div>
       </div>
@@ -479,10 +518,22 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
     bodyContent = (
       <div className='flex flex-col gap-8'>
         <div className='mx-6'>
-          <Heading
-            title='Choose a start date and period'
-            subtitle='You should pay the parking lot fee before the start date'
-          />
+          <div className='flex justify-between'>
+            <div className='max-w-[70%]'>
+              <Heading
+                title='Choose a start date and period'
+                subtitle='You should pay the parking fee before the start date'
+              />
+            </div>
+            {timeLeft > 0 && !isTimeout && isActive && (
+              <div className={`flex items-center justify-center h-fit 2xl:w-44 md:w-36 2xl:text-3xl md:text-xl font-bold shadow-sm bg-neutral-50 py-3 rounded-md ${timeLeft > 10 ? 'text-secondary' : 'text-button'} ${candal.className}`}>
+                <div className='flex items-center flex-row gap-x-2 w-[90%]'>
+                  <span className='p-0'>⏱️</span>
+                  <span className='2xl:w-24 md:w-16'>{formatTime(timeLeft)}</span>
+                </div>
+              </div>
+            )}
+          </div>
           <div className='flex flex-row gap-x-8'>
             <div className='flex flex-col justify-start gap-y-2 w-1/2'>
               <h3 className='text-lg text-center font-medium mb-2'>Start date</h3>
@@ -492,6 +543,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
                 maxDate={new Date(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate())}
                 onChange={(date) => {
                   setStartDate(date);
+                  setCustomValue('startDate', date);
                 }}
               />
             </div>
@@ -517,6 +569,8 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
                             key={month.id}
                             onClick={() => {
                               setCustomValue('month', month.id);
+                              setPrice(price * month.id);
+                              setCustomValue('price', price * month.id);
                               setSelectedMonth(month.name);
                               setIsPeriodOpen(false);
                             }}
@@ -536,7 +590,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
               {month && (
                 <div className='h-1/2'>
                   <div className='flex flex-col justify-start gap-y-4 py-4 rounded-md border border-primary text-primary hover:shadow-md'>
-                    <h3 className='text-lg text-center font-medium mb-4'>Parking Lot Period</h3>
+                    <h3 className='text-lg text-center font-medium mb-4'>Parking Period</h3>
                     <div className='px-8 w-2/3 flex justify-between items-center'>
                       <p className='text-base'>From:</p>
                       <span className='font-semibold'>{formatDate(startDate)}</span>
@@ -557,16 +611,21 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
 
   if (step === STEPS.SPOT) {
     bodyContent = (
-      <div className='flex flex-col gap-8 mx-6'>
+      <div className='flex flex-col mx-6'>
         <div className='flex justify-between'>
-          <Heading
-            title='Choose an available spot'
-            subtitle='Please complete the registration process within 10 minutes'
-          />
-          {timeLeft > 0 && !isTimeout && isActive && (
-            <div className={`flex items-center justify-center h-fit w-36 text-3xl font-bold border shadow-sm bg-gray-50 px-4 py-3 rounded ${timeLeft > 10 ? 'text-secondary' : 'text-button'} ${candal.className}`}>
-              {formatTime(timeLeft)}
+          <div className='max-w-[70%]'>
+            <Heading
+              title='Choose an available spot'
+              subtitle='Please complete the registration process within 10 minutes'
+            />
           </div>
+          {timeLeft > 0 && !isTimeout && isActive && (
+            <div className={`flex items-center justify-center h-fit 2xl:w-44 md:w-36 2xl:text-3xl md:text-xl font-bold shadow-sm bg-neutral-50 py-3 rounded-md ${timeLeft > 10 ? 'text-secondary' : 'text-button'} ${candal.className}`}>
+              <div className='flex items-center flex-row gap-x-2 w-[90%]'>
+                <span className='p-0'>⏱️</span>
+                <span className='2xl:w-24 md:w-16'>{formatTime(timeLeft)}</span>
+              </div>
+            </div>
           )}
         </div>
         <div className='flex-1'>
@@ -583,7 +642,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
                   <div key={spot.id} className='relative'>
                     <div
                       key={spot.id}
-                      onClick={() => handleSpotClick(spot, buildingId)}
+                      onClick={() => handleSpotClick(spot, buildingId, lineIndex, spotIndex)}
                       onMouseEnter={() => setHoveredSpot(spot)}
                       onMouseLeave={() => setHoveredSpot(null)}
                       className={`p-2 transition-all duration-300 cursor-pointer ${spot.status === 'taken' ? 'cursor-not-allowed' : 'hover:scale-110'}`}
@@ -599,7 +658,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
                         <p className='text-sm font-semibold text-gray-800 mb-1 capitalize'>
                           Status:&nbsp;
                           <span className={`${getSpotColor(hoveredSpot)}`}>
-                            {hoveredSpot.status === 'locked' ? hoveredSpot.userId === currentUser?.id ? 'selected' : 'locked' : hoveredSpot.status}
+                            {hoveredSpot.status === 'locked' ? hoveredSpot.userId === currentUser?.id ? 'selected' : 'locked' : hoveredSpot.status === 'registered' ? 'taken' : hoveredSpot.status}
                           </span>
                         </p>
                       </div>
@@ -644,10 +703,22 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
     bodyContent = (
       <div className='flex flex-col gap-8'>
         <div className='mx-6'>
-          <Heading
-            title='Upload your license plate image'
-            subtitle='The image must be legible (it can be read clearly, cracks are accepted but must not obscure the numbers)'
-          />
+          <div className='flex justify-between'>
+            <div className='max-w-[70%]'>
+              <Heading
+                title='Upload your license plate image'
+                subtitle='The image must be legible (it can be read clearly, cracks are accepted but must not obscure the numbers)'
+              />
+            </div>
+            {timeLeft > 0 && !isTimeout && isActive && (
+              <div className={`flex items-center justify-center h-fit 2xl:w-44 md:w-36 2xl:text-3xl md:text-xl font-bold shadow-sm bg-neutral-50 py-3 rounded-md ${timeLeft > 10 ? 'text-secondary' : 'text-button'} ${candal.className}`}>
+                <div className='flex items-center flex-row gap-x-2 w-[90%]'>
+                  <span className='p-0'>⏱️</span>
+                  <span className='2xl:w-24 md:w-16'>{formatTime(timeLeft)}</span>
+                </div>
+              </div>
+            )}
+          </div>
           <ResourceUpload
             value={license}
             onChange={(value) => setCustomValue('licensePlateImage', value)}
@@ -660,57 +731,61 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
 
   if (step === STEPS.PAYMENT) {
     bodyContent = (
-      <div className='flex flex-col gap-8'>
-        <div className='mx-6'>
-          <Heading
-            title='Choose a payment method'
-            subtitle='Please carefully check the payment information'
-          />
-          <div className='max-w-3xl max-h-[55vh] mx-auto p-6 bg-white overflow-y-auto'>
-            <div className='mb-8'>
-              <div className='flex border-b border-gray-200' role='tablist'>
-                {tabs.map((tab) => (
-                  <button
-                    type='button'
-                    title={tab.label}
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-6 py-3 text-lg font-medium transition-colors duration-200 relative ${activeTab === tab.id ? 'text-secondary' : 'text-gray-500 hover:text-gray-700'}`}
-                    role='tab'
-                  >
-                    <div className='flex items-center'>
-                      {tab.label === 'Cash' ? (
-                        <MdAttachMoney className='mr-2 text-xl' />
-                      ) : (
-                        <MdAccountBalance className='mr-2 text-xl' />
-                      )}
-                      {tab.label}
-                    </div>
-                    {activeTab === tab.id && (
-                      <div className='absolute bottom-0 left-0 w-full h-0.5 bg-secondary'></div>
-                    )}
-                  </button>
-                ))}
+      <div className='flex flex-col'>
+        <div className='flex justify-between mx-6'>
+          <div className='max-w-[70%]'>
+            <Heading
+              title='Choose a payment method'
+              subtitle='Please carefully check the payment information'
+            />
+          </div>
+          {timeLeft > 0 && !isTimeout && isActive && (
+            <div className={`flex items-center justify-center h-fit 2xl:w-44 md:w-36 2xl:text-3xl md:text-xl font-bold shadow-sm bg-neutral-50 py-3 rounded-md ${timeLeft > 10 ? 'text-secondary' : 'text-button'} ${candal.className}`}>
+              <div className='flex items-center flex-row gap-x-2 w-[90%]'>
+                <span className='p-0'>⏱️</span>
+                <span className='2xl:w-24 md:w-16'>{formatTime(timeLeft)}</span>
               </div>
             </div>
+          )}
+        </div>
+        <div className='max-w-3xl max-h-[52vh] p-6 bg-white'>
+          <div className='mx-6'>
+            <div className='flex border-b border-gray-200' role='tablist'>
+              {tabs.map((tab) => (
+                <button
+                  type='button'
+                  title={tab.label}
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-6 py-3 text-lg font-medium transition-colors duration-200 relative ${activeTab === tab.id ? 'text-secondary' : 'text-gray-500 hover:text-gray-700'}`}
+                  role='tab'
+                >
+                  <div className='flex items-center'>
+                    {tab.label === 'Cash' ? (
+                      <MdAttachMoney className='mr-2 text-xl' />
+                    ) : (
+                      <MdAccountBalance className='mr-2 text-xl' />
+                    )}
+                    {tab.label}
+                  </div>
+                  {activeTab === tab.id && (
+                    <div className='absolute bottom-0 left-0 w-full h-0.5 bg-secondary'></div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
 
-            <div className='mt-4' role='tabpanel'>
-              <div className='mb-4 text-center'>
-                <p className='text-xl font-bold text-gray-800'>Payment Amount: 30,000 VND</p>
+          <div className='max-h-[45vh] mb-10 overflow-y-auto' role='tabpanel'>
+            <div className='mx-6 py-8'>
+              <div className='mb-8 text-center'>
+                <p className='text-xl font-bold text-gray-800'>{`Parking Fee: 🪙 ${price},000 VND`}</p>
               </div>
               {activeTab === 'cash' ? (
                 <div className='space-y-6'>
-                  <p className='text-lg text-gray-700 px-4'>
-                    Please go to Finance Office to pay your parking fee and complete the registration in the next 3 days.
+                  <p className='text-lg text-gray-700 px-4 text-center'>
+                    Please go to the Finance Office to pay your parking fee and complete the registration in the next 3 days.
                   </p>
-                  <div className='text-center'>
-                    <p className='text-lg font-semibold mb-2'>Time Remaining:</p>
-                    <p
-                      className={`text-4xl font-bold ${isRed ? 'text-button' : 'text-primary'} ${candal.className}`}
-                    >
-                      {difference > 0 ? formatTime(Math.floor(difference / 1000)) : validTime}
-                    </p>
-                  </div>
                 </div>
               ) : (
                 <div className='space-y-6'>
@@ -749,14 +824,97 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({ currentUser, buildi
                     </div>
                     <div className='p-4 bg-gray-50 rounded-lg'>
                       <p className='text-sm text-gray-500 mb-1'>Transfer Description Format</p>
-                      <p className='text-lg font-medium'>[Student name] - [Student ID]</p>
-                      <p className='text-sm text-gray-500 mt-1'>Example: Nguyen Van A - ITITDS12345</p>
+                      <p className='text-lg font-medium'>[Student name] - [Student ID] - parking fee</p>
+                      <p className='text-sm text-gray-500 mt-1'>Example: Nguyen Van A - ITITDS12345 - parking fee</p>
+                    </div>
+                    <div className='p-4 bg-gray-50 rounded-lg'>
+                      <p className='text-sm text-gray-500 mb-4'>Transaction Receipt Image</p>
+                      <ResourceUpload
+                        value={bill}
+                        onChange={(value) => setCustomValue('bill', value)}
+                        limited='image'
+                      />
                     </div>
                   </div>
                 </div>
               )}
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === STEPS.COMPLETE) {
+    bodyContent = (
+      <div className='flex flex-col mx-6'>
+        <div className='max-w-3xl max-h-[55vh] mx-auto p-6 bg-white overflow-y-auto'>
+          {hasRegistered && (
+            <div className='space-y-10'>
+              <p className='text-lg text-gray-700 px-4 text-center'>
+                {`Please go to the Finance Office to pay your parking fee and complete the registration within the time limit.`}
+              </p>
+              <div className='mt-4 text-center'>
+                <p className='text-xl font-bold text-gray-800'>{`Parking Fee: 🪙 ${registeredSpot?.price!!},000 VND`}</p>
+              </div>
+              <div className='text-center'>
+                <p className='text-lg font-semibold mb-2'>Time Remaining:</p>
+                <p
+                  className={`w-[7ch] mx-auto text-4xl font-bold tracking-widest ${isRed ? 'text-button' : 'text-primary'} ${candal.className}`}
+                >
+                  {difference > 0 ? formatTime(difference) : validTime}
+                </p>
+              </div>
+            </div>
+          )}
+          {registeredSpot?.paid && (
+            <div className='space-y-8'>
+              <p className='text-lg text-gray-700 px-4 text-center'>
+                Congratulations! You have successfully registered your parking spot.
+              </p>
+              <div className='space-y-6'>
+                <p className='text-lg font-semibold text-gray-900 px-4 text-center'>
+                  Your registered information
+                </p>
+                <table className='w-full border-collapse border border-gray-300 mt-4'>
+                  <thead>
+                    <tr className='bg-gray-200'>
+                      <th className='border border-gray-300 px-4 py-2 text-center'>Category</th>
+                      <th className='border border-gray-300 px-4 py-2 text-center'>Detail</th>
+                    </tr>
+                  </thead>
+                  <tbody className='text-center'>
+                    <tr>
+                      <td className='border border-gray-300 px-4 py-2'>Spot</td>
+                      <td className='border border-gray-300 px-4 py-2'>{registeredSpot?.spot}</td>
+                    </tr>
+                    <tr>
+                      <td className='border border-gray-300 px-4 py-2'>Building</td>
+                      <td className='border border-gray-300 px-4 py-2'>{registeredBuilding?.name}</td>
+                    </tr>
+                    <tr>
+                      <td className='border border-gray-300 px-4 py-2'>Payment Status</td>
+                      <td className='border border-gray-300 px-4 py-2'>{registeredSpot?.paid ? 'Paid' : 'Unpaid'}</td>
+                    </tr>
+                    <tr>
+                      <td className='border border-gray-300 px-4 py-2'>Period</td>
+                      <td className='border border-gray-300 px-4 py-2'>
+                        {`${registeredSpot?.month} ${registeredSpot?.month && registeredSpot?.month > 1 ? 'months' : 'month'}`}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className='border border-gray-300 px-4 py-2'>Start Date</td>
+                      <td className='border border-gray-300 px-4 py-2'>{registeredSpot?.startDate?.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                    </tr>
+                    <tr>
+                      <td className='border border-gray-300 px-4 py-2'>End Date</td>
+                      <td className='border border-gray-300 px-4 py-2'>{registeredSpot?.endDate?.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );

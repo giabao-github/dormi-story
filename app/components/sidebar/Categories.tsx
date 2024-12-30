@@ -3,7 +3,7 @@
 import { BiNews } from 'react-icons/bi';
 import { MdEventAvailable, MdOutlineReport,  MdOutlineGrade } from 'react-icons/md';
 import { RiSurveyLine, RiMessengerLine } from 'react-icons/ri';
-import { LuParkingCircle } from 'react-icons/lu';
+import { LuCircleParking } from 'react-icons/lu';
 import { HiOutlineWrench } from 'react-icons/hi2';
 import { IoNotificationsOutline, IoImageOutline } from 'react-icons/io5';
 import { FaRegUserCircle } from 'react-icons/fa';
@@ -40,7 +40,7 @@ export const categories = [
   {
     label: 'Parking Spot Registration',
     route: '/parking-spot-registration',
-    icon: LuParkingCircle,
+    icon: LuCircleParking,
     description: "Parking spot registration" 
   },
   {

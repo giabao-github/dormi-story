@@ -12,7 +12,9 @@ export default async function getParkingSpotByUserId() {
     const parkingSpots = await prisma.parkingSpot.findMany({
       where: {
         userId: currentUser?.id,
-        status: 'taken'
+        status: {
+          in: ['taken', 'registered'],
+        },
       },
       orderBy: {
         createdAt: 'desc'
@@ -22,18 +24,7 @@ export default async function getParkingSpotByUserId() {
       }
     });
 
-    const safeParkingSpots = parkingSpots.map(parkingLot => ({
-      ...parkingLot,
-      startDate: parkingLot.startDate?.toISOString(),
-      endDate: parkingLot.endDate?.toISOString(),
-      createdAt: parkingLot.createdAt.toISOString(),
-      building: {
-        ...parkingLot.building,
-        createdAt: parkingLot.building.createdAt.toISOString(),
-      }
-    }));
-
-    return safeParkingSpots;
+    return parkingSpots;
   } catch (error: any) {
     throw new Error(error);
   }

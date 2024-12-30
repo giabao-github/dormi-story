@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       data: {
         name,
         capacity,
-        availableSlots: capacity,
+        availableSpots: capacity,
         price,
         userId: currentUser.id
       },

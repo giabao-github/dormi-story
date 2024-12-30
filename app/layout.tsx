@@ -23,6 +23,8 @@ import { getReceivedFriendRequests } from './actions/getReceivedFriendRequests';
 import getFriendsByUserId from './actions/getFriendsByUserId';
 import BuildingModal from './components/modals/BuildingModal';
 import getBuildings from './actions/getBuildings';
+import getParkingSpotByUserId from './actions/getParkingSpotByUserId';
+import getBuildingById from './actions/getBuildingById';
 
 
 const nunito = Nunito({
@@ -42,6 +44,10 @@ export default async function RootLayout({
   const pendingRequests = receivedRequests.filter((request) => request.status === 'Pending');
   const notification = receivedRequests.length > 0 ? pendingRequests.length : 0;
   const buildings = await getBuildings();
+  const parkingSpots = await getParkingSpotByUserId();
+  const registeredSpot = parkingSpots.find((spot) => spot.status === 'registered');
+  const hasRegistered = parkingSpots.some((spot) => spot.status === 'registered');
+  const registeredBuilding = await getBuildingById(registeredSpot?.buildingId || undefined);
 
 
   return (
@@ -62,7 +68,7 @@ export default async function RootLayout({
           <SurveyModal currentUser={currentUser} />
           <EventModal currentUser={currentUser} />
           <BuildingModal currentUser={currentUser} />
-          <ParkingSpotModal currentUser={currentUser} buildings={buildings} />
+          <ParkingSpotModal currentUser={currentUser} buildings={buildings} hasRegistered={hasRegistered} registeredSpot={registeredSpot} registeredBuilding={registeredBuilding || undefined} />
           <Navbar currentUser={currentUser} notification={notification} />
           <IntroductionPage currentUser={currentUser} />
           <Sidebar currentUser={currentUser} />

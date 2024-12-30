@@ -139,7 +139,7 @@ model Building {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   name String
   capacity Int
-  availableSlots Int
+  availableSpots Int
   price Int
   parkingSpot ParkingSpot[]
   userId String @db.ObjectId
@@ -159,6 +159,11 @@ model ParkingSpot {
   spot String?
   time Int?
   status String
+  registeredAt DateTime?
+  expiresAt DateTime?
+  price Int?
+  paid Boolean?
+  bill String?
   createdAt DateTime @default(now())
 
   building Building @relation(fields: buildingId, references: id)

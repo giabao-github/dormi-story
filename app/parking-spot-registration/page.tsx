@@ -18,6 +18,7 @@ interface IParams {
 const ParkingLotRegistration = async () => {
   const currentUser = await getCurrentUser();
   const parkingSpot = await getParkingSpotByUserId();
+  const hasTaken = parkingSpot.some((spot) => spot.status === 'taken');
 
   if (!currentUser) {
     return null;
@@ -30,6 +31,20 @@ const ParkingLotRegistration = async () => {
           title='No registered information'
           subtitle="It seems you haven't registered a parking spot yet. You can register one by clicking the button below"
           buttonLabel='Register now'
+          type='parking lot'
+          showReset 
+        />
+      </ClientOnly>
+    );
+  } 
+
+  if (!hasTaken) {
+    return (
+      <ClientOnly>
+        <EmptyState  
+          title='Pay your parking fee'
+          subtitle="It seems you haven't paid your parking fee yet. Please go to the Finance Office to pay and complete your registration."
+          buttonLabel='View status'
           type='parking lot'
           showReset 
         />
