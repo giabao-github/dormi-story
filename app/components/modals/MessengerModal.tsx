@@ -10,10 +10,9 @@ interface MessengerModalProps {
   onClose: () => void;
   disabled?: boolean;
   children: React.ReactNode;
-  type?: string;
 }
 
-const MessengerModal: React.FC<MessengerModalProps> = ({ isOpen, onClose, disabled, children, type }) => {
+const MessengerModal: React.FC<MessengerModalProps> = ({ isOpen, onClose, disabled, children }) => {
   return (
     <Transition
       show={isOpen}

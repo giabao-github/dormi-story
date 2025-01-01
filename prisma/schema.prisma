@@ -157,7 +157,6 @@ model ParkingSpot {
   endDate DateTime?
   licensePlateImage String?
   spot String?
-  time Int?
   status String
   registeredAt DateTime?
   expiresAt DateTime?

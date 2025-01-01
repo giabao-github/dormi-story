@@ -48,32 +48,32 @@ const ReportCardModal = () => {
           <div className='grid gap-6'>
             <div className='flex flex-col space-y-4'>
               <div className='flex items-center'>
-                <span className='font-semibold w-48 text-gray-700'>Reporter name:</span>
+                <span className='font-semibold w-36 text-gray-700'>Reporter name:</span>
                 <span className='text-gray-600 font-medium'>{reportCardModal.name}</span>
               </div>
 
               <div className='flex items-center'>
-                <span className='font-semibold w-48 text-gray-700'>Reporter student ID:</span>
+                <span className='font-semibold w-36 text-gray-700'>Student ID:</span>
                 <span className='text-gray-600 font-medium'>{reportCardModal.studentId}</span>
               </div>
 
               <div className='flex items-center'>
-                <span className='font-semibold w-48 text-gray-700'>Reported date:</span>
+                <span className='font-semibold w-36 text-gray-700'>Date of report:</span>
                 <span className='text-gray-600 font-medium'>{reportCardModal.createdAt}</span>
               </div>
 
               <div className='flex items-center'>
-                <span className='font-semibold w-48 text-gray-700'>Category:</span>
+                <span className='font-semibold w-36 text-gray-700'>Category:</span>
                 <span className='text-gray-600 font-medium'>{reportCardModal.category}</span>
               </div>
 
               <div className='flex items-center'>
-                <span className='font-semibold w-48 text-gray-700'>Time:</span>
+                <span className='font-semibold w-36 text-gray-700'>Time:</span>
                 <span className='text-gray-600 font-medium'>{reportCardModal.time}</span>
               </div>
 
               <div className='flex items-center'>
-                <span className='font-semibold w-48 text-gray-700'>Location:</span>
+                <span className='font-semibold w-36 text-gray-700'>Location:</span>
                 <span className='text-gray-600 font-medium'>{reportCardModal.location}</span>
               </div>
 
@@ -83,7 +83,7 @@ const ReportCardModal = () => {
               </div>
 
               <div className='flex items-center'>
-                <span className='font-semibold w-48 text-gray-700'>Media:</span>
+                <span className='font-semibold w-36 text-gray-700'>Media:</span>
                 {reportCardModal.mediaLink.length > 0 && (
                   <a 
                     href={reportCardModal.mediaLink}

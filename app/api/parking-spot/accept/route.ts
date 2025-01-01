@@ -2,51 +2,43 @@ import { NextResponse } from 'next/server';
 import getCurrentUser from '@/app/actions/getCurrentUser';
 import prisma from '@/app/libs/prismadb';
 import getParkingSpotsByBuildingId from '@/app/actions/getParkingSpotsByBuildingId';
-import { handleSpotLock, notifySpotUpdate } from '@/app/libs/socket';
+import { notifySpotUpdate } from '@/app/libs/socket';
 
 export async function POST(request: Request) {
   const currentUser = await getCurrentUser();
   const body = await request.json();
-  const { id, buildingId, userId } = body;
+  const { spotId, buildingId, userId } = body;
 
-  if (!currentUser) {
+  if (!currentUser?.id || !currentUser?.email) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
-  if (!id || typeof id !== 'string') {
-    return new NextResponse('Invalid ID', { status: 400 });
+  if (!spotId) {
+    return new NextResponse('Unknown accept request', { status: 400 });
   }
 
   try {
-    await prisma.parkingSpot.updateMany({
+    const acceptedSpot = await prisma.parkingSpot.update({
       where: {
-        NOT: { id },
-        userId,
+        id: spotId,
         buildingId,
-        status: 'locked',
+        userId,
       },
       data: {
-        userId: null,
-        status: 'available',
+        status: 'taken',
+        paid: true
       },
-    });
-    await prisma.parkingSpot.update({
-      where: {
-        id,
-        buildingId,
-      },
-      data: {
-        userId,
-        status: 'locked'
-      },
+      include: {
+        user: true
+      }
     });
 
     const parkingSpots = await getParkingSpotsByBuildingId(buildingId);
     notifySpotUpdate(buildingId, parkingSpots);
 
-    return NextResponse.json(parkingSpots);
+    return NextResponse.json(acceptedSpot);
   } catch (error: any) {
-    console.log('Error at /api/parking-lot/fetch:', error);
+    console.log('Error at /api/parking-spot//accept:', error);
     return new NextResponse(error.message || 'Internal Server Error', { status: 500 });
   }
 }

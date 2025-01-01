@@ -7,23 +7,36 @@ interface ImageModalProps {
   src?: string | null;
   isOpen?: boolean;
   onClose: () => void;
+  type?: string;
 }
 
-const ImageModal: React.FC<ImageModalProps> = ({ src, isOpen, onClose }) => {
+const ImageModal: React.FC<ImageModalProps> = ({ src, isOpen, onClose, type }) => {
   if (!src) {
     return null;
   }
 
   return (
     <MessengerModal isOpen={isOpen} onClose={onClose}>
-      <div className='w-80 h-80'>
+      {type === 'parking' ? (
         <Image
           alt='Image'
           src={src}
-          fill
-          className='object-cover'
+          layout='intrinsic' 
+          width={0}
+          height={0}
+          sizes='100vw'
+          className='w-auto h-auto max-w-full max-h-full object-cover mx-auto mt-6'
         />
-      </div>
+      ) : (
+        <div className={'w-80 h-80'}>
+          <Image
+            alt='Image'
+            src={src}
+            fill
+            className='object-cover'
+          />
+        </div>
+      )}
     </MessengerModal>
   );
 }

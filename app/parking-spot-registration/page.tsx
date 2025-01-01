@@ -4,6 +4,7 @@ import EmptyState from '../components/EmptyState';
 import getCurrentUser from '../actions/getCurrentUser';
 import { Lexend } from 'next/font/google';
 import getParkingSpotByUserId from '../actions/getParkingSpotByUserId';
+import PageContent from './components/PageContent';
 
 
 const lexend = Lexend({
@@ -11,22 +12,21 @@ const lexend = Lexend({
   weight: '400'
 });
 
-interface IParams {
-  userId: string;
-} 
 
 const ParkingLotRegistration = async () => {
   const currentUser = await getCurrentUser();
-  const parkingSpot = await getParkingSpotByUserId();
-  const hasTaken = parkingSpot.some((spot) => spot.status === 'taken');
+  const parkingSpots = await getParkingSpotByUserId();
+  const takenSpot = parkingSpots.find((spot) => spot.userId === currentUser?.id && spot.status === 'taken');
+  const hasTaken = parkingSpots.some((spot) => spot.status === 'taken');
 
   if (!currentUser) {
     return null;
   }
 
-  if (parkingSpot.length === 0) {
+  if (parkingSpots.length === 0) {
     return (
       <ClientOnly>
+        <title>Dormistory | Parking Spot Registration</title>
         <EmptyState  
           title='No registered information'
           subtitle="It seems you haven't registered a parking spot yet. You can register one by clicking the button below"
@@ -41,6 +41,7 @@ const ParkingLotRegistration = async () => {
   if (!hasTaken) {
     return (
       <ClientOnly>
+        <title>Dormistory | Parking Spot Registration</title>
         <EmptyState  
           title='Pay your parking fee'
           subtitle="It seems you haven't paid your parking fee yet. Please go to the Finance Office to pay and complete your registration."
@@ -54,13 +55,14 @@ const ParkingLotRegistration = async () => {
 
   return (
     <div className={`mt-4 overflow-y-auto max-h-[86%] w-full absolute right-0 ${lexend.className}`}>
-      <title>Dormistory | Parking Spot Registration</title>
+      <title>Dormistory | Your Parking Spot</title>
       <ClientOnly>
         <Container>
           <div className={`ml-[248px] mt-4 mb-32 grid grid-cols-1 gap-8`}>
             <div className='flex justify-center my-10'>
-              <span className='font-bold text-4xl'>Parking Lot Registration</span>
+              <span className='font-bold text-4xl'>Your Registered Parking Spot</span>
             </div>
+            <PageContent parkingSpot={takenSpot} />
           </div>
         </Container>
       </ClientOnly>

@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { Candal } from 'next/font/google';
@@ -19,6 +18,7 @@ import { Building, ParkingSpot } from '@prisma/client';
 import Calendar from '../inputs/Calendar';
 import ResourceUpload from '../inputs/ResourceUpload';
 import ActionModal from './ActionModal';
+import { useRouter } from 'next/navigation';
 
 
 const candal = Candal({
@@ -31,9 +31,9 @@ enum STEPS {
   BUILDING = 1,
   DATE = 2,
   SPOT = 3,
-  LICENSE = 4,
-  PAYMENT = 5,
-  COMPLETE = 6,
+  LICENSE = 7,
+  PAYMENT = 4,
+  COMPLETE = 5,
 }
 
 const SLOTS_PER_LINE = 5;
@@ -81,6 +81,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
   registeredBuilding, 
   hasRegistered 
 }) => {
+  const router= useRouter();
   const parkingLotModal = useParkingLotModal();
   const [step, setStep] = useState(hasRegistered ? STEPS.COMPLETE : STEPS.INFORMATION);
   const [selectedBuilding, setSelectedBuilding] = useState<string | null>(null);
@@ -158,7 +159,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
   const fetchParkingSpots = useCallback(async (buildingId: string): Promise<ParkingSpot[]>  => {
     const response = await axios.post('/api/parking-spot/fetch', { buildingId: buildingId })
     return response.data;
-  }, [buildingId]);
+  }, [buildingId, parkingSpots, selectedSpot]);
 
   const handleSelectBuilding = (building: Building) => {
     if (building.availableSpots > 0) {
@@ -237,6 +238,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
         setTimeLeft(600);
         setIsActive(true);
       }
+      router.refresh();
     } catch (error) {
       console.error('Error selecting spot:', error);
       toast.remove();
@@ -329,14 +331,19 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
   }, [endDate]);
 
   useEffect(() => {
+    let intervalId: NodeJS.Timeout;
     const fetchData = async () => {
-      const updatedSpots = await fetchParkingSpots(buildingId)
+      const updatedSpots = await fetchParkingSpots(buildingId);
       setParkingSpots(updatedSpots);
-    }
-    if (step && buildingId) {
+    };
+
+    if ((step === STEPS.BUILDING || step === STEPS.SPOT) && buildingId) {
       fetchData();
+      intervalId = setInterval(fetchData, 1000);
     }
-  }, [buildingId]);
+
+    return () => clearInterval(intervalId);
+  }, [buildingId, step]);
 
   useEffect(() => {
     matrix = [];
@@ -470,7 +477,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
                 className={`w-2/3 border ${selectedBuilding ? 'border-primary' : 'border-gray-400 hover:border-gray-700'} rounded-md p-3 text-base shadow-sm hover:shadow-md focus:outline-none`}
               >
                 <div className={`flex items-center ${selectedBuilding ? 'justify-between px-2' : 'justify-center'}`}>
-                  <span className={`${selectedBuilding ? 'text-primary' : ''}`}>
+                  <span className={`${selectedBuilding ? 'text-primary font-semibold' : ''}`}>
                     {selectedBuilding ? `Building ${selectedBuilding}` : 'Select a building'}
                   </span>
                   {selectedBuilding && (
@@ -490,7 +497,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
                         }`}
                         style={{ pointerEvents: building.availableSpots === 0 ? 'none' : 'auto' }}
                       >
-                        <span>
+                        <span className='font-semibold'>
                           {building.name} ({building.availableSpots} spots available)
                         </span>
                         {building.availableSpots <= 0 ? (
@@ -557,7 +564,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
                       className={`w-full border ${selectedMonth ? 'border-primary' : 'border-gray-400'} rounded-md p-3 text-base shadow-sm hover:shadow-md focus:outline-none`}
                     >
                       <div className='flex items-center justify-center'>
-                        <span className={`${selectedMonth ? 'text-primary' : ''}`}>
+                        <span className={`${selectedMonth ? 'text-primary font-semibold' : ''}`}>
                           {selectedMonth ? `${selectedMonth}` : 'Select a period'}
                         </span>
                       </div>
@@ -777,7 +784,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
           </div>
 
           <div className='max-h-[45vh] mb-10 overflow-y-auto' role='tabpanel'>
-            <div className='mx-6 py-8'>
+            <div className={`mx-6 ${activeTab === 'cash' ? 'pt-8' : 'py-8'}`}>
               <div className='mb-8 text-center'>
                 <p className='text-xl font-bold text-gray-800'>{`Parking Fee: 🪙 ${price},000 VND`}</p>
               </div>
@@ -849,10 +856,10 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
     bodyContent = (
       <div className='flex flex-col mx-6'>
         <div className='max-w-3xl max-h-[55vh] mx-auto p-6 bg-white overflow-y-auto'>
-          {hasRegistered && (
-            <div className='space-y-10'>
+          {!registeredSpot?.paid && (
+            <div className='space-y-10 mb-10'>
               <p className='text-lg text-gray-700 px-4 text-center'>
-                {`Please go to the Finance Office to pay your parking fee and complete the registration within the time limit.`}
+                {`Please go to the Finance Office to pay your parking fee and complete the registration before ${new Date(new Date(registeredSpot?.expiresAt!!).setDate(new Date(registeredSpot?.expiresAt!!).getDate() + 1)).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}.`}
               </p>
               <div className='mt-4 text-center'>
                 <p className='text-xl font-bold text-gray-800'>{`Parking Fee: 🪙 ${registeredSpot?.price!!},000 VND`}</p>
@@ -867,54 +874,54 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
               </div>
             </div>
           )}
-          {registeredSpot?.paid && (
-            <div className='space-y-8'>
+          <div className='space-y-8'>
+            {registeredSpot?.paid && (
               <p className='text-lg text-gray-700 px-4 text-center'>
                 Congratulations! You have successfully registered your parking spot.
               </p>
-              <div className='space-y-6'>
-                <p className='text-lg font-semibold text-gray-900 px-4 text-center'>
-                  Your registered information
-                </p>
-                <table className='w-full border-collapse border border-gray-300 mt-4'>
-                  <thead>
-                    <tr className='bg-gray-200'>
-                      <th className='border border-gray-300 px-4 py-2 text-center'>Category</th>
-                      <th className='border border-gray-300 px-4 py-2 text-center'>Detail</th>
-                    </tr>
-                  </thead>
-                  <tbody className='text-center'>
-                    <tr>
-                      <td className='border border-gray-300 px-4 py-2'>Spot</td>
-                      <td className='border border-gray-300 px-4 py-2'>{registeredSpot?.spot}</td>
-                    </tr>
-                    <tr>
-                      <td className='border border-gray-300 px-4 py-2'>Building</td>
-                      <td className='border border-gray-300 px-4 py-2'>{registeredBuilding?.name}</td>
-                    </tr>
-                    <tr>
-                      <td className='border border-gray-300 px-4 py-2'>Payment Status</td>
-                      <td className='border border-gray-300 px-4 py-2'>{registeredSpot?.paid ? 'Paid' : 'Unpaid'}</td>
-                    </tr>
-                    <tr>
-                      <td className='border border-gray-300 px-4 py-2'>Period</td>
-                      <td className='border border-gray-300 px-4 py-2'>
-                        {`${registeredSpot?.month} ${registeredSpot?.month && registeredSpot?.month > 1 ? 'months' : 'month'}`}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className='border border-gray-300 px-4 py-2'>Start Date</td>
-                      <td className='border border-gray-300 px-4 py-2'>{registeredSpot?.startDate?.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
-                    </tr>
-                    <tr>
-                      <td className='border border-gray-300 px-4 py-2'>End Date</td>
-                      <td className='border border-gray-300 px-4 py-2'>{registeredSpot?.endDate?.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            )}
+            <div className='space-y-6'>
+              <p className='text-lg font-semibold text-gray-900 px-4 text-center'>
+                Your registered information
+              </p>
+              <table className='w-full border-collapse border border-gray-300 mt-4'>
+                <thead>
+                  <tr className='bg-gray-200'>
+                    <th className='border border-gray-300 px-4 py-2 text-center'>Category</th>
+                    <th className='border border-gray-300 px-4 py-2 text-center'>Detail</th>
+                  </tr>
+                </thead>
+                <tbody className='text-center'>
+                  <tr>
+                    <td className='border border-gray-300 px-4 py-2'>Building</td>
+                    <td className='border border-gray-300 px-4 py-2'>{registeredBuilding?.name}</td>
+                  </tr>
+                  <tr>
+                    <td className='border border-gray-300 px-4 py-2'>Spot</td>
+                    <td className='border border-gray-300 px-4 py-2'>{registeredSpot?.spot}</td>
+                  </tr>
+                  <tr>
+                    <td className='border border-gray-300 px-4 py-2'>Payment Status</td>
+                    <td className='border border-gray-300 px-4 py-2'>{registeredSpot?.paid ? 'Paid' : 'Unpaid'}</td>
+                  </tr>
+                  <tr>
+                    <td className='border border-gray-300 px-4 py-2'>Period</td>
+                    <td className='border border-gray-300 px-4 py-2'>
+                      {`${registeredSpot?.month} ${registeredSpot?.month && registeredSpot?.month > 1 ? 'months' : 'month'}`}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='border border-gray-300 px-4 py-2'>Start Date</td>
+                    <td className='border border-gray-300 px-4 py-2'>{registeredSpot?.startDate?.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                  </tr>
+                  <tr>
+                    <td className='border border-gray-300 px-4 py-2'>End Date</td>
+                    <td className='border border-gray-300 px-4 py-2'>{registeredSpot?.endDate?.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-          )}
+          </div>
         </div>
       </div>
     );

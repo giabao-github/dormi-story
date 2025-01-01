@@ -33,7 +33,7 @@ const ResourceUpload: React.FC<ProofUploadProps> = ({ onChange, value, limited }
         return (
             <div
               onClick={() => open?.()}
-              className={`relative cursor-pointer hover:opacity-70 transition p-20 ${value ? 'border-solid border-2 border-primary rounded-md' : 'border-dashed border-2 border-primary rounded-md'} flex flex-col justify-center items-center gap-4 text-neutral-600`}
+              className={`relative cursor-pointer hover:opacity-70 transition p-20 ${value ? '' : 'border-dashed border-2 border-primary rounded-md'} flex flex-col justify-center items-center gap-4 text-neutral-600`}
             >
               {!value && (
                 <div>

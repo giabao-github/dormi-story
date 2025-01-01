@@ -25,6 +25,9 @@ import BuildingModal from './components/modals/BuildingModal';
 import getBuildings from './actions/getBuildings';
 import getParkingSpotByUserId from './actions/getParkingSpotByUserId';
 import getBuildingById from './actions/getBuildingById';
+import ParkingRequestsModal from './components/modals/ParkingRequestsModal';
+import { getParkingRequests } from './actions/getParkingRequests';
+import Avatar from './components/Avatar';
 
 
 const nunito = Nunito({
@@ -48,6 +51,8 @@ export default async function RootLayout({
   const registeredSpot = parkingSpots.find((spot) => spot.status === 'registered');
   const hasRegistered = parkingSpots.some((spot) => spot.status === 'registered');
   const registeredBuilding = await getBuildingById(registeredSpot?.buildingId || undefined);
+  const parkingRequests = await getParkingRequests();
+  const parkingCount = parkingRequests.length;
 
 
   return (
@@ -62,6 +67,7 @@ export default async function RootLayout({
           <SearchModal />
           <ReportCardModal />
           <FriendRequestsModal sentRequests={sentRequests} receivedRequests={receivedRequests} friendList={friendList} />
+          <ParkingRequestsModal />
           <TokenModal currentUser={currentUser} />
           <ReportModal currentUser={currentUser} />
           <ArticleModal currentUser={currentUser} />
@@ -69,7 +75,7 @@ export default async function RootLayout({
           <EventModal currentUser={currentUser} />
           <BuildingModal currentUser={currentUser} />
           <ParkingSpotModal currentUser={currentUser} buildings={buildings} hasRegistered={hasRegistered} registeredSpot={registeredSpot} registeredBuilding={registeredBuilding || undefined} />
-          <Navbar currentUser={currentUser} notification={notification} />
+          <Navbar currentUser={currentUser} />
           <IntroductionPage currentUser={currentUser} />
           <Sidebar currentUser={currentUser} />
           <div className='pb-20 pt-28'>

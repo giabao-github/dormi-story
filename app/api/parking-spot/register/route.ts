@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/app/libs/prismadb';
 import getCurrentUser from '@/app/actions/getCurrentUser';
+import getParkingSpotsByBuildingId from '@/app/actions/getParkingSpotsByBuildingId';
+import { notifySpotUpdate } from '@/app/libs/socket';
 
 export async function POST(request: Request) {
   try {
@@ -64,6 +66,9 @@ export async function POST(request: Request) {
           availableSpots: availableSpots
         },
       });
+
+      const parkingSpots = await getParkingSpotsByBuildingId(buildingId);
+      notifySpotUpdate(buildingId, parkingSpots);
 
       return NextResponse.json(newParkingSpot);
     } else {

@@ -14,13 +14,25 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-          protocol: 'https',
-          hostname: 'lh3.googleusercontent.com',
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
       },
       {
-          protocol: 'https',
-          hostname: 'res.cloudinary.com',
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.thuvienphapluat.vn',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.pinimg.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ototai247.com',
+      }
     ],
   }
 };

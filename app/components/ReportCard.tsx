@@ -35,7 +35,7 @@ const ReportCard: React.FC<ReportCardProps> = ({ data, onAction, disabled, actio
             className='object-cover'
           />
         </div>
-        <div className='flex flex-row justify-between items-center w-full mx-6'>
+        <div className='flex flex-row justify-between items-center w-full mx-6 py-1'>
           <div className='flex flex-col gap-3'>
             <div 
               title={data.category}

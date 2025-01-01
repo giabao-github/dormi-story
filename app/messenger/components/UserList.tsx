@@ -70,7 +70,7 @@ const UserList: React.FC<UserListProps> = ({
       />
       <aside ref={containerRef} className='inset-y-0 pb-20 lg:pb-0 lg:block overflow-y-auto border-r border-gray-200 block w-full h-[calc(100vh-128px)]'>
         <div className='flex-col h-full'>
-          <div className='flex justify-between mb-10 pt-8 2xl:mx-6 xl:mx-10'>
+          <div className='flex justify-between mb-10 pt-8 xl:mx-10'>
             <div className='text-3xl font-extrabold text-neutral-800'>Friends</div>
             <div
               title='Add friend'

@@ -15,10 +15,9 @@ const bungeeInline = Bungee_Inline({ subsets: ["latin", "vietnamese"], weight: '
 
 interface NavbarProps {
   currentUser?: SafeUser | null;
-  notification: number;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ currentUser, notification }) => {
+const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
   const registerModal = useRegisterModal();
   const loginModal = useLoginModal();
   const pathname = usePathname();
@@ -50,7 +49,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser, notification }) => {
                 </div>
               )}
               {currentUser && <Search />}
-              {currentUser && <UserMenu currentUser={currentUser} notification={notification} />}
+              {currentUser && <UserMenu currentUser={currentUser} />}
               {!currentUser && (
                 <div className='flex flex-row 2xl:min-w-[10%] xl:min-w-[20%]'>
                   <button

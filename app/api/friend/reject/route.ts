@@ -16,7 +16,7 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    const rejectedRequest = await prisma.friend.deleteMany({
+    const rejectedRequest = await prisma.friend.delete({
       where: {
         id: requestId,
         status: 'Pending'

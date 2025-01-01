@@ -10,6 +10,7 @@ import { SafeReceivedRequest, SafeSentRequest, SafeUser } from '@/app/types';
 import MessengerModal from '@/app/components/modals/MessengerModal';
 import ProfileInput from '@/app/components/inputs/ProfileInput';
 import FetchedUserCard from './FetchedUserCard';
+import useRequestsModal from '@/app/hooks/useRequestsModal';
 
 
 interface FriendModalProps {
@@ -26,8 +27,6 @@ const FriendModal: React.FC<FriendModalProps> = ({
   isOpen, 
   onClose, 
   currentUser, 
-  sentRequests, 
-  receivedRequests,
   friendList, 
   users 
 }) => {
@@ -42,6 +41,7 @@ const FriendModal: React.FC<FriendModalProps> = ({
   const [requestId, setRequestId] = useState('');
   const [matchedEmail, setMatchedEmail] = useState(false);
   const [searchedUser, setSearchedUser] = useState<SafeUser | undefined>(undefined);
+  const { sentRequests, receivedRequests, setSentRequests, setReceivedRequests } = useRequestsModal();
 
   const { register, handleSubmit, watch, formState: { errors} } = useForm<FieldValues>({
     defaultValues: {
@@ -73,6 +73,7 @@ const FriendModal: React.FC<FriendModalProps> = ({
     .then(() => {
       toast.remove();
       toast.success('Friend request sent');
+      router.refresh();
     })
     .catch((error) => {
       console.log(error);
@@ -121,12 +122,25 @@ const FriendModal: React.FC<FriendModalProps> = ({
   };
 
   useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    const fetchRequests = async () => {
+      const response = await axios.post('/api/refresh')
+      setSentRequests(response.data.sentRequests);
+      setReceivedRequests(response.data.receivedRequests);
+    }
+    if (isOpen) {
+      fetchRequests();
+      intervalId = setInterval(fetchRequests, 1000);
+    }
+    return () => clearInterval(intervalId);
+  }, [isOpen]);
+
+  useEffect(() => {
     const displayLabel = () => {
       const currentId = searchedUser?.id;
       const hasSent = sentRequests.find((request) => request.receiverId === currentId);
       const isPending = receivedRequests.find((request) => request.senderId === currentId);
       const isFriend = friendList.length > 0 && friendList.find((friend) => friend.id === currentId);
-      console.log('pending: ', sentRequests)
       if (isFriend) {
         setLabel('Friend');
         setIsFriend(true);

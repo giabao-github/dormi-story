@@ -22,7 +22,6 @@ interface MessageBoxProps {
 }
 
 const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) => {
-  const router = useRouter();
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [fileMetadata, setFileMetadata] = useState<{ [url: string]: any }>({});
   const [isSingleLine, setIsSingleLine] = useState(true);

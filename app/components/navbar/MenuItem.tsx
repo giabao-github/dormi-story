@@ -1,8 +1,9 @@
 "use client";
 
 import { TbLogout } from 'react-icons/tb';
-import { MdOutlineToken, MdOutlineReport, MdEventAvailable } from 'react-icons/md';
+import { MdOutlineReport, MdEventAvailable } from 'react-icons/md';
 import { BiNews } from 'react-icons/bi';
+import { LuCircleParking } from 'react-icons/lu';
 import { HiOutlineUserCircle } from 'react-icons/hi2';
 import { RiSurveyLine } from 'react-icons/ri';
 import { FaRegHandshake } from 'react-icons/fa6';
@@ -28,6 +29,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ onClick, label, notification }) => 
     Icon = MdOutlineReport;
   } else if (label === 'Friend Requests') {
     Icon = FaRegHandshake;
+  } else if (label === 'Parking Requests') {
+    Icon = LuCircleParking;
   } else if (label === 'Post An Article') {
     Icon = BiNews;
   } else if (label === 'Schedule An Event') {

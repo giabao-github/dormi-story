@@ -121,7 +121,7 @@ const BuildingModal: React.FC<BuildingModalProps> = ({ currentUser }) => {
             value={name}
             {...register('name')}
             onChange={(e) => setCustomValue('name', e.target.value)}
-            className={`ml-10 w-3/4 py-2 px-4 text-lg font-semibold text-neutral-700 border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['name'] || nameError) && 'border-red-500 focus:border-red-500'}`}  
+            className={`ml-10 w-3/4 py-2 px-4 text-lg font-medium text-neutral-700 border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['name'] || nameError) && 'border-red-500 focus:border-red-500'}`}  
           />
         </div>
       </div>
@@ -132,12 +132,12 @@ const BuildingModal: React.FC<BuildingModalProps> = ({ currentUser }) => {
         <div className='flex flex-col gap-y-4'>
           <input
             id='capacity'
-            placeholder='Capacity'
+            placeholder='Parking capacity'
             type='text'
             value={capacity}
             {...register('capacity')}
             onChange={(e) => setCustomValue('capacity', e.target.value.replace(/[^0-9]/g, ''))}
-            className={`ml-10 w-3/4 py-2 px-4 text-lg font-semibold text-neutral-700 border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['capacity'] || capacityError) && 'border-red-500 focus:border-red-500'}`}  
+            className={`ml-10 w-3/4 py-2 px-4 text-lg font-medium text-neutral-700 border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['capacity'] || capacityError) && 'border-red-500 focus:border-red-500'}`}  
           />
         </div>
       </div>
@@ -148,12 +148,12 @@ const BuildingModal: React.FC<BuildingModalProps> = ({ currentUser }) => {
         <div className='flex flex-col gap-y-4'>
           <input
             id='price'
-            placeholder='Price per slot'
+            placeholder='Price per spot'
             type='text'
             value={price}
             {...register('price')}
             onChange={(e) => setCustomValue('price', e.target.value.replace(/[^0-9]/g, ''))}
-            className={`ml-10 w-3/4 py-2 px-4 text-lg font-semibold text-neutral-700 border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['price'] || priceError) && 'border-red-500 focus:border-red-500'}`}  
+            className={`ml-10 w-3/4 py-2 px-4 text-lg font-medium text-neutral-700 border-2 border-border focus:border-black rounded-md outline-none transition disabled:opacity-50 disabled:cursor-not-allowed ${(errors['price'] || priceError) && 'border-red-500 focus:border-red-500'}`}  
           />
         </div> 
       </div>

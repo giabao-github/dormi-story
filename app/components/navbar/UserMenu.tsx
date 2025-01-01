@@ -9,7 +9,7 @@ import useLoginModal from '@/app/hooks/useLoginModal';
 import useTokenModal from '@/app/hooks/useTokenModal';
 import { signOut } from 'next-auth/react';
 import toast from 'react-hot-toast';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { SafeUser } from '@/app/types';
 import { MdOutlineToken } from 'react-icons/md';
 import useReportModal from '@/app/hooks/useReportModal';
@@ -20,16 +20,17 @@ import useSurveyModal from '@/app/hooks/useSurveyModal';
 import useEventModal from '@/app/hooks/useEventModal';
 import useRequestsModal from '@/app/hooks/useRequestsModal';
 import useBuildingModal from '@/app/hooks/useBuildingModal';
+import useParkingRequestsModal from '@/app/hooks/useParkingRequestsModal';
+import axios from 'axios';
 
 
 interface UserMenuProps {
   currentUser?: SafeUser | null; 
-  notification: number;
 }
 
 const adminAccounts = ['ITITIU13579@student.hcmiu.edu.vn'];
 
-const UserMenu: React.FC<UserMenuProps> = ({ currentUser, notification }) => {
+const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
   const pathname = usePathname();
   const loginModal = useLoginModal();
   const profileModal = useProfileModal();
@@ -41,9 +42,14 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, notification }) => {
   const eventModal = useEventModal();
   const buildingModal = useBuildingModal();
   const requestsModal = useRequestsModal();
+  const parkingRequestsModal = useParkingRequestsModal();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null); 
-  const menuItemRef = useRef<HTMLDivElement>(null); 
+  const menuItemRef = useRef<HTMLDivElement>(null);
+  const [notifications, setNotifications] = useState({
+    friend: 0,
+    parking: 0
+  });
 
   const toggleOpen = useCallback(() => {
     setIsOpen((value) => !value);
@@ -105,6 +111,13 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, notification }) => {
     requestsModal.onOpen();
   }, [currentUser, loginModal, requestsModal]);
 
+  const handleParkingRequestsModal = useCallback(() => {
+    if (!currentUser) {
+      return loginModal.onOpen();
+    }
+    parkingRequestsModal.onOpen();
+  }, [currentUser, loginModal, parkingRequestsModal]);
+
   const handleClickOutside = (event: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(event.target as Node) && menuItemRef.current && !menuItemRef.current.contains(event.target as Node)) {
       setIsOpen(false);
@@ -122,6 +135,39 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, notification }) => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    const fetchData = async () => {
+      const response = await axios.post('/api/refresh')
+      setNotifications({
+        friend: response.data.notification,
+        parking: response.data.parkingCount,
+      });
+      requestsModal.setSentRequests(response.data.sentRequests);
+      requestsModal.setReceivedRequests(response.data.receivedRequests);
+      requestsModal.setPendingRequests(response.data.pendingRequests);
+    }
+    if (isOpen) {
+      fetchData();
+      intervalId = setInterval(fetchData, 1000);
+    }
+    return () => clearInterval(intervalId);
+  }, [isOpen]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axios.post('/api/refresh')
+      setNotifications({
+        friend: response.data.notification,
+        parking: response.data.parkingCount,
+      });
+      requestsModal.setSentRequests(response.data.sentRequests);
+      requestsModal.setReceivedRequests(response.data.receivedRequests);
+      requestsModal.setPendingRequests(response.data.pendingRequests);
+    }
+    fetchData();
+  }, []);
 
   return (
     <div ref={menuItemRef} className='relative'>
@@ -182,12 +228,17 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, notification }) => {
                       onClick={handleBuildingModal}
                       label='Create A Building'
                     />
+                    <MenuItem
+                      onClick={handleParkingRequestsModal}
+                      label='Parking Requests'
+                      notification={notifications.parking}
+                    />
                   </>
                 )}
                 <MenuItem
                   onClick={handleRequestsModal}
                   label='Friend Requests'
-                  notification={notification}
+                  notification={notifications.friend}
                 />
                 <hr />
                 <MenuItem

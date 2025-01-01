@@ -21,8 +21,6 @@ interface RequestsModalProps {
 }
 
 const FriendRequestsModal: React.FC<RequestsModalProps> = ({ 
-  sentRequests, 
-  receivedRequests,
   friendList
 }) => {
   const router = useRouter();
@@ -32,10 +30,7 @@ const FriendRequestsModal: React.FC<RequestsModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [requestId, setRequestId] = useState('');
-  const memoSentRequests = useMemo(() => sentRequests, [sentRequests]);
-  const memoReceivedRequests = useMemo(() => receivedRequests, [receivedRequests]);
-  const memoFriendList = useMemo(() => friendList, [friendList]);
-
+  const { sentRequests, receivedRequests, pendingRequests, setSentRequests, setReceivedRequests, setPendingRequests } = useRequestsModal();
 
   const handleAccept = (id: string) => {
     setIsLoading(true);
@@ -121,14 +116,30 @@ const FriendRequestsModal: React.FC<RequestsModalProps> = ({
     }
   };
 
-  // useEffect(() => {
-  //   const timeout = setTimeout(() => {
-  //     router.refresh();
-  //   }, 500);
-  
-  //   return () => clearTimeout(timeout);
-  // }, [memoSentRequests, memoReceivedRequests, memoFriendList]);
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    const fetchRequests = async () => {
+      const response = await axios.post('/api/refresh')
+      setSentRequests(response.data.sentRequests);
+      setReceivedRequests(response.data.receivedRequests);
+      setPendingRequests(response.data.pendingRequests);
+    }
+    if (isOpen) {
+      fetchRequests();
+      intervalId = setInterval(fetchRequests, 1000);
+    }
+    return () => clearInterval(intervalId);
+  }, [isOpen]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axios.post('/api/refresh')
+      setSentRequests(response.data.sentRequests);
+      setReceivedRequests(response.data.receivedRequests);
+      setPendingRequests(response.data.pendingRequests);
+    }
+    fetchData();
+  }, []);
 
   if (!isOpen) {
     return null;
@@ -202,7 +213,7 @@ const FriendRequestsModal: React.FC<RequestsModalProps> = ({
 
           <div className='min-h-96 overflow-y-auto'>
             {activeTab === 'received' ? (
-              <div className='space-y-4'>
+              <div className='space-y-4 mx-4'>
                 {
                   receivedRequests.length === 0 ? 
                   <div className='flex items-center justify-center p-8 h-96'>
@@ -210,8 +221,7 @@ const FriendRequestsModal: React.FC<RequestsModalProps> = ({
                       You have no received friend requests
                     </p>
                   </div> :
-                  receivedRequests.map((request) =>
-                    (request.status === 'Pending' || request.status === 'Rejected') ? (
+                  pendingRequests.map((request) => (
                     <div
                       key={request.id}
                       className='flex items-center justify-between p-4 rounded-lg bg-gray-50'
@@ -223,7 +233,7 @@ const FriendRequestsModal: React.FC<RequestsModalProps> = ({
                             {request.sender.name}
                           </h3>
                           <p className='text-sm text-gray-500'>
-                            {formatDistanceToNow(new Date(request.createdAt), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(request.updatedAt), { addSuffix: true })}
                           </p>
                         </div>
                       </div>
@@ -246,26 +256,21 @@ const FriendRequestsModal: React.FC<RequestsModalProps> = ({
                         </button>
                       </div>
                     </div>
-                  ) : (
-                    <div className='flex items-center justify-center p-8 h-96'>
-                      <p className='text-gray-500 text-lg py-10'>
-                        You have no received friend requests
-                      </p>
-                    </div>
                   ))
                 }
               </div>
             ) : activeTab === 'sent' ? (
-              <div className='space-y-4'>
+              <div className='space-y-4 mx-4'>
                 {
-                  sentRequests.length === 0 ?
-                  <div className='flex items-center justify-center h-96 p-8'>
-                    <p className='text-gray-500 text-lg py-10'>
-                      You have no sent friend requests
-                    </p>
-                  </div> :
+                  sentRequests.length === 0 ? (
+                    <div className='flex items-center justify-center h-96 p-8'>
+                      <p className='text-gray-500 text-lg py-10'>
+                        You have no sent friend requests
+                      </p>
+                    </div> 
+                  ) :
                   sentRequests.map((request) => 
-                    (request.status === 'Pending' || request.status === 'Rejected') ? (
+                    request.status === 'Pending' && (
                     <div
                       key={request.id}
                       className='flex items-center justify-between p-4 rounded-lg bg-gray-50'
@@ -287,35 +292,20 @@ const FriendRequestsModal: React.FC<RequestsModalProps> = ({
                         {request.status}
                       </span>
                       {request.status === 'Pending' && (
-                          <button
-                            onClick={() => handleCancel(request.id)}
-                            className='flex items-center px-4 py-2 bg-primary text-white font-medium rounded-md hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
-                            disabled={isLoading}
-                          >
-                            Cancel request
-                          </button>
-                      )}
-                      {request.status === 'Rejected' && (
                         <button
                           onClick={() => handleCancel(request.id)}
                           className='flex items-center px-4 py-2 bg-primary text-white font-medium rounded-md hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
                           disabled={isLoading}
                         >
-                          Dismiss
+                          Cancel request
                         </button>
                       )}
                     </div>
-                  ) : (
-                    <div className='flex items-center justify-center h-96 p-8'>
-                      <p className='text-gray-500 text-lg py-10'>
-                        You have no sent friend requests
-                      </p>
-                    </div> 
                   ))
                 }
               </div>
             ) : (
-              <div className='space-y-4'>
+              <div className='space-y-4 mx-4'>
                 {
                   friendList.length === 0 ?
                   <div className='flex items-center justify-center h-96 p-8'>

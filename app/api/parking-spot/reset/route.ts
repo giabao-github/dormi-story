@@ -22,7 +22,6 @@ export async function POST(request: Request) {
       data: {
         userId: null,
         status: 'available',
-        time: null
       },
     });
 
