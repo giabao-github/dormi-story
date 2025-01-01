@@ -59,7 +59,7 @@ const ParkingDetailsModal: React.FC<ParkingDetailsProps> = ({ parkingRequest }) 
         </button>
 
         <div className='space-y-10'>
-          <h2 className='text-2xl font-bold text-gray-800 mb-6'>Parking Details</h2>
+          <h2 className='text-2xl font-bold text-gray-800 mb-6'>Parking Spot Registration Details</h2>
           <div className='grid gap-6'>
             <div className='flex flex-col space-y-4'>
               <div className='flex items-center'>
@@ -83,43 +83,50 @@ const ParkingDetailsModal: React.FC<ParkingDetailsProps> = ({ parkingRequest }) 
               </div>
 
               <div className='flex items-center'>
-                <span className='font-semibold w-48 text-gray-700'>Registered date:</span>
+                  <ImageModal
+                    src={parkingRequest.licensePlateImage}
+                    isOpen={licensePlateOpen}
+                    onClose={() => setLicensePlateOpen(false)}
+                    type='parking'
+                  />
+                <span className='font-semibold w-48 text-gray-700'>License plate image:</span>
+                {parkingRequest.licensePlateImage.length > 0 && (
+                  <div
+                  onClick={() => {
+                    setLicensePlateOpen(true);
+                    setActiveModal('license');
+                  }}                  
+                    className='text-primary font-semibold hover:underline cursor-pointer'
+                  >
+                    View license plate image
+                  </div>
+                )}
+              </div>
+
+              <div className='flex items-center'>
+                <span className='font-semibold w-48 text-gray-700'>Start date:</span>
                 <span className='text-gray-600 font-medium'>
                   {
-                    new Date(parkingRequest.registeredAt)
+                    new Date(parkingRequest.startDate)
                     .toLocaleDateString('en-US', { 
                       year: 'numeric', 
                       month: 'short', 
                       day: 'numeric' 
                     }) 
-                    + ' at ' + 
-                    new Date(parkingRequest.registeredAt)
-                      .toLocaleTimeString('en-US', { 
-                        hour: '2-digit', 
-                        minute: '2-digit', 
-                        hour12: false
-                      })
                   }
                 </span>
               </div>
 
               <div className='flex items-center'>
-                <span className='font-semibold w-48 text-gray-700'>Expired date:</span>
+                <span className='font-semibold w-48 text-gray-700'>End date:</span>
                 <span className='text-gray-600 font-medium'>
-                {
-                    new Date(parkingRequest.expiresAt)
+                  {
+                    new Date(parkingRequest.endDate)
                     .toLocaleDateString('en-US', { 
                       year: 'numeric', 
                       month: 'short', 
                       day: 'numeric' 
                     }) 
-                    + ' at ' + 
-                    new Date(parkingRequest.expiresAt)
-                      .toLocaleTimeString('en-US', { 
-                        hour: '2-digit', 
-                        minute: '2-digit', 
-                        hour12: false
-                      })
                   }
                 </span>
               </div>
@@ -161,24 +168,45 @@ const ParkingDetailsModal: React.FC<ParkingDetailsProps> = ({ parkingRequest }) 
               )}
 
               <div className='flex items-center'>
-                  <ImageModal
-                    src={parkingRequest.licensePlateImage}
-                    isOpen={licensePlateOpen}
-                    onClose={() => setLicensePlateOpen(false)}
-                    type='parking'
-                  />
-                <span className='font-semibold w-48 text-gray-700'>License plate image:</span>
-                {parkingRequest.licensePlateImage.length > 0 && (
-                  <div
-                  onClick={() => {
-                    setLicensePlateOpen(true);
-                    setActiveModal('license');
-                  }}                  
-                    className='text-primary font-semibold hover:underline cursor-pointer'
-                  >
-                    View license plate image
-                  </div>
-                )}
+                <span className='font-semibold w-48 text-gray-700'>Registered date:</span>
+                <span className='text-gray-600 font-medium'>
+                  {
+                    new Date(parkingRequest.registeredAt)
+                    .toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    }) 
+                    + ' at ' + 
+                    new Date(parkingRequest.registeredAt)
+                      .toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit', 
+                        hour12: false
+                      })
+                  }
+                </span>
+              </div>
+
+              <div className='flex items-center'>
+                <span className='font-semibold w-48 text-gray-700'>Expired date:</span>
+                <span className='text-gray-600 font-medium'>
+                {
+                    new Date(parkingRequest.expiresAt)
+                    .toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    }) 
+                    + ' at ' + 
+                    new Date(parkingRequest.expiresAt)
+                      .toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit', 
+                        hour12: false
+                      })
+                  }
+                </span>
               </div>
             </div>
           </div>

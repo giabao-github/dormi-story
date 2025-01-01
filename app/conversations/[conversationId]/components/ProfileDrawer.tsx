@@ -128,7 +128,7 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, data, cu
                               {data.isGroup && (
                                 <div>
                                   <dt className='text-base mb-4 font-medium text-gray-600 sm:w-40 sm:flex-shrink-0'>
-                                    Emails
+                                    Members' Emails
                                   </dt>
                                   <dd className='mt-1 text-sm leading-8 text-gray-900 sm:col-span-2'>
                                     {data.users.map((user) => user.email).join('\n')}

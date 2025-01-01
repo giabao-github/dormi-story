@@ -31,9 +31,9 @@ enum STEPS {
   BUILDING = 1,
   DATE = 2,
   SPOT = 3,
-  LICENSE = 7,
-  PAYMENT = 4,
-  COMPLETE = 5,
+  LICENSE = 4,
+  PAYMENT = 5,
+  COMPLETE = 6,
 }
 
 const SLOTS_PER_LINE = 5;
@@ -208,9 +208,9 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
       toast.error('Please select a parking spot before proceeding');
       return;
     } else if (step === STEPS.LICENSE && !license) {
-      toast.remove();
-      toast.error('Please upload your license plate image before proceeding');
-      return;
+      // toast.remove();
+      // toast.error('Please upload your license plate image before proceeding');
+      // return;
     }
     setStep((value) => value + 1);
   };
@@ -346,12 +346,14 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
   }, [buildingId, step]);
 
   useEffect(() => {
-    matrix = [];
-    for (let i = 0; i < parkingSpots.length; i += SLOTS_PER_LINE) {
-      matrix.push(parkingSpots.slice(i, i + SLOTS_PER_LINE));
+    if (buildingId && step < STEPS.LICENSE) {
+      matrix = [];
+      for (let i = 0; i < parkingSpots.length; i += SLOTS_PER_LINE) {
+        matrix.push(parkingSpots.slice(i, i + SLOTS_PER_LINE));
+      }
+      setCustomValue('status', selectedSpot?.status);  
     }
-    setCustomValue('status', selectedSpot?.status);  
-  }, [parkingSpots])
+  }, [buildingId, parkingSpots]);
 
   useEffect(() => {
     const resetData = async () => {

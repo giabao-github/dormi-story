@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
 import { format, isToday, isThisWeek, isYesterday, isThisYear } from 'date-fns';
@@ -22,6 +22,7 @@ interface MessageBoxProps {
 }
 
 const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) => {
+  const router = useRouter();
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [fileMetadata, setFileMetadata] = useState<{ [url: string]: any }>({});
   const [isSingleLine, setIsSingleLine] = useState(true);
@@ -221,11 +222,29 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
     dataStyle
   );
 
+  const cache = new Map(); // Simple cache for metadata
+
+  const fetchMetadataWithCache = async (url: string, setFileMetadata: Function) => {
+    if (cache.has(url)) {
+      // Use cached metadata
+      setFileMetadata((prev: any) => ({ ...prev, [url]: cache.get(url) }));
+    } else {
+      // Fetch metadata and cache it
+      const metadata = await getAudioVideoMetadata(url);
+      if (metadata) {
+        cache.set(url, metadata);
+        setFileMetadata((prev: any) => ({ ...prev, [url]: metadata }));
+      }
+    }
+  };
+
   useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
     const fetchMetadata = async () => {
       const fileType = detectFileType(data.image || '');
       if (fileType === 'audio' || fileType === 'video') {
-        await getAudioVideoMetadata(data.image!);
+        await fetchMetadataWithCache(data.image!, setFileMetadata);
       } else if (fileType === 'document') {
         const title = await getPdfMetadata(data.image!);
         if (!title) {
@@ -239,10 +258,29 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast, currentUser }) =>
         }
       }
     }
+
+    const startFetching = () => {
+      interval = setInterval(async () => {
+        await fetchMetadata();
+        if (cache.has(data.image)) {
+          if (interval) {
+            clearInterval(interval);
+          }
+          router.refresh();
+        }
+      }, 1000);
+    };
+
     if (data.image) {
-      fetchMetadata();
+      startFetching();
     } 
-  }, []);
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [data.image]);
 
   useEffect(() => {
     if (messageRef.current) {

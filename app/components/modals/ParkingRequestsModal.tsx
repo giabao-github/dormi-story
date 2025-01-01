@@ -144,22 +144,25 @@ const ParkingRequestsModal = () => {
                         title='Details'
                         onClick={() => parkingDetailsModal.onOpen()}
                         disabled={isLoading}
+                        className='transition-colors focus:outline-none hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed'
                       >
-                        <FaCircleInfo size={30} className='text-secondary hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed transition-colors' />
+                        <FaCircleInfo size={30} className='text-secondary' />
                       </button>
                       <button
                         title='Approve'
                         onClick={() => handleAccept(request.id, request.buildingId, request.userId)}
                         disabled={isLoading}
+                        className='transition-colors focus:outline-none hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed'
                       >
-                        <FaCircleCheck size={30} className='text-primary hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed transition-colors' />
+                        <FaCircleCheck size={30} className='text-primary' />
                       </button>
                       <button
                         title='Reject'
                         onClick={() => handleReject(request.id, request.buildingId)}
                         disabled={isLoading}
+                        className='transition-colors focus:outline-none hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed'
                       >
-                        <FaCircleXmark size={30} className='text-button hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed transition-colors' />
+                        <FaCircleXmark size={30} className='text-button' />
                       </button>
                     </div>
                   </div>
