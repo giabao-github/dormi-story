@@ -9,7 +9,7 @@ import useLoginModal from '@/app/hooks/useLoginModal';
 import useTokenModal from '@/app/hooks/useTokenModal';
 import { signOut } from 'next-auth/react';
 import toast from 'react-hot-toast';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { SafeUser } from '@/app/types';
 import { MdOutlineToken } from 'react-icons/md';
 import useReportModal from '@/app/hooks/useReportModal';
@@ -50,6 +50,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
     friend: 0,
     parking: 0
   });
+  const prevNotifications = useRef(notifications);
 
   const toggleOpen = useCallback(() => {
     setIsOpen((value) => !value);
@@ -124,6 +125,26 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
     }
   };
 
+  const fetchData = async () => {
+    if (prevNotifications.current.friend === notifications.friend && prevNotifications.current.parking === notifications.parking) {
+      return;
+    }
+
+    const response = await axios.post('/api/refresh')
+    const newNotifications = {
+      friend: response.data.notification,
+      parking: response.data.parkingCount,
+    };
+
+    if (prevNotifications.current.friend !== newNotifications.friend || prevNotifications.current.parking !== newNotifications.parking) {
+      requestsModal.setSentRequests(response.data.sentRequests);
+      requestsModal.setReceivedRequests(response.data.receivedRequests);
+      requestsModal.setPendingRequests(response.data.pendingRequests);
+      setNotifications(newNotifications);
+      prevNotifications.current = newNotifications;
+    }
+  }
+
   useEffect(() => {
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
@@ -140,34 +161,31 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
     let intervalId: NodeJS.Timeout;
     const fetchData = async () => {
       const response = await axios.post('/api/refresh')
-      setNotifications({
+      const newNotifications = {
         friend: response.data.notification,
         parking: response.data.parkingCount,
-      });
-      requestsModal.setSentRequests(response.data.sentRequests);
-      requestsModal.setReceivedRequests(response.data.receivedRequests);
-      requestsModal.setPendingRequests(response.data.pendingRequests);
+      };
+
+      if (prevNotifications.current.friend !== newNotifications.friend || prevNotifications.current.parking !== newNotifications.parking) {
+        requestsModal.setSentRequests(response.data.sentRequests);
+        requestsModal.setReceivedRequests(response.data.receivedRequests);
+        requestsModal.setPendingRequests(response.data.pendingRequests);
+        setNotifications(newNotifications);
+        prevNotifications.current = newNotifications;
+      }
     }
+
+    fetchData();
+
     if (isOpen) {
-      fetchData();
-      intervalId = setInterval(fetchData, 1000);
+      intervalId = setInterval(fetchData, 500);
     }
     return () => clearInterval(intervalId);
-  }, [isOpen]);
+  }, [isOpen, notifications, prevNotifications]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await axios.post('/api/refresh')
-      setNotifications({
-        friend: response.data.notification,
-        parking: response.data.parkingCount,
-      });
-      requestsModal.setSentRequests(response.data.sentRequests);
-      requestsModal.setReceivedRequests(response.data.receivedRequests);
-      requestsModal.setPendingRequests(response.data.pendingRequests);
-    }
     fetchData();
-  }, []);
+  }, [notifications, prevNotifications]);
 
   return (
     <div ref={menuItemRef} className='relative'>

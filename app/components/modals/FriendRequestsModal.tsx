@@ -126,7 +126,7 @@ const FriendRequestsModal: React.FC<RequestsModalProps> = ({
     }
     if (isOpen) {
       fetchRequests();
-      intervalId = setInterval(fetchRequests, 1000);
+      intervalId = setInterval(fetchRequests, 500);
     }
     return () => clearInterval(intervalId);
   }, [isOpen]);

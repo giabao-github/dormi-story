@@ -18,7 +18,6 @@ import { Building, ParkingSpot } from '@prisma/client';
 import Calendar from '../inputs/Calendar';
 import ResourceUpload from '../inputs/ResourceUpload';
 import ActionModal from './ActionModal';
-import { useRouter } from 'next/navigation';
 
 
 const candal = Candal({
@@ -81,7 +80,6 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
   registeredBuilding, 
   hasRegistered 
 }) => {
-  const router= useRouter();
   const parkingLotModal = useParkingLotModal();
   const [step, setStep] = useState(hasRegistered ? STEPS.COMPLETE : STEPS.INFORMATION);
   const [selectedBuilding, setSelectedBuilding] = useState<string | null>(null);
@@ -105,7 +103,8 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
     }
     return 0;
   });
-  const [price, setPrice] = useState(50);
+  const [unitPrice, setUnitPrice] = useState(0);  
+  const [price, setPrice] = useState(0);
 
   const tabs = [
     { id: 'cash', label: 'Cash' },
@@ -166,7 +165,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
       setCustomValue('buildingId', building.id);
       setSelectedBuilding(building.name);
       setIsBuildingOpen(false);
-      setPrice(building.price / 1000);
+      setUnitPrice(building.price / 1000);
     }
   };
 
@@ -215,7 +214,15 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
     setStep((value) => value + 1);
   };
 
-  const handleSpotClick = useCallback(async (spot: ParkingSpot, buildingId: string, lineIndex: number, spotIndex: number) => {
+  const handleSpotClick = useCallback(async (
+    spot: ParkingSpot, 
+    buildingId: string, 
+    lineIndex: number, 
+    spotIndex: number,
+    event: React.MouseEvent<HTMLDivElement>
+  ) => {
+    event.preventDefault();
+
     if (isLoading || !currentUser || spot.status !== 'available' || spot.userId !== null) {
       return;
     }
@@ -238,7 +245,6 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
         setTimeLeft(600);
         setIsActive(true);
       }
-      router.refresh();
     } catch (error) {
       console.error('Error selecting spot:', error);
       toast.remove();
@@ -500,7 +506,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
                         style={{ pointerEvents: building.availableSpots === 0 ? 'none' : 'auto' }}
                       >
                         <span className='font-semibold'>
-                          {building.name} ({building.availableSpots} spots available)
+                          {`${building.name} (${building.availableSpots} ${building.availableSpots > 1 ? 'spots' : 'spot'} available)`}
                         </span>
                         {building.availableSpots <= 0 ? (
                           <span className='text-sm text-rose-500'>Full</span>
@@ -578,8 +584,8 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
                             key={month.id}
                             onClick={() => {
                               setCustomValue('month', month.id);
-                              setPrice(price * month.id);
-                              setCustomValue('price', price * month.id);
+                              setPrice(unitPrice * month.id);
+                              setCustomValue('price', unitPrice * month.id);
                               setSelectedMonth(month.name);
                               setIsPeriodOpen(false);
                             }}
@@ -651,7 +657,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
                   <div key={spot.id} className='relative'>
                     <div
                       key={spot.id}
-                      onClick={() => handleSpotClick(spot, buildingId, lineIndex, spotIndex)}
+                      onClick={(event) => handleSpotClick(spot, buildingId, lineIndex, spotIndex, event)}
                       onMouseEnter={() => setHoveredSpot(spot)}
                       onMouseLeave={() => setHoveredSpot(null)}
                       className={`p-2 transition-all duration-300 cursor-pointer ${spot.status === 'taken' ? 'cursor-not-allowed' : 'hover:scale-110'}`}
@@ -788,7 +794,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
           <div className='max-h-[45vh] mb-10 overflow-y-auto' role='tabpanel'>
             <div className={`mx-6 ${activeTab === 'cash' ? 'pt-8' : 'py-8'}`}>
               <div className='mb-8 text-center'>
-                <p className='text-xl font-bold text-gray-800'>{`Parking Fee: 🪙 ${price},000 VND`}</p>
+                <p className='text-xl font-bold text-gray-800'>{`Parking Fee: 🪙 ${new Intl.NumberFormat().format(price)},000 VND`}</p>
               </div>
               {activeTab === 'cash' ? (
                 <div className='space-y-6'>
@@ -864,7 +870,7 @@ const ParkingSpotModal: React.FC<ParkingSpotModalProps> = ({
                 {`Please go to the Finance Office to pay your parking fee and complete the registration before ${new Date(new Date(registeredSpot?.expiresAt!!).setDate(new Date(registeredSpot?.expiresAt!!).getDate() + 1)).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}.`}
               </p>
               <div className='mt-4 text-center'>
-                <p className='text-xl font-bold text-gray-800'>{`Parking Fee: 🪙 ${registeredSpot?.price!!},000 VND`}</p>
+                <p className='text-xl font-bold text-gray-800'>{`Parking Fee: 🪙 ${new Intl.NumberFormat().format(registeredSpot?.price!!)},000 VND`}</p>
               </div>
               <div className='text-center'>
                 <p className='text-lg font-semibold mb-2'>Time Remaining:</p>

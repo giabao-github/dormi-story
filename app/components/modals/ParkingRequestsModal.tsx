@@ -16,9 +16,11 @@ import useParkingDetailsModal from '@/app/hooks/useParkingDetailsModal';
 const ParkingRequestsModal = () => {
   const router = useRouter();
   const { isOpen, onClose } = useParkingRequestsModal();
+  const [activeTab, setActiveTab] = useState('pending');
   const parkingDetailsModal = useParkingDetailsModal();
   const [isLoading, setIsLoading] = useState(false);
   const [parkingRequests, setParkingRequests] = useState<any[]>([]);
+  const [approvedRequests, setApprovedRequests] = useState<any[]>([]);
 
   const handleAccept = (id: string, buildingId: string, userId: string) => {
     setIsLoading(true);
@@ -28,7 +30,7 @@ const ParkingRequestsModal = () => {
       buildingId,
       userId
     })
-    .then(() => {
+    .then((response) => {
       toast.remove();
       toast.success('Parking request accepted');
       router.refresh();
@@ -66,6 +68,7 @@ const ParkingRequestsModal = () => {
     const fetchRequests = async () => {
       const response = await axios.post('/api/refresh')
       setParkingRequests(response.data.parkingRequests);
+      setApprovedRequests(response.data.approvedRequests);
     }
     if (isOpen) {
       fetchRequests();
@@ -78,20 +81,10 @@ const ParkingRequestsModal = () => {
     const fetchData = async () => {
       const response = await axios.post('/api/refresh')
       setParkingRequests(response.data.parkingRequests);
+      setApprovedRequests(response.data.approvedRequests);
     }
     fetchData();
   }, []);
-
-  const getStatusColor = (status:string) => {
-    switch (status) {
-      case 'Accepted':
-        return 'text-green-600 bg-green-100';
-      case 'Rejected':
-        return 'text-red-600 bg-red-100';
-      case 'Pending':
-      return 'text-yellow-600 bg-yellow-100';
-    }
-  };
 
 
   if (!isOpen) {
@@ -99,22 +92,54 @@ const ParkingRequestsModal = () => {
   }
 
   return (
-      <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
-        <div className='w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl'>
-          <div className='flex items-center justify-between mb-12'>
-            <h2 className='text-2xl font-bold text-gray-800 mx-4'>Parking Requests List</h2>
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
+      <div className='w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl'>
+        <div className='flex items-center justify-between mb-12'>
+          <h2 className='text-2xl font-bold text-gray-800 mx-4'>Parking Requests List</h2>
+          <button
+            type='button'
+            onClick={onClose}
+            disabled={isLoading}
+            className='text-gray-400 hover:text-button disabled:text-gray-400 disabled:cursor-not-allowed focus:outline-none'
+          >
+            <span className='sr-only'>Close</span>
+            <IoClose size={24} className='h-6 w-6' />
+          </button>
+        </div>
+
+        <div className='mb-6'>
+          <div className='flex border-b'>
             <button
-              type='button'
-              onClick={onClose}
+              className={`px-6 py-3 font-medium ${
+                activeTab === 'pending'
+                  ? 'border-b-2 border-secondary text-secondary'
+                  : 'text-gray-500 hover:text-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed'
+              }`}
+              onClick={() => setActiveTab('pending')}
               disabled={isLoading}
-              className='text-gray-400 hover:text-button disabled:text-gray-400 disabled:cursor-not-allowed focus:outline-none'
             >
-              <span className='sr-only'>Close</span>
-              <IoClose size={24} className='h-6 w-6' />
+              <span className='font-semibold'>
+                Pending Requests
+              </span>
+            </button>
+            <button
+              className={`px-6 py-3 font-medium ${
+                activeTab === 'approved'
+                  ? 'border-b-2 border-secondary text-secondary'
+                  : 'text-gray-500 hover:text-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed'
+              }`}
+              onClick={() => setActiveTab('approved')}
+              disabled={isLoading}
+            >
+              <span className='font-semibold'>
+                Approved Requests
+              </span>
             </button>
           </div>
+        </div>
 
-          <div className='min-h-96 overflow-y-auto'>
+        <div className='min-h-96 overflow-y-auto'>
+          {activeTab === 'pending' ? (
             <div className='space-y-4 mx-4'>
               {parkingRequests.length <= 0 ? 
                 <div className='flex items-center justify-center p-8 h-96'>
@@ -169,9 +194,68 @@ const ParkingRequestsModal = () => {
                 ))
               }
             </div>
-          </div>
+          ) : (
+            <div className='space-y-4 mx-4'>
+              {approvedRequests.length <= 0 ? 
+                <div className='flex items-center justify-center p-8 h-96'>
+                  <p className='text-gray-500 text-lg py-10'>
+                    There are no approved parking requests
+                  </p>
+                </div> :
+                approvedRequests
+                .filter(
+                  (request) =>
+                    request.id && request.userId && request.buildingId &&
+                    request.month && request.startDate && request.endDate &&
+                    request.spot && request.status &&
+                    request.price && request.paid &&
+                    request.user && request.building &&
+                    request.createdAt && request.expiresAt &&
+                    (request.registeredAt || request.updatedAt)
+                )
+                .map((request) => (
+                  <div
+                    key={request.id}
+                    className='flex items-center justify-between p-4 rounded-lg bg-gray-50'
+                  >
+                    <ParkingDetailsModal parkingRequest={request} />
+                    <div className='flex items-center space-x-4'>
+                      <Avatar type='panel' user={request.user} />
+                      <div>
+                        <h3 className='font-medium text-gray-800'>
+                          {request.user.name}
+                        </h3>
+                        <p className='text-sm text-gray-500'>
+                          {`Approved ${formatDistanceToNow(new Date(request.updatedAt || request.registeredAt), { addSuffix: true })}`}
+                        </p>
+                      </div>
+                    </div>
+                    <div className='flex space-x-6'>
+                      <button
+                        title='Details'
+                        onClick={() => parkingDetailsModal.onOpen()}
+                        disabled={isLoading}
+                        className='transition-colors focus:outline-none hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed'
+                      >
+                        <FaCircleInfo size={30} className='text-secondary' />
+                      </button>
+                      <button
+                        title='Reject'
+                        onClick={() => handleReject(request.id, request.buildingId)}
+                        disabled={isLoading}
+                        className='transition-colors focus:outline-none hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed'
+                      >
+                        <FaCircleXmark size={30} className='text-button' />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          )}
         </div>
       </div>
+    </div>
   );
 };
 

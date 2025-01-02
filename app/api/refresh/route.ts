@@ -4,6 +4,7 @@ import { getReceivedFriendRequests } from '@/app/actions/getReceivedFriendReques
 import { getParkingRequests } from '@/app/actions/getParkingRequests';
 import { Friend } from '@prisma/client';
 import { getSentFriendRequests } from '@/app/actions/getSentFriendRequests';
+import { getApprovedParkingRequests } from '@/app/actions/getApprovedParkingRequests';
 
 export async function POST() {
   try {
@@ -19,12 +20,14 @@ export async function POST() {
     const parkingRequests = await getParkingRequests();
     const notification = receivedRequests.length > 0 ? pendingRequests.length : 0;
     const parkingCount = parkingRequests.length;
+    const approvedRequests = await getApprovedParkingRequests();
 
     return NextResponse.json({
       pendingRequests,
       sentRequests,
       receivedRequests,
       parkingRequests,
+      approvedRequests,
       notification,
       parkingCount
     });

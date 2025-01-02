@@ -164,6 +164,7 @@ model ParkingSpot {
   paid Boolean?
   bill String?
   createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
 
   building Building @relation(fields: buildingId, references: id)
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
