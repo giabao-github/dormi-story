@@ -2,10 +2,10 @@
 
 import { useMemo } from 'react';
 import { SafeArticle, SafeUser } from '@/app/types';
-import ArticleHead from '@/app/components/articles/ArticleHead';
+import ArticleHead from '@/app/articles/components/ArticleHead';
 import Container from '@/app/components/Container';
 import { categories } from '@/app/components/modals/ArticleModal';
-import ArticleInfo from '@/app/components/articles/ArticleInfo';
+import ArticleInfo from '@/app/articles/components/ArticleInfo';
 
 
 interface ArticleClientProps {

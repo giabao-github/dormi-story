@@ -2,7 +2,7 @@ import ClientOnly from '../components/ClientOnly';
 import Container from '../components/Container';
 import EmptyState from '../components/EmptyState';
 import getArticles from '../actions/getArticles';
-import ArticleCard from '../components/articles/ArticleCard';
+import ArticleCard from './components/ArticleCard';
 import getCurrentUser from '../actions/getCurrentUser';
 import { Lexend } from 'next/font/google';
 
