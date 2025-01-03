@@ -12,25 +12,26 @@ interface ParkingDetailsProps {
 const ParkingDetailsModal: React.FC<ParkingDetailsProps> = ({ parkingRequest }) => {
   const parkingDetailsModal = useParkingDetailsModal();
   const [licensePlateOpen, setLicensePlateOpen] = useState(false);
-  const [billOpen, setBillOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<'bill' | 'license' | null>(null);
+  const [billOpen, setBillOpen] = useState(false);
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        if (activeModal === 'bill' && billOpen) {
-          setBillOpen(false);
-          setActiveModal(null);
-        } else if (activeModal === 'license' && licensePlateOpen) {
+        if (activeModal === 'license') {
           setLicensePlateOpen(false);
           setActiveModal(null);
-        } else if (!activeModal && !billOpen && !licensePlateOpen) {
-          parkingDetailsModal.onClose();
-        }
+          return;
+        } 
+        if (activeModal === 'bill') {
+          setBillOpen(false);
+          setActiveModal(null);
+          return;
+        } 
       }
     };
 
-    if (parkingDetailsModal.isOpen || billOpen || licensePlateOpen) {
+    if (parkingDetailsModal.isOpen && (billOpen || licensePlateOpen)) {
       document.addEventListener('keydown', handleEscape);
     }
 
@@ -40,10 +41,6 @@ const ParkingDetailsModal: React.FC<ParkingDetailsProps> = ({ parkingRequest }) 
   }, [parkingDetailsModal.isOpen, billOpen, licensePlateOpen, activeModal]);
 
 
-  useEffect(() => {
-    console.log(activeModal)
-    console.log(billOpen, licensePlateOpen)
-  })
   if (!parkingDetailsModal.isOpen) {
     return null;
   }
@@ -87,29 +84,29 @@ const ParkingDetailsModal: React.FC<ParkingDetailsProps> = ({ parkingRequest }) 
                 <span className='text-gray-600 font-medium'>{parkingRequest.spot}</span>
               </div>
 
-              <div className='flex items-center'>
-                <ImageModal
-                  src={parkingRequest.licensePlateImage}
-                  isOpen={licensePlateOpen}
-                  onClose={() => {
-                    setActiveModal(null);
-                    setLicensePlateOpen(false);
-                  }}
-                  type='parking'
-                />
-                <span className='font-semibold w-48 text-gray-700'>License plate image:</span>
-                {parkingRequest.licensePlateImage.length > 0 && (
+              {parkingRequest.licensePlateImage.length > 0 && (
+                <div className='flex items-center'>
+                  <ImageModal
+                    src={parkingRequest.licensePlateImage}
+                    isOpen={licensePlateOpen}
+                    onClose={() => {
+                      setActiveModal(null);
+                      setLicensePlateOpen(false);
+                    }}
+                    type='parking'
+                  />
+                  <span className='font-semibold w-48 text-gray-700'>License plate image:</span>
                   <div
-                  onClick={() => {
-                    setActiveModal('license');
-                    setLicensePlateOpen(true);
-                  }}                  
+                    onClick={() => {
+                      setActiveModal('license');
+                      setLicensePlateOpen(true);
+                    }}                  
                     className='text-primary font-semibold hover:underline cursor-pointer'
                   >
                     View license plate image
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
               <div className='flex items-center'>
                 <span className='font-semibold w-48 text-gray-700'>Start date:</span>
@@ -166,15 +163,15 @@ const ParkingDetailsModal: React.FC<ParkingDetailsProps> = ({ parkingRequest }) 
                     type='parking'
                   />
                   <span className='font-semibold w-48 text-gray-700'>Transaction receipt:</span>
-                    <div
-                      onClick={() => {
-                        setActiveModal('bill');
-                        setBillOpen(true);
-                      }}
-                      className='text-primary font-semibold hover:underline cursor-pointer'
-                    >
-                      View transaction receipt
-                    </div>
+                  <div
+                    onClick={() => {
+                      setActiveModal('bill');
+                      setBillOpen(true);
+                    }}
+                    className='text-primary font-semibold hover:underline cursor-pointer'
+                  >
+                    View transaction receipt
+                  </div>
                 </div>
               )}
 

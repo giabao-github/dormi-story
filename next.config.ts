@@ -32,6 +32,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'ototai247.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'banktop.vn',
       }
     ],
   }
