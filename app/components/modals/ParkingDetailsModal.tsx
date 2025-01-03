@@ -18,13 +18,13 @@ const ParkingDetailsModal: React.FC<ParkingDetailsProps> = ({ parkingRequest }) 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        if (activeModal === 'bill') {
+        if (activeModal === 'bill' && billOpen) {
           setBillOpen(false);
           setActiveModal(null);
-        } else if (activeModal === 'license') {
+        } else if (activeModal === 'license' && licensePlateOpen) {
           setLicensePlateOpen(false);
           setActiveModal(null);
-        } else {
+        } else if (!activeModal && !billOpen && !licensePlateOpen) {
           parkingDetailsModal.onClose();
         }
       }
@@ -39,12 +39,17 @@ const ParkingDetailsModal: React.FC<ParkingDetailsProps> = ({ parkingRequest }) 
     };
   }, [parkingDetailsModal.isOpen, billOpen, licensePlateOpen, activeModal]);
 
+
+  useEffect(() => {
+    console.log(activeModal)
+    console.log(billOpen, licensePlateOpen)
+  })
   if (!parkingDetailsModal.isOpen) {
     return null;
   }
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
+    <div className='fixed inset-0 z-50 flex items-center justify-center'>
       <div 
         role='dialog'
         aria-modal='true'
@@ -83,18 +88,21 @@ const ParkingDetailsModal: React.FC<ParkingDetailsProps> = ({ parkingRequest }) 
               </div>
 
               <div className='flex items-center'>
-                  <ImageModal
-                    src={parkingRequest.licensePlateImage}
-                    isOpen={licensePlateOpen}
-                    onClose={() => setLicensePlateOpen(false)}
-                    type='parking'
-                  />
+                <ImageModal
+                  src={parkingRequest.licensePlateImage}
+                  isOpen={licensePlateOpen}
+                  onClose={() => {
+                    setActiveModal(null);
+                    setLicensePlateOpen(false);
+                  }}
+                  type='parking'
+                />
                 <span className='font-semibold w-48 text-gray-700'>License plate image:</span>
                 {parkingRequest.licensePlateImage.length > 0 && (
                   <div
                   onClick={() => {
-                    setLicensePlateOpen(true);
                     setActiveModal('license');
+                    setLicensePlateOpen(true);
                   }}                  
                     className='text-primary font-semibold hover:underline cursor-pointer'
                   >
@@ -151,14 +159,17 @@ const ParkingDetailsModal: React.FC<ParkingDetailsProps> = ({ parkingRequest }) 
                   <ImageModal
                     src={parkingRequest.bill}
                     isOpen={billOpen}
-                    onClose={() => setBillOpen(false)}
+                    onClose={() => {
+                      setActiveModal(null);
+                      setBillOpen(false);
+                    }}
                     type='parking'
                   />
                   <span className='font-semibold w-48 text-gray-700'>Transaction receipt:</span>
                     <div
                       onClick={() => {
-                        setBillOpen(true);
                         setActiveModal('bill');
+                        setBillOpen(true);
                       }}
                       className='text-primary font-semibold hover:underline cursor-pointer'
                     >

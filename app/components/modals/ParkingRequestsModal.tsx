@@ -20,6 +20,7 @@ const ParkingRequestsModal = () => {
   const parkingDetailsModal = useParkingDetailsModal();
   const [isLoading, setIsLoading] = useState(false);
   const [parkingRequests, setParkingRequests] = useState<any[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [approvedRequests, setApprovedRequests] = useState<any[]>([]);
 
   const handleAccept = (id: string, buildingId: string, userId: string) => {
@@ -30,7 +31,7 @@ const ParkingRequestsModal = () => {
       buildingId,
       userId
     })
-    .then((response) => {
+    .then(() => {
       toast.remove();
       toast.success('Parking request accepted');
       router.refresh();
@@ -152,7 +153,7 @@ const ParkingRequestsModal = () => {
                     key={request.id}
                     className='flex items-center justify-between p-4 rounded-lg bg-gray-50'
                   >
-                    <ParkingDetailsModal parkingRequest={request} />
+                    <ParkingDetailsModal parkingRequest={selectedRequest} />
                     <div className='flex items-center space-x-4'>
                       <Avatar type='panel' user={request.user} />
                       <div>
@@ -167,7 +168,10 @@ const ParkingRequestsModal = () => {
                     <div className='flex space-x-6'>
                       <button
                         title='Details'
-                        onClick={() => parkingDetailsModal.onOpen()}
+                        onClick={() => {
+                          setSelectedRequest(request);
+                          parkingDetailsModal.onOpen();
+                        }}
                         disabled={isLoading}
                         className='transition-colors focus:outline-none hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed'
                       >
